@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1000314673536",
+    "project_id": "careconnect-030215",
+    "storage_bucket": "careconnect-030215.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1000314673536:android:dd4de83b754499a3980965",
+        "android_client_info": {
+          "package_name": "com.example.careconnect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1000314673536-0iotroipr8vvm1im8g3nqs5mqv52vf7u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.careconnect",
+            "certificate_hash": "1a670468d07224ecf11b8e43cb2890617476e307"
+          }
+        },
+        {
+          "client_id": "1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN_ctkkZm1hHtKh0-Anx5MXMv_0PcBJxc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
