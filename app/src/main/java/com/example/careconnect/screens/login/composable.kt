@@ -1,15 +1,19 @@
 package com.example.careconnect.screens.login
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -210,5 +215,34 @@ fun PreviewPasswordTextField() {
                 onTogglePasswordVisibility = {}
             )
         }
+    }
+}
+
+/**
+ * A login button composable that is typically used in login screens.
+ * The button has a fixed height, rounded corners, and uses the primary color from the Material theme.
+ *
+ * @param text The string resource ID for the button text.
+ * @param modifier The modifier to be applied to the button.
+ * @param action The action to be triggered when the button is clicked.
+ */
+@Composable
+fun LoginButton(@StringRes text: Int, modifier: Modifier, action: () -> Unit) {
+    Button(
+        onClick = action,
+        modifier = Modifier
+            .width(280.dp)
+            .height(40.dp),
+
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(size = 4.dp)
+    ) {
+        Text(
+            text = stringResource(text),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+        )
     }
 }

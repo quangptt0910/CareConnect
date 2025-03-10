@@ -7,3 +7,10 @@ plugins {
     id("com.google.devtools.ksp") version "2.1.10-1.0.31" apply false
     id("com.google.dagger.hilt.android") version "2.55" apply false
 }
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
