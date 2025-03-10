@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CareConnect</string>
+
+    <string name="email">Email</string>
 </resources>
