@@ -1,13 +1,15 @@
 package com.example.careconnect.screens.login
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +28,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.careconnect.ui.theme.AppTheme
 import com.example.careconnect.R.string as AppText
 
 
@@ -181,5 +185,30 @@ fun PasswordVisibilityToggleIcon(
             contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.primary
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPasswordTextField() {
+
+    AppTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            PasswordTextField(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier
+            )
+
+            EmailField(
+                value = "",
+                onNewValue = {},
+                modifier = Modifier
+            )
+            PasswordVisibilityToggleIcon(
+                showPassword = true,
+                onTogglePasswordVisibility = {}
+            )
+        }
     }
 }

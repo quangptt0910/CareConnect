@@ -6,6 +6,6 @@ data class Administrator(
     val surname: String = "",
     val phone: String = "",
     val email: String = "",
-    val role: String = "",  // "admin", "doctor", "patient"
+    val role: String = "admin",  // "admin", "doctor", "patient"
     val createdAt: com.google.firebase.Timestamp? = null
 )

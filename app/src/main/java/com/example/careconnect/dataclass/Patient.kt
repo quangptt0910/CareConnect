@@ -8,7 +8,7 @@ data class Patient(
     val email: String = "",
     val address: String = "",
     val dateOfBirth: String = "",
-    val role: String = "",  // "admin", "doctor", "patient"
+    val role: String = "patient",  // "admin", "doctor", "patient"
     val createdAt: com.google.firebase.Timestamp? = null
 )
 

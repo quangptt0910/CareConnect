@@ -2,6 +2,7 @@ package com.example.careconnect.dataclass
 
 data class DoctorSchedule(
     val id: String = "",  // Firestore document ID (optional)
+
     val doctorId: String = "",  // Firebase UID of the doctor
     val doctorName: String = "",  // Doctor's name
     val doctorSpecialty: String = "",  // Doctor's specialty

@@ -8,6 +8,6 @@ data class Doctor(
     val email: String = "",
     val address: String = "",
     val speciality: String = "", //type of doctor
-    val role: String = "",  // "admin", "doctor", "patient"
+    val role: String = "doctor",  // "admin", "doctor", "patient"
     val createdAt: com.google.firebase.Timestamp? = null
 )
