@@ -3,4 +3,17 @@
 
     <string name="email">Email</string>
     <string name="login">Log In</string>
+
+    -- SignUpScreen -->
+    <string name="create_account">Create account</string>
+    <string name="password_error">Password does not meet the requirement. Please use a stronger password.</string>
+    <string name="password_match_error">Passwords does not match.</string>
+    <string name="all_fields_required">All fields are required.</string>">
+
+    <string name="signup">Create Account</string>
+    <string name="password_level">Password Level: </string>
+    <string name="password_requirement">Must be at least 8 characters, contain at least 1 uppercase letter, 1 number and 1 special character</string>
+    <string name="password_valid">Strong password</string>
+    <string name="password_not_valid">Weak password</string>
+
 </resources>
