@@ -123,9 +123,7 @@ fun LoginScreenContent(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview(
-
-){
+fun LoginScreenPreview(){
     AppTheme {
         LoginScreenContent(
             uiState = LoginUiState(),

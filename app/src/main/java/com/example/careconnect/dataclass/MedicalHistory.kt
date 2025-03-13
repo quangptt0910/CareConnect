@@ -1,5 +1,12 @@
 package com.example.careconnect.dataclass
 
+
+/*
+ * Data class for patient medical history
+ * Medical history - Information about the patient
+ * Patient and Doctors can view, add their medical history here
+ * Patient should have their own medical history before they start a consultation
+ */
 data class MedicalHistory(
     val patientId: String = "",  // Firebase UID of the patient
     val patientName: String = "",

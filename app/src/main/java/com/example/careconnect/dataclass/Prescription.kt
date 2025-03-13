@@ -3,15 +3,8 @@ package com.example.careconnect.dataclass
 data class Prescription(
     val id: String = "", // Firestore document ID (optional)
     val patientId: String = "", // Firebase UID of the patient
-    val patientName: String = "", // Patient name
-    val patientSurname: String = "", // Patient surname
-    val patientPhone: String = "", // Patient phone number
 
     val doctorId: String = "", // Firebase UID of the doctor
-    val doctorName: String = "", // Doctor name
-    val doctorSurname: String = "", // Doctor surname
-    val doctorPhone: String = "", // Doctor phone number
-    val doctorSpecialty: String = "", // Doctor specialty
 
     val medicationName: String = "", // Name of the prescribed medication
     val dosage: String = "", // Dosage instruction (e.g., "1 tablet 3 times a day")

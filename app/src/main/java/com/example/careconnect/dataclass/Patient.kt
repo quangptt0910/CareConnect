@@ -1,14 +1,22 @@
 package com.example.careconnect.dataclass
 
 data class Patient(
-    val id: String = "",  // FirebaseAuth UID
     val name: String = "",
     val surname: String = "",
     val phone: String = "",
     val email: String = "",
     val address: String = "",
     val dateOfBirth: String = "",
-    val role: String = "patient",  // "admin", "doctor", "patient"
-    val createdAt: com.google.firebase.Timestamp? = null
+    val gender: Gender,
+
+    val height: Double = 0.0,
+    val weight: Double = 0.0,
+    val medicalHistory: MedicalHistory = MedicalHistory(),  // Patient's medical history or conditions
+//    val allergies: List<String> = emptyList(),  // Allergies (can be a list or just a string)
 )
 
+enum class Gender {
+    MALE,
+    FEMALE,
+    OTHER
+}
