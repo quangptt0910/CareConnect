@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.careconnect.ui.theme.AppTheme
+import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
 
@@ -302,7 +302,7 @@ fun showDatePicker(context: android.content.Context, onDateSelected: (String, In
 @Composable
 fun MoreAboutYouPreview() {
 
-    AppTheme {
+    CareConnectTheme {
         MoreAboutYouContent(
             onContinueClick = {},
             onWeightChange = {},
