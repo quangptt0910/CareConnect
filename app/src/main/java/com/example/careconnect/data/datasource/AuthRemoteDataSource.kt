@@ -25,7 +25,7 @@ class AuthRemoteDataSource @Inject constructor(private val auth: FirebaseAuth) {
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
-    suspend fun linkAccount(email: String, password: String, patient: Patient) {
+    suspend fun linkAccount(name: String, surname: String, email: String, password: String) {
         // link authentication with email and password account
         val credential = EmailAuthProvider.getCredential(email, password)
         val authResult = auth.currentUser!!.linkWithCredential(credential).await()
@@ -33,7 +33,7 @@ class AuthRemoteDataSource @Inject constructor(private val auth: FirebaseAuth) {
         // save patient id to firestore
         val userId = auth.currentUser!!.uid
         val db = FirebaseFirestore.getInstance()
-
+        val patient = Patient(name = name, surname = surname, email = email)
         // Create patient document in Firestore as "patients" collection
         db.collection("patients").document(userId).set(patient).await()
 

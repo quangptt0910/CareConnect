@@ -1,5 +1,7 @@
 package com.example.careconnect.screens.login
 
+import android.R.attr.action
+import android.R.attr.text
 import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.careconnect.ui.theme.AppTheme
+import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.R.string as AppText
 
 
@@ -197,7 +200,7 @@ fun PasswordVisibilityToggleIcon(
 @Composable
 fun PreviewPasswordTextField() {
 
-    AppTheme {
+    CareConnectTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PasswordTextField(
                 value = "",
@@ -227,13 +230,12 @@ fun PreviewPasswordTextField() {
  * @param action The action to be triggered when the button is clicked.
  */
 @Composable
-fun LoginButton(@StringRes text: Int, modifier: Modifier, action: () -> Unit) {
+fun LoginButton(@StringRes text: Int, modifier: Modifier, onButtonClick: () -> Unit) {
     Button(
-        onClick = action,
+        onClick = onButtonClick,
         modifier = Modifier
             .width(280.dp)
             .height(40.dp),
-
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White

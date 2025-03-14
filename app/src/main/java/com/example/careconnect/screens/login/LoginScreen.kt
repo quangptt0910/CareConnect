@@ -5,6 +5,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,6 +33,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -41,32 +45,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.common.ext.fieldModifier
-import com.example.careconnect.ui.theme.AppTheme
+import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
+import kotlinx.serialization.Serializable
+
+@Serializable
+object LoginRoute
 
 @Composable
 fun LoginScreen(
     openHomeScreen: () -> Unit,
     openSignUpScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ){
-
+    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+    if (shouldRestartApp) {
+        openHomeScreen()
+    } else {
+        LoginScreenContent(
+            openSignUpScreen = openSignUpScreen,
+            login = viewModel::login,
+            showErrorSnackbar = showErrorSnackbar
+        )
+    }
 }
 
 @Composable
 fun LoginScreenContent(
-    uiState: LoginUiState,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onSignInClick: () -> Unit,
-    onSignUpScreenClick: () -> Unit,
-    onGoogleSignInClick: () -> Unit,
-    onFacebookSignInClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit,
-
+    openSignUpScreen: () -> Unit,
+    login: (String, String, (ErrorMessage) -> Unit) -> Unit,
+    onForgotPasswordClick: () -> Unit = {},
+    onGoogleSignInClick: () -> Unit = {},
+    onFacebookSignInClick: () -> Unit = {},
+    showErrorSnackbar: (ErrorMessage) -> Unit
 ){
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -85,13 +105,15 @@ fun LoginScreenContent(
                         .fillMaxWidth()
                         .fillMaxHeight(fraction = 0.6f), // Adjust this height as needed
                     painter = painterResource(id = R.drawable.wave_above),
-                    contentDescription = null,
+                    contentDescription = "wave above",
                     contentScale = ContentScale.FillBounds
                 )
             }
 
             Column(
-                modifier = Modifier.padding(top = 160.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(top = 160.dp)
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Text(
@@ -104,37 +126,37 @@ fun LoginScreenContent(
 
                 Spacer(modifier = Modifier.height(60.dp))
 
-                EmailField(uiState.email, onEmailChange, Modifier.fieldModifier()
-                )
+                EmailField(email, { email = it }, Modifier.fieldModifier())
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                PasswordTextField(uiState.password, onPasswordChange, Modifier.fieldModifier())
+                PasswordTextField(password, { password = it }, Modifier.fieldModifier())
 
                 Spacer(modifier = Modifier.height(15.dp))
 
-                // Forgot Password Section
-                Row(
-                    modifier = Modifier.width(280.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        modifier = Modifier.clickable { onForgotPasswordClick() },
-                        text = "Forgot password?",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline
-                    )
-                }
+                // Forgot Password Section TODO()
+//                Row(
+//                    modifier = Modifier.width(280.dp),
+//                    horizontalArrangement = Arrangement.End
+//                ) {
+//                    Text(
+//                        modifier = Modifier.clickable { onForgotPasswordClick() },
+//                        text = "Forgot password?",
+//                        style = MaterialTheme.typography.labelMedium,
+//                        color = MaterialTheme.colorScheme.primary,
+//                        textDecoration = TextDecoration.Underline
+//                    )
+//                }
 
                 Spacer(modifier = Modifier.height(30.dp))
 
                 LoginButton(
                     text = R.string.login,
                     modifier = Modifier.fieldModifier(),
-                ){
-                    onSignInClick()
-                }
+                    onButtonClick = {
+                        login(email, password, showErrorSnackbar)
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -161,7 +183,7 @@ fun LoginScreenContent(
                         }
                     },
                     modifier = Modifier.clickable {
-                        onSignUpScreenClick()
+                        openSignUpScreen
                     }
                 )
 
@@ -282,15 +304,9 @@ fun Modifier.socialMedia(): Modifier = composed {
 fun LoginScreenPreview(){
     CareConnectTheme {
         LoginScreenContent(
-            uiState = LoginUiState(),
-            onEmailChange = {},
-            onPasswordChange = {},
-            onSignInClick = {},
-            onSignUpScreenClick = {},
-            onGoogleSignInClick = {},
-            onFacebookSignInClick = {},
-            onForgotPasswordClick = {},
-
+            openSignUpScreen = {},
+            login = { _, _, showErrorSnackbar -> },
+            showErrorSnackbar = {}
         )
     }
 }

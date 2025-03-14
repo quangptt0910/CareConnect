@@ -1,14 +1,16 @@
 <resources>
     <string name="app_name">CareConnect</string>
 
-    -- ErrorMessage -->
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <!-- ErrorMessage -->
     <string name="generic_error">Something went wrong. Please try again later.</string>
 
-    -- LoginScreen -->
+    <!-- LoginScreen -->
     <string name="email">Email</string>
     <string name="login">Log In</string>
 
-    -- SignUpScreen -->
+    <!-- SignUpScreen -->
     <string name="create_account">Create account</string>
     <string name="password_error">Password does not meet the requirement. Please use a stronger password.</string>
     <string name="password_match_error">Passwords does not match.</string>
@@ -16,11 +18,14 @@
 
     <string name="signup">Create Account</string>
     <string name="password_level">Password Level: </string>
-    <string name="password_requirement">Must be at least 8 characters, contain at least 1 uppercase letter, 1 number and 1 special character</string>
+    <string name="password_requirement">Must be at least eight digits, contain at least one uppercase letter, one number and one special character</string>
     <string name="password_valid">Strong password</string>
     <string name="password_not_valid">Weak password</string>
 
-    -- HomeScreen -->
+    <string name="invalid_email">Invalid email format</string>
+    <string name="invalid_password">Passwords should have at least eight digits and include one digit, one lower case letter and one upper case letter</string>
+
+    <!-- HomeScreen -->
     <string name="carousel_image_1_description">Image 1 Description</string>
     <string name="carousel_image_2_description">Image 2 Description</string>
     <string name="carousel_image_3_description">Image 3 Description</string>

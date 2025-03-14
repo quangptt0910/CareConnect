@@ -1,28 +1,29 @@
 package com.example.careconnect.screens.signup
 
+import android.R.attr.name
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,45 +39,55 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.careconnect.R
 import com.example.careconnect.common.ext.fieldModifier
+import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.login.EmailField
-import com.example.careconnect.ui.theme.AppTheme
-import com.example.careconnect.R.string as AppText
+import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.serialization.Serializable
 
+
+@Serializable
+object SignUpRoute
 
 /**
  * Composable function for the Sign-Up screen.
  *
- * @param openAndPopUp Function to navigate between screens.
  * @param viewModel ViewModel responsible for handling Sign-Up logic.
  */
-@Composable
-fun SignUpScreen(
-
-) {
-
-}
+//@Composable
+//fun SignUpScreen(
+//    openHomeScreen: () -> Unit,
+//    showErrorSnackbar: (ErrorMessage) -> Unit,
+//    viewModel: SignUpViewModel = hiltViewModel()
+//) {
+//    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+//
+//    if (shouldRestartApp) {
+//        openHomeScreen()
+//    } else {
+//        SignUpScreenContent(
+//            signUp = viewModel::signUp,
+//            showErrorSnackbar = showErrorSnackbar
+//        )
+//    }
+//}
 
 /**
  * Composable function that represents the content of the Sign-Up screen.
  *
- * @param uiState The current UI state containing user input.
- * @param onNameChange Callback when the name input changes.
- * @param onSurnameChange Callback when the surname input changes.
- * @param onEmailChange Callback when the email input changes.
- * @param onPasswordChange Callback when the password input changes.
- * @param onSignUpClick Callback when the Sign-Up button is clicked.
- * @param onLoginScreenClick Callback when navigating to the Login screen.
  */
+
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun SignUpScreenContent(
-    uiState: SignUpUiState,
-    onNameChange: (String) -> Unit,
-    onSurnameChange: (String) -> Unit,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onSignUpClick: () -> Unit,
-    onLoginScreenClick: () -> Unit,
+    signUp: (String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    openLoginScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit
 ) {
+    var name by remember { mutableStateOf("") }
+    var surname by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val isLoading by remember { mutableStateOf(false) }
 
@@ -95,26 +106,22 @@ fun SignUpScreenContent(
             }
 
             item {
-                Spacer(modifier = Modifier.height(30.dp))
-            }
-
-            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 50.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    LabelTextField(uiState.name, onNameChange, fieldModifier, label = "Name")
+                    LabelTextField(name, { name = it }, fieldModifier, stringResource(R.string.name) )
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    LabelTextField(uiState.surname, onSurnameChange, fieldModifier, label = "Surname")
+                    LabelTextField(surname, { surname = it }, fieldModifier, stringResource(R.string.surname))
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    EmailField(uiState.email, onEmailChange, fieldModifier)
+                    EmailField(email, { email = it }, fieldModifier)
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    PasswordSignUpTextField(uiState.password, onPasswordChange, fieldModifier)
+                    PasswordSignUpTextField(password, { password = it }, fieldModifier)
                     Spacer(modifier = Modifier.height(40.dp))
 
                     // Display error message if exists
@@ -134,14 +141,14 @@ fun SignUpScreenContent(
                             .height(40.dp),
                         onClick = {
                             when {
-                                uiState.name.isBlank() -> errorMessage = "Name is required"
-                                uiState.surname.isBlank() -> errorMessage = "Surname is required"
-                                uiState.email.isBlank() -> errorMessage = "Email is required"
-                                uiState.password.isBlank() -> errorMessage = "Password is required"
+                                name.isBlank() -> errorMessage = "Name is required"
+                                surname.isBlank() -> errorMessage = "Surname is required"
+                                email.isBlank() -> errorMessage = "Email is required"
+                                password.isBlank() -> errorMessage = "Password is required"
 
                                 else -> {
                                     errorMessage = null
-                                    onSignUpClick()
+                                    signUp(name, surname, email, password, showErrorSnackbar)
                                 }
                             }
                         },
@@ -166,7 +173,7 @@ fun SignUpScreenContent(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .clickable {
-                                onLoginScreenClick()
+                                openLoginScreen
                             },
                         text = buildAnnotatedString {
                             withStyle(
@@ -205,8 +212,6 @@ fun SignUpScreenContent(
 fun SignUpTopSection() {
     val uiColor = MaterialTheme.colorScheme.primary
 
-
-
     Box(
         contentAlignment = Alignment.TopCenter
     ) {
@@ -227,72 +232,41 @@ fun SignUpTopSection() {
             )
         }
 
-//        Image(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .fillMaxHeight(fraction = 0.35f),
-//            painter = painterResource(id = R.drawable.shape),
-//            contentDescription = null,
-//            contentScale = ContentScale.FillBounds
-//        )
-
-
-        Row(
-            modifier = Modifier.padding(top = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-//            Icon(
-//                modifier = Modifier.size(60.dp),
-//                painter = painterResource(id = R.drawable.logo),
-//                contentDescription = stringResource(id = AppText.app_icon),
-//                tint = MaterialTheme.colorScheme.onPrimary
-//            )
-//            Spacer(modifier = Modifier.width(15.dp))
-//            Column {
-//                Text(
-//                    text = stringResource(id = AppText.app_name),
-//                    style = MaterialTheme.typography.headlineMedium,
-//                    color = MaterialTheme.colorScheme.onPrimary
-//                )
-//                Text(
-//                    text = stringResource(id = AppText.app_catchphrase),
-//                    style = MaterialTheme.typography.titleMedium,
-//                    color = MaterialTheme.colorScheme.onPrimary
-//                )
-//            }
-        }
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             modifier = Modifier
                 .padding(bottom = 10.dp)
                 .align(alignment = Alignment.BottomCenter),
-            text = stringResource(id = AppText.signup),
+            text = stringResource(R.string.signup),
             style = MaterialTheme.typography.headlineLarge,
             color = uiColor
         )
     }
+    Spacer(modifier = Modifier.height(20.dp))
 }
 
 
-@Preview
+
 @Composable
+@Preview(showSystemUi = true)
 fun SignUpScreenPreview() {
-    AppTheme {
-        val uiState = SignUpUiState(
-            name = "nicky",
-            email = "emailtest.com",
+    CareConnectTheme {
+        val name = "nicky"
+        val surname = "bb"
+        val email = "emailtest.com"
+        val password = "password"
+
+        SignUpScreenContent(
+            openLoginScreen = {},
+            signUp = { _, _, _, _, _ ->},
+            showErrorSnackbar = {}
         )
 
         SignUpScreenContent(
-            uiState = uiState,
-            onNameChange = {},
-            onSurnameChange = {},
-            onEmailChange = {},
-            onPasswordChange = {},
-            onSignUpClick = {},
-            onLoginScreenClick = {}
+            openLoginScreen = {},
+            signUp = {name, surname, email, password, _ ->},
+            showErrorSnackbar = {},
         )
     }
 

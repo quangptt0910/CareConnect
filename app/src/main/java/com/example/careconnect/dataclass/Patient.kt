@@ -3,11 +3,11 @@ package com.example.careconnect.dataclass
 data class Patient(
     val name: String = "",
     val surname: String = "",
-    val phone: String = "",
     val email: String = "",
+    val phone: String = "",
     val address: String = "",
     val dateOfBirth: String = "",
-    val gender: Gender,
+    val gender: Gender = Gender.MALE,
 
     val height: Double = 0.0,
     val weight: Double = 0.0,

@@ -119,7 +119,8 @@ fun PasswordSignUpTextField(
             text = stringResource(id = AppText.password_requirement),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
-            fontSize = 12.sp)
+            fontSize = 12.sp
+        )
         // check for strong password
         if (value.isNotEmpty()) {
             val strongPassword = value.isValidPassword()
@@ -181,43 +182,33 @@ fun LabelTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 14.sp
-            )
-        },
+        label = { Text(text = label) },
         trailingIcon = {
             // Check if trailing composable is provided
             trailing?.invoke()
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
-        colors = TextFieldDefaults.colors(
-            // Text colors
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-            disabledTextColor = Color.Gray,
-
-            // Container colors
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
-
-            // Border/Indicator colors
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-
-            // Label colors
-            focusedLabelColor = MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
-
-            // Cursor color
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
+//        colors = TextFieldDefaults.colors(
+//            // Text colors
+//            focusedTextColor = Color.Black,
+//            unfocusedTextColor = Color.Black,
+//            disabledTextColor = Color.Gray,
+//
+//            // Container colors
+//            focusedContainerColor = Color.White,
+//            unfocusedContainerColor = Color.White,
+//            disabledContainerColor = Color.White,
+//
+//            // Border/Indicator colors
+//            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+//            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+//
+//            // Label colors
+//            focusedLabelColor = MaterialTheme.colorScheme.primary,
+//            unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
+//
+//            // Cursor color
+//            cursorColor = MaterialTheme.colorScheme.primary
+//        ),
         shape = RoundedCornerShape(10.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
 
