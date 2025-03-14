@@ -20,4 +20,11 @@
     <string name="password_valid">Strong password</string>
     <string name="password_not_valid">Weak password</string>
 
+    -- HomeScreen -->
+    <string name="carousel_image_1_description">Image 1 Description</string>
+    <string name="carousel_image_2_description">Image 2 Description</string>
+    <string name="carousel_image_3_description">Image 3 Description</string>
+    <string name="carousel_image_4_description">Image 4 Description</string>
+    <string name="carousel_image_5_description">Image 5 Description</string>
+
 </resources>
