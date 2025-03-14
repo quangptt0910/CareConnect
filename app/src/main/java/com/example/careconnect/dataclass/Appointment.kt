@@ -19,3 +19,8 @@ enum class AppointmentStatus {
     NO_SHOW     // Patient did not show up for the appointment
 }
 
+data class AppointmentDetails (
+    val appointment: Appointment,
+    val doctor: Doctor,
+    val patient: Patient
+)

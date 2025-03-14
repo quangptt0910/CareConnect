@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">CareConnect</string>
 
+    -- ErrorMessage -->
+    <string name="generic_error">Something went wrong. Please try again later.</string>
+
+    -- LoginScreen -->
     <string name="email">Email</string>
     <string name="login">Log In</string>
 
