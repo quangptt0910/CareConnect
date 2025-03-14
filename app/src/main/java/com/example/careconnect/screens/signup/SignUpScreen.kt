@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.example.careconnect.R
 import com.example.careconnect.common.ext.fieldModifier
 import com.example.careconnect.screens.login.EmailField
-import com.example.careconnect.ui.theme.AppTheme
+import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.R.string as AppText
 
 
@@ -279,7 +279,7 @@ fun SignUpTopSection() {
 @Preview
 @Composable
 fun SignUpScreenPreview() {
-    AppTheme {
+    CareConnectTheme {
         val uiState = SignUpUiState(
             name = "nicky",
             email = "emailtest.com",

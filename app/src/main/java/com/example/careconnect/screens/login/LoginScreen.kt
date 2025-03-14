@@ -42,15 +42,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import com.example.careconnect.common.ext.fieldModifier
-import com.example.careconnect.ui.theme.AppTheme
+import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
 
 @Composable
 fun LoginScreen(
-    openHomeScreen: () -> Unit,
-    openSignUpScreen: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+
 ){
 
 }
