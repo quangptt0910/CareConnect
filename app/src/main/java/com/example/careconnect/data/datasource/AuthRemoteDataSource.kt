@@ -34,6 +34,7 @@ class AuthRemoteDataSource @Inject constructor(private val auth: FirebaseAuth) {
         val userId = auth.currentUser!!.uid
         val db = FirebaseFirestore.getInstance()
         val patient = Patient(name = name, surname = surname, email = email)
+        
         // Create patient document in Firestore as "patients" collection
         db.collection("patients").document(userId).set(patient).await()
 

@@ -67,6 +67,11 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import com.example.careconnect.R.string as AppText
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+object HomeRoute
 
 data class CarouselItem(
     val id: Int,
