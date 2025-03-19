@@ -21,7 +21,7 @@ class AuthRepository @Inject constructor(
     // signUp using the authRemoteDataSource with email password auth provider
     // link account with name and surname (Patient)
     suspend fun signUp(name: String, surname: String, email: String, password: String) {
-        authRemoteDataSource.linkAccount(email, password)
+        authRemoteDataSource.linkAccount(name, surname, email, password)
     }
 
     fun signOut() {
