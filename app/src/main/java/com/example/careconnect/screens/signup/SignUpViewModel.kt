@@ -36,10 +36,10 @@ class SignUpViewModel @Inject constructor(
             return
         }
 
-        launchCatching(showSnackbar) {
-            authRepository.signUp(name, surname, email, password)
-            _shouldRestartApp.value = true
-        }
+//        launchCatching(showSnackbar) {
+//            authRepository.signUp(name, surname, email, password)
+//            _shouldRestartApp.value = true
+//        }
     }
 }
 

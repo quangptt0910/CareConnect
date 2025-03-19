@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -44,7 +45,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.careconnect.R
+import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
@@ -70,7 +73,9 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     uiState: HomeUiState,
-    onSettingsClick: () -> Unit,
+    openSettingsScreen: () -> Unit,
+    onDoctorSelected: (Doctor, Boolean) -> Unit = { _, _ -> },
+    onSearchQueryChange: (String) -> Unit = {}
 
 ) {
 
@@ -86,6 +91,8 @@ fun HomeScreenContent(
         "Orthopedic Surgeon", "Gynecologist", "Ophthalmologist", "Dentist"
     )
     val date = LocalDate.now()
+
+
 
     val items =
         listOf(
@@ -130,9 +137,11 @@ fun HomeScreenContent(
                             HorizontalDivider()
                         }
                     }
+
+
                 }
             },
-            sheetPeekHeight = 300.dp, // The visible height when collapsed
+            sheetPeekHeight = 400.dp, // The visible height when collapsed
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         ) { paddingValues ->
             Column(modifier = Modifier.padding(16.dp)) {
@@ -148,9 +157,19 @@ fun HomeScreenContent(
                             .align(Alignment.CenterVertically)
                     )
 
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Go to notifications screen
+                    IconButton(
+                        onClick = { scope.launch { sheetState.expand() } },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ){
+                        Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
+                    }
+
                     // Go to settings screen
                     IconButton(
-                        onClick = { onSettingsClick() },
+                        onClick = { openSettingsScreen() },
                         modifier = Modifier.align(Alignment.CenterVertically)
                     ) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu")
@@ -168,6 +187,14 @@ fun HomeScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                SearchSection(
+                    uiState = uiState,
+                    onDoctorSelected = onDoctorSelected,
+                    onSearchQueryChange = onSearchQueryChange
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
 
                 HorizontalMultiBrowseCarousel(
                     state = rememberCarouselState { items.count() },
@@ -177,13 +204,26 @@ fun HomeScreenContent(
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) { i ->
                     val item = items[i]
-                    Image(
-                        modifier = Modifier.height(205.dp)
-                            .maskClip(MaterialTheme.shapes.extraLarge),
-                        painter = painterResource(id = item.imageResId),
-                        contentDescription = stringResource(item.contentDescriptionResId),
-                        contentScale = ContentScale.Crop
-                    )
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+
+                    ){
+                        Image(
+                            modifier = Modifier.height(205.dp)
+                                .maskClip(MaterialTheme.shapes.extraLarge),
+                            painter = painterResource(id = item.imageResId),
+                            contentDescription = stringResource(item.contentDescriptionResId),
+                            contentScale = ContentScale.Crop
+                        )
+
+
+                        Text(
+                            text = stringResource(item.contentDescriptionResId),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+
                 }
             }
         }
@@ -202,7 +242,7 @@ fun HomeScreenPreview() {
         val uiState = HomeUiState()
         HomeScreenContent(
             uiState = uiState,
-            onSettingsClick = {}
+            openSettingsScreen = {}
         )
     }
 }
