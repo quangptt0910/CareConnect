@@ -27,6 +27,7 @@ import com.example.careconnect.screens.home.HomeScreen
 import com.example.careconnect.screens.login.LoginRoute
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.signup.SignUpRoute
+import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.ui.theme.CareConnectTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -83,6 +84,22 @@ class MainActivity : ComponentActivity() {
                                 )
 
                             }
+
+                            composable<SignUpRoute> {
+                                SignUpScreen(
+                                    openHomeScreen = {
+                                        navController.navigate(HomeRoute) { launchSingleTop = true }
+                                    },
+                                    openLoginScreen = {
+                                        navController.navigate(LoginRoute) { launchSingleTop = true }
+                                    },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
+
                         }
                     }
                 }

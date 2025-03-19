@@ -37,6 +37,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.common.ext.fieldModifier
 import com.example.careconnect.dataclass.ErrorMessage
@@ -53,23 +55,25 @@ object SignUpRoute
  *
  * @param viewModel ViewModel responsible for handling Sign-Up logic.
  */
-//@Composable
-//fun SignUpScreen(
-//    openHomeScreen: () -> Unit,
-//    showErrorSnackbar: (ErrorMessage) -> Unit,
-//    viewModel: SignUpViewModel = hiltViewModel()
-//) {
-//    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-//
-//    if (shouldRestartApp) {
-//        openHomeScreen()
-//    } else {
-//        SignUpScreenContent(
-//            signUp = viewModel::signUp,
-//            showErrorSnackbar = showErrorSnackbar
-//        )
-//    }
-//}
+@Composable
+fun SignUpScreen(
+    openHomeScreen: () -> Unit,
+    openLoginScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit,
+    viewModel: SignUpViewModel = hiltViewModel()
+) {
+    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+
+    if (shouldRestartApp) {
+        openHomeScreen()
+    } else {
+        SignUpScreenContent(
+            signUp = viewModel::signUp,
+            openLoginScreen = openLoginScreen,
+            showErrorSnackbar = showErrorSnackbar
+        )
+    }
+}
 
 /**
  * Composable function that represents the content of the Sign-Up screen.
