@@ -7,5 +7,6 @@ data class Doctor(
     val email: String = "",
     val address: String = "",
     val specialization: String = "",
-    val experience: Int = 2025 // Year start to work
+    val experience: Int = 2025, // Year start to work
+    val schedule: DoctorSchedule = DoctorSchedule()
 )
