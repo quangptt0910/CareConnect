@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.screens.home.HomeUiState
+import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 

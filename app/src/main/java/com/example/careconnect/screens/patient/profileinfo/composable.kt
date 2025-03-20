@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.profileinfo
+package com.example.careconnect.screens.patient.profileinfo
 
 
 import androidx.compose.foundation.layout.Arrangement
