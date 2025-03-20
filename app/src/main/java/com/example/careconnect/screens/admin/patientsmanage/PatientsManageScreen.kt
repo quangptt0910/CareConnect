@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.admin.doctormanage
+package com.example.careconnect.screens.admin.patientsmanage
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,13 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
-fun DoctorManageScreen(
+fun PatientsManageScreen(
 
 ){
 
@@ -30,7 +30,7 @@ fun DoctorManageScreen(
 
 
 @Composable
-fun DoctorManageScreenContent(
+fun PatientsManageScreenContent(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -44,40 +44,31 @@ fun DoctorManageScreenContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Doctors",
+                    text = "Patient Profile",
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            val doctors = listOf(
-                Doctor("John", "Doe", "133","123","123","Cardiologist"),
-                Doctor("Jane", "Smith","133","123","123", "Dermatologist"),
-                Doctor("Bob", "Johnson","133","123","123", "Neurologist"),
-                Doctor("Alice", "Williams","133","123","123", "Pediatrician"),
-                Doctor("David", "Brown","133","123","123", "Orthopedic Surgeon"),
-                Doctor("Emily", "Jones","133","123","123", "Gynecologist"),
-                //Doctor("Michael", "Davis","133","123","123", "Ophthalmologist"),
-                //Doctor("Sarah", "Miller","133","123","123", "Dentist")
+            val patients = listOf(
+                Patient("John", "Doe", "133","123","123","Cardiologist"),
+                Patient("Jane", "Smith","133","123","123", "Dermatologist"),
+                Patient("Bob", "Johnson","133","123","123", "Neurologist"),
+                Patient("Alice", "Williams","133","123","123", "Pediatrician"),
+                Patient("David", "Brown","133","123","123", "Orthopedic Surgeon"),
+                Patient("Emily", "Jones","133","123","123", "Gynecologist"),
             )
 
-
-            FilledCardExample(
-                title = "Doctors",
-                userProducts = doctors,
-                onDeleteProduct = {}
+            FilledCardPatients(
+                title = "Patients",
+                userProducts = patients,
+                onDeleteProduct = { /* Handle product deletion */ }
             )
 
-            FilledCardStats(
-                title = "Total hours worked",
-                userProducts = doctors,
-                onDeleteProduct = {}
-            )
         }
-
 
 
     }
@@ -86,10 +77,10 @@ fun DoctorManageScreenContent(
 
 @Preview
 @Composable
-fun DoctorManageScreenPreview() {
+fun PatientsManageScreenPreview() {
     CareConnectTheme {
         val uiState = HomeUiState()
-        DoctorManageScreenContent(
+        PatientsManageScreenContent(
         )
     }
 }

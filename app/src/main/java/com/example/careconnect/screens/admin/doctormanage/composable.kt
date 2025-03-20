@@ -48,7 +48,7 @@ import com.example.careconnect.R.string as AppText
  */
 @Composable
 fun FilledCardExample(
-    title : String,
+    title: String,
     modifier: Modifier = Modifier,
     userProducts: List<Doctor>,
     onDeleteProduct: (Doctor) -> Unit,
