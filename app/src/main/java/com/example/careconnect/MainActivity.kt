@@ -11,21 +11,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
-import com.example.careconnect.screens.patient.home.HomeRoute
-import com.example.careconnect.screens.patient.home.HomeScreen
 import com.example.careconnect.screens.login.LoginRoute
 import com.example.careconnect.screens.login.LoginScreen
+import com.example.careconnect.screens.patient.home.HomeRoute
+import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.signup.SignUpRoute
 import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -79,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             composable<HomeRoute> {
-                                HomeScreen(
+                                HomeScreenPatient(
 
                                 )
 
