@@ -19,9 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.screens.admin.home.HomeAdminRoute
+import com.example.careconnect.screens.doctor.HomeDoctorRoute
 import com.example.careconnect.screens.login.LoginRoute
 import com.example.careconnect.screens.login.LoginScreen
-import com.example.careconnect.screens.patient.home.HomeRoute
+import com.example.careconnect.screens.patient.home.HomePatientRoute
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.signup.SignUpRoute
 import com.example.careconnect.screens.signup.SignUpScreen
@@ -60,8 +62,14 @@ class MainActivity : ComponentActivity() {
                         ) {
                             composable<LoginRoute> {
                                 LoginScreen(
-                                    openHomeScreen = {
-                                        navController.navigate(HomeRoute) { launchSingleTop = true }
+                                    openHomeScreenPatient = {
+                                        navController.navigate(HomePatientRoute) { launchSingleTop = true }
+                                    },
+                                    openHomeScreenDoctor = {
+                                        navController.navigate(HomeDoctorRoute) { launchSingleTop = true }
+                                    },
+                                    openHomeScreenAdmin = {
+                                        navController.navigate(HomeAdminRoute) { launchSingleTop = true }
                                     },
                                     openSignUpScreen = {
                                         navController.navigate(SignUpRoute) {
@@ -75,9 +83,11 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                            composable<HomeRoute> {
+                            composable<HomePatientRoute> {
                                 HomeScreenPatient(
-
+                                    openSettingsScreen = {
+                                        navController.navigate(LoginRoute) { launchSingleTop = true }
+                                    }
                                 )
 
                             }
@@ -85,7 +95,7 @@ class MainActivity : ComponentActivity() {
                             composable<SignUpRoute> {
                                 SignUpScreen(
                                     openHomeScreen = {
-                                        navController.navigate(HomeRoute) { launchSingleTop = true }
+                                        navController.navigate(HomePatientRoute) { launchSingleTop = true }
                                     },
                                     openLoginScreen = {
                                         navController.navigate(LoginRoute) { launchSingleTop = true }

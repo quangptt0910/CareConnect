@@ -53,7 +53,7 @@ import java.time.LocalDate
 
 
 @Serializable
-object HomeRoute
+object HomePatientRoute
 
 data class CarouselItem(
     val id: Int,
@@ -63,9 +63,12 @@ data class CarouselItem(
 
 @Composable
 fun HomeScreenPatient(
-
+    openSettingsScreen: () -> Unit
 ) {
-
+    HomeScreenPatientContent(
+        uiState = HomeUiState(),
+        openSettingsScreen = openSettingsScreen
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

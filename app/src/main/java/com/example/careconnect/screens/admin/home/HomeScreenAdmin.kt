@@ -8,7 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.serialization.Serializable
 
+@Serializable
+object HomeAdminRoute
 
 @Composable
 fun HomeScreenAdmin(

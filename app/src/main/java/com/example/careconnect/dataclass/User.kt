@@ -1,5 +1,7 @@
 package com.example.careconnect.dataclass
 
+import com.google.firebase.firestore.DocumentId
+
 /*
 * Data class for user account
 * id: Firebase UID
@@ -8,9 +10,11 @@ package com.example.careconnect.dataclass
 * userData: data for user by role
 */
 data class User(
-    val id: String = "",  // FirebaseAuth UID
+    @DocumentId val id: String = "",  // FirebaseAuth UID
+    val name: String = "",
+    val surname: String = "",
     val email: String = "",
-    val role: Role,
+    val role: Role = Role.PATIENT,
     val userData: UserData
 )
 

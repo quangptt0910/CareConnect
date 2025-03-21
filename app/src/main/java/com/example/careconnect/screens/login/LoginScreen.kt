@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -49,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.common.ext.fieldModifier
 import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
 import kotlinx.serialization.Serializable
@@ -58,21 +60,39 @@ object LoginRoute
 
 @Composable
 fun LoginScreen(
-    openHomeScreen: () -> Unit,
+    openHomeScreenPatient: () -> Unit,
+    openHomeScreenDoctor: () -> Unit,
+    openHomeScreenAdmin: () -> Unit,
     openSignUpScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-    if (shouldRestartApp) {
-        openHomeScreen()
-    } else {
+    val userRole by viewModel.userRole.collectAsStateWithLifecycle()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
+
+    // Using both shouldRestartApp and isLoggedIn for compatibility
+    val shouldNavigate = shouldRestartApp && isLoggedIn
+
+    // Handle navigation based on user role
+    LaunchedEffect(shouldNavigate, userRole) {
+        if (shouldNavigate && userRole != null) {
+            when (userRole) {
+                Role.PATIENT -> openHomeScreenPatient()
+                Role.DOCTOR -> openHomeScreenDoctor()
+                Role.ADMIN -> openHomeScreenAdmin()
+                // Handle any new roles that might be added in the future
+                else -> openHomeScreenPatient() // Default to patient screen as fallback
+            }
+
+        }
+    }
         LoginScreenContent(
             openSignUpScreen = openSignUpScreen,
             login = viewModel::login,
             showErrorSnackbar = showErrorSnackbar
         )
-    }
+
 }
 
 @Composable

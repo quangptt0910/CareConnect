@@ -1,7 +1,9 @@
 package com.example.careconnect.dataclass
 
+import com.google.firebase.firestore.DocumentId
+
 data class DoctorSchedule(
-    val id: String = "",  // Firestore document ID (optional)
+    @DocumentId val id: String = "",  // Firestore document ID (optional)
 
     val availability: List<DaySchedule> = listOf(),  // List of available days with time slots
     val timeOff: List<String> = listOf()  // List of days when the doctor is off (e.g., ["2025-03-10", "2025-03-15"])

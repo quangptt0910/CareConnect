@@ -2,6 +2,8 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
+import com.example.careconnect.dataclass.User
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -12,6 +14,9 @@ class AuthRepository @Inject constructor(
     val currentUser: FirebaseUser? = authRemoteDataSource.currentUser
     val currentUserIdFlow: Flow<String?> = authRemoteDataSource.currentUserIdFlow
 
+    val currentUserFlow: Flow<User?> = authRemoteDataSource.currentUserFlow
+
+    val currentRoleFlow: Flow<Role?> = authRemoteDataSource.currentRoleFlow
     // simply login using the authRemoteDataSource with email password auth provider
     // and return the result
     suspend fun login(email: String, password: String) {

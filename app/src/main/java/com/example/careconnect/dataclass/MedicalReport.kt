@@ -1,12 +1,14 @@
 package com.example.careconnect.dataclass
 
+import com.google.firebase.firestore.DocumentId
+
 
 /*
  * Data class for medical report
  * Medical report for the consultation of the patient
  */
 data class MedicalReport(
-    val id: String = "",  // Firestore document ID (optional)
+    @DocumentId val id: String = "",  // Firestore document ID (optional)
     val patientId: String = "",  // Firebase UID of the patient
 
     val doctorId: String = "",  // Firebase UID of the doctor
