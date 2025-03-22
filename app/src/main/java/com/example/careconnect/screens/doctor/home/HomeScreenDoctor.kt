@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.doctor
+package com.example.careconnect.screens.doctor.home
 
 import kotlinx.serialization.Serializable
 

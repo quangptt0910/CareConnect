@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -199,6 +201,7 @@ fun ChatBox(
     modifier: Modifier = Modifier,
     onSend: (String) -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) } // Controls dropdown visibility
     var text by remember { mutableStateOf("") }
 
     Row(
@@ -209,12 +212,17 @@ fun ChatBox(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-            onClick = { /* Handle adding attachments */ }
+        // Plus (+) button for dropdown menu
+        Box {
+            IconButton(
+                onClick = { expanded = true } // Open dropdown
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Attachments")
+            }
 
-        ){
-            Icon(Icons.Filled.Add, contentDescription = "Attachments")
+            MinimalDropdownMenu(expanded, onDismissRequest = { expanded = false })
         }
+
         TextField(
             value = text,
             onValueChange = { text = it },
@@ -226,6 +234,7 @@ fun ChatBox(
             )
         )
 
+        //Send button
         IconButton(
             onClick = {
                 if (text.isNotBlank()) {
@@ -235,6 +244,29 @@ fun ChatBox(
             }
         ) {
             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+        }
+    }
+}
+
+@Composable
+fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
+    //var expanded by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest
+        ) {
+            DropdownMenuItem(
+                text = { Text("Send image") },
+                onClick = { /* Do something... */ }
+            )
+            DropdownMenuItem(
+                text = { Text("Send document") },
+                onClick = { /* Do something... */ }
+            )
         }
     }
 }
