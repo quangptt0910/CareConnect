@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.careconnect.common.ext.isValidPassword
 import com.example.careconnect.R.string as AppText
 
 /**
@@ -66,7 +65,7 @@ fun PasswordSignUpTextField(
 
     // OutlinedTextField for entering user password
     Column(
-        modifier = Modifier.height(100.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = value,
@@ -187,28 +186,28 @@ fun LabelTextField(
             // Check if trailing composable is provided
             trailing?.invoke()
         },
-//        colors = TextFieldDefaults.colors(
-//            // Text colors
-//            focusedTextColor = Color.Black,
-//            unfocusedTextColor = Color.Black,
-//            disabledTextColor = Color.Gray,
-//
-//            // Container colors
-//            focusedContainerColor = Color.White,
-//            unfocusedContainerColor = Color.White,
-//            disabledContainerColor = Color.White,
-//
-//            // Border/Indicator colors
-//            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-//            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-//
-//            // Label colors
-//            focusedLabelColor = MaterialTheme.colorScheme.primary,
-//            unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
-//
-//            // Cursor color
-//            cursorColor = MaterialTheme.colorScheme.primary
-//        ),
+        colors = TextFieldDefaults.colors(
+            // Text colors
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
+            disabledTextColor = Color.Gray,
+
+            // Container colors
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledContainerColor = Color.White,
+
+            // Border/Indicator colors
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+
+            // Label colors
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
+
+            // Cursor color
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
         shape = RoundedCornerShape(10.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
 

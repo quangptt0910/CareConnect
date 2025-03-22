@@ -1,6 +1,5 @@
 package com.example.careconnect.screens.signup
 
-import android.R.attr.name
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -177,7 +176,7 @@ fun SignUpScreenContent(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .clickable {
-                                openLoginScreen
+                                openLoginScreen()
                             },
                         text = buildAnnotatedString {
                             withStyle(

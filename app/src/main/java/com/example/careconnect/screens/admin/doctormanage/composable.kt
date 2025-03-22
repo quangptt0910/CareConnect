@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.DoctorSchedule
+import com.example.careconnect.dataclass.Role
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -43,20 +44,20 @@ import com.example.careconnect.R.string as AppText
  * Composable function to display a filled card with a title, expandable list of user products, and delete functionality.
  *
  * @param title The title of the card.
- * @param userProducts List of user-added products to be displayed.
+ * @param users List of user-added products to be displayed.
  * @param onDeleteProduct Callback function to handle product deletion.
  */
 @Composable
 fun FilledCardExample(
     title: String,
     modifier: Modifier = Modifier,
-    userProducts: List<Doctor>,
+    doctors: List<Doctor>,
     onDeleteProduct: (Doctor) -> Unit,
 ) {
 
     var expanded by rememberSaveable { mutableStateOf(false) }
     var showWarningDialog by remember { mutableStateOf(false) }
-    var productToDelete by remember { mutableStateOf<Doctor?>(null) }
+    var doctorToDelete by remember { mutableStateOf<Doctor?>(null) }
 
     Card(
         colors = CardDefaults.cardColors(
@@ -73,11 +74,12 @@ fun FilledCardExample(
         ) {
 
             Column {
-                userProducts.forEach { doctor ->
+                doctors.forEach { doctor ->
                     ListItem(
                         headlineContent = { Text(doctor.name + " " + doctor.surname) },
                         supportingContent = {
                             Column {
+                                // take the specialization from the userData of the doctor (ensure the userData is .Doctor
                                 Text(doctor.specialization)
 
                             } },
@@ -102,7 +104,7 @@ fun FilledCardExample(
 
                                 IconButton(
                                     onClick = {
-                                        productToDelete = doctor
+                                        doctorToDelete = doctor
                                         showWarningDialog = true
                                     }
                                 ){
@@ -123,14 +125,14 @@ fun FilledCardExample(
             }
         }
 
-        if (showWarningDialog && productToDelete != null) {
+        if (showWarningDialog && doctorToDelete != null) {
             AlertDialog(
                 title = { Text(stringResource(AppText.delete_product_title)) },
                 text = { Text(stringResource(AppText.delete_product_description)) },
                 dismissButton = { DialogCancelButton(AppText.cancel) { showWarningDialog = false } },
                 confirmButton = {
                     DialogConfirmButton(AppText.delete) {
-                        onDeleteProduct(productToDelete!!)
+                        onDeleteProduct(doctorToDelete!!)
                         showWarningDialog = false
                     }
                 },
@@ -183,12 +185,6 @@ fun FilledCardStats(
         }
     }
 }
-
-
-
-
-
-
 
 /**
  * A confirmation button composable typically used in dialogs.

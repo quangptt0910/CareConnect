@@ -23,12 +23,11 @@ class LoginViewModel @Inject constructor(
         get() = _shouldRestartApp.asStateFlow()
 
     // Convert the Flow to StateFlow for easier collection in UI
-    val userRole: StateFlow<Role?> = authRepository.currentRoleFlow
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            null
-        )
+    val currentUser: StateFlow<Any?> = authRepository.currentUserFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean>

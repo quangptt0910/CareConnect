@@ -21,6 +21,6 @@ enum class AppointmentStatus {
 
 data class AppointmentDetails (
     val appointment: Appointment,
-    val doctor: Doctor,
+    val doctor: Doctor, // TODO() change the doctor type as new User class
     val patient: Patient
 )

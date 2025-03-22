@@ -4,13 +4,37 @@ package com.example.careconnect.screens.patient.profileinfo
 import android.app.DatePickerDialog
 import android.widget.DatePicker
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
-
 
 
 @Composable
@@ -58,7 +81,7 @@ fun MoreAboutYouContent(
     var ageText by remember { mutableStateOf("") }
     var genderText by remember { mutableStateOf("") }
     var genderExpanded by remember { mutableStateOf(false) }
-    val genderList = listOf("Male", "Female")
+    val genderList = listOf("Male", "Female", "Other")
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDateText by remember { mutableStateOf(dob) }
 
@@ -103,7 +126,7 @@ fun MoreAboutYouContent(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(), // Ensures dropdown appears directly below the text field
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled = true), // Ensures dropdown appears directly below the text field
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,

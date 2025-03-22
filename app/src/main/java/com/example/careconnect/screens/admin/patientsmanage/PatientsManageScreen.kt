@@ -16,7 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.careconnect.dataclass.Gender
+import com.example.careconnect.dataclass.MedicalHistory
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -54,17 +57,25 @@ fun PatientsManageScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
 
             val patients = listOf(
-                Patient("John", "Doe", "133","123","123","Cardiologist"),
-                Patient("Jane", "Smith","133","123","123", "Dermatologist"),
-                Patient("Bob", "Johnson","133","123","123", "Neurologist"),
-                Patient("Alice", "Williams","133","123","123", "Pediatrician"),
-                Patient("David", "Brown","133","123","123", "Orthopedic Surgeon"),
-                Patient("Emily", "Jones","133","123","123", "Gynecologist"),
+                Patient(
+                    id = "patient456",
+                    name = "Jane",
+                    surname = "Smith",
+                    email = "jane.smith@example.com",
+                    role = Role.PATIENT,
+                    phone = "987-654-3210",
+                    address = "456 Wellness Ave, Care Town",
+                    dateOfBirth = "1990-05-15",
+                    gender = Gender.FEMALE,
+                    height = 165.0, // Height in cm
+                    weight = 50.0,  // Weight in kg
+                    medicalHistory = MedicalHistory() // Assuming MedicalHistory has a default constructor
+                )
             )
 
             FilledCardPatients(
                 title = "Patients",
-                userProducts = patients,
+                patients = patients,
                 onDeleteProduct = { /* Handle product deletion */ }
             )
 

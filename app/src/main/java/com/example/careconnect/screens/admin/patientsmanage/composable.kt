@@ -39,14 +39,14 @@ import com.example.careconnect.screens.admin.doctormanage.DialogConfirmButton
  * Composable function to display a filled card with a title, expandable list of user products, and delete functionality.
  *
  * @param title The title of the card.
- * @param userProducts List of user-added products to be displayed.
+ * @param user List of user-added products to be displayed.
  * @param onDeleteProduct Callback function to handle product deletion.
  */
 @Composable
 fun FilledCardPatients(
     title : String,
     modifier: Modifier = Modifier,
-    userProducts: List<Patient>,
+    patients: List<Patient>,
     onDeleteProduct: (Patient) -> Unit,
 ) {
 
@@ -69,7 +69,7 @@ fun FilledCardPatients(
         ) {
 
             Column {
-                userProducts.forEach { patients ->
+                patients.forEach { patients ->
                     ListItem(
                         headlineContent = { Text(patients.name + " " + patients.surname) },
 

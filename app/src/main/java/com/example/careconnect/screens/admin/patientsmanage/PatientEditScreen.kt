@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -54,14 +53,14 @@ fun PatientEditScreenContent(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            val patients = listOf(
-                Patient("John", "Doe", "133", "123", "123", "Cardiologist"),
-                Patient("Jane", "Smith", "133", "123", "123", "Dermatologist"),
-                Patient("Bob", "Johnson", "133", "123", "123", "Neurologist"),
-                Patient("Alice", "Williams", "133", "123", "123", "Pediatrician"),
-                Patient("David", "Brown", "133", "123", "123", "Orthopedic Surgeon"),
-                Patient("Emily", "Jones", "133", "123", "123", "Gynecologist"),
-            )
+//            val patients = listOf(
+//                Patient("John", "Doe", "133", "123", "123", "Cardiologist"),
+//                Patient("Jane", "Smith", "133", "123", "123", "Dermatologist"),
+//                Patient("Bob", "Johnson", "133", "123", "123", "Neurologist"),
+//                Patient("Alice", "Williams", "133", "123", "123", "Pediatrician"),
+//                Patient("David", "Brown", "133", "123", "123", "Orthopedic Surgeon"),
+//                Patient("Emily", "Jones", "133", "123", "123", "Gynecologist"),
+//            )
 
             FilledCardEdit()
 

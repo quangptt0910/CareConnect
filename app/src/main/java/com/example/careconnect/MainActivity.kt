@@ -14,7 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -31,6 +30,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,10 +41,6 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember { SnackbarHostState() }
             val navController = rememberNavController()
-
-            fun navigate(route: Navigation) {
-                navController.navigate(route) { launchSingleTop = true }
-            }
 
             CareConnectTheme {
                 Surface(
@@ -57,9 +53,10 @@ class MainActivity : ComponentActivity() {
                     ) { innerPadding ->
                         NavHost(
                             navController = navController,
-                            startDestination = "home",
+                            startDestination = HomePatientRoute,
                             modifier = Modifier.padding(innerPadding)
                         ) {
+
                             composable<LoginRoute> {
                                 LoginScreen(
                                     openHomeScreenPatient = {
@@ -72,9 +69,7 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate(HomeAdminRoute) { launchSingleTop = true }
                                     },
                                     openSignUpScreen = {
-                                        navController.navigate(SignUpRoute) {
-                                            launchSingleTop = true
-                                        }
+                                        navController.navigate(SignUpRoute) { launchSingleTop = true }
                                     },
                                     showErrorSnackbar = { errorMessage ->
                                         val message = getErrorMessage(errorMessage)

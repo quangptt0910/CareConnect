@@ -2,8 +2,6 @@ package com.example.careconnect.data.datasource
 
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Role
-import com.example.careconnect.dataclass.User
-import com.example.careconnect.dataclass.UserData
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -11,7 +9,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -30,7 +27,7 @@ class AuthRemoteDataSource @Inject constructor(
             awaitClose { auth.removeAuthStateListener(listener) }
         }
 
-    val currentUserFlow: Flow<User?>
+    val currentUserFlow: Flow<Any?>
         get() = callbackFlow {
             val listener = FirebaseAuth.AuthStateListener { auth ->
                 launch {
@@ -38,26 +35,26 @@ class AuthRemoteDataSource @Inject constructor(
                     if (uid != null) {
                         try {
                             val user = firestore.collection("users").document(uid).get().await()
-                                .toObject(User::class.java)
-                            this@callbackFlow.trySend(user)
+                            val role = user.getString("role")
+
+                            val userByRole = when (role) {
+                                Role.ADMIN.name -> firestore.collection("admins").document(uid).get().await()
+                                Role.DOCTOR.name -> firestore.collection("doctors").document(uid).get().await()
+                                Role.PATIENT.name -> firestore.collection("patients").document(uid).get().await()
+                                else -> null
+                            }
+                            trySend(userByRole)
                         } catch (e: Exception) {
-                            this@callbackFlow.trySend(null)
+                            trySend(null)
                         }
                     } else {
-                        this@callbackFlow.trySend(null)
+                        trySend(null)
                     }
                 }
             }
             auth.addAuthStateListener(listener)
             awaitClose { auth.removeAuthStateListener(listener) }
         }
-
-    val currentRoleFlow: Flow<Role?> = currentUserFlow.map { user -> user?.role }
-
-
-    suspend fun createAccount(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password).await()
-    }
 
     suspend fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).await()
@@ -73,9 +70,7 @@ class AuthRemoteDataSource @Inject constructor(
         // save patient id to firestore
         val userId = auth.currentUser!!.uid
         val db = FirebaseFirestore.getInstance()
-
-
-        val patient = User(name = name, surname = surname, email = email, role = Role.PATIENT, userData = UserData.PatientData(Patient()))
+        val patient = Patient(name = name, surname = surname, email = email)
         
         // Create patient document in Firestore as "patients" collection
         db.collection("user").document(userId).set(patient).await()

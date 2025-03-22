@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">CareConnect</string>
+    <string name="app_catchphrase">Connect with care</string>
 
     <string name="name">Name</string>
     <string name="surname">Surname</string>

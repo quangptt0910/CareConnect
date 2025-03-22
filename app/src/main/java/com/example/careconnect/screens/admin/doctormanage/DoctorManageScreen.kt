@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.DoctorSchedule
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -53,21 +55,35 @@ fun DoctorManageScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val doctors = listOf(
-                Doctor("John", "Doe", "133","123","123","Cardiologist"),
-                Doctor("Jane", "Smith","133","123","123", "Dermatologist"),
-                Doctor("Bob", "Johnson","133","123","123", "Neurologist"),
-                Doctor("Alice", "Williams","133","123","123", "Pediatrician"),
-                Doctor("David", "Brown","133","123","123", "Orthopedic Surgeon"),
-                Doctor("Emily", "Jones","133","123","123", "Gynecologist"),
-                //Doctor("Michael", "Davis","133","123","123", "Ophthalmologist"),
-                //Doctor("Sarah", "Miller","133","123","123", "Dentist")
-            )
+//            val doctors = listOf(
+////                Doctor("John", "Doe", "133","123","123","Cardiologist"),
+////                Doctor("Jane", "Smith","133","123","123", "Dermatologist"),
+////                Doctor("Bob", "Johnson","133","123","123", "Neurologist"),
+////                Doctor("Alice", "Williams","133","123","123", "Pediatrician"),
+////                Doctor("David", "Brown","133","123","123", "Orthopedic Surgeon"),
+////                Doctor("Emily", "Jones","133","123","123", "Gynecologist"),
+//                //Doctor("Michael", "Davis","133","123","123", "Ophthalmologist"),
+//                //Doctor("Sarah", "Miller","133","123","123", "Dentist")
+//            )
 
+            val doctors = listOf(
+                Doctor(
+                    id = "doctor123",
+                    name = "John",
+                    surname = "Doe",
+                    email = "john.doe@example.com",
+                    role = Role.DOCTOR,
+                    phone = "123-456-7890",
+                    address = "123 Medical St, Health City",
+                    specialization = "Cardiology",
+                    experience = 2015,
+                    schedule = DoctorSchedule() // Assuming DoctorSchedule has a default constructor
+                )
+            )
 
             FilledCardExample(
                 title = "Doctors",
-                userProducts = doctors,
+                doctors = doctors,
                 onDeleteProduct = {}
             )
 
