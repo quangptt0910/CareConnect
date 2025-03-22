@@ -1,0 +1,208 @@
+package com.example.careconnect.screens.admin.doctormanage
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.careconnect.screens.patient.home.HomeUiState
+import com.example.careconnect.ui.theme.CareConnectTheme
+
+
+@Composable
+fun AddDoctorScreen(
+
+){
+
+}
+
+
+@Composable
+fun AddDoctorScreenContent(
+    onNextStep: () -> Unit = {}
+) {
+
+    var name by remember { mutableStateOf(TextFieldValue("")) }
+    var surname by remember { mutableStateOf(TextFieldValue("")) }
+    var speciality by remember { mutableStateOf(TextFieldValue("")) }
+    var address by remember { mutableStateOf(TextFieldValue("")) }
+    var phone by remember { mutableStateOf(TextFieldValue("")) }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        SmallTopAppBarExample()
+
+        Column(modifier = Modifier.padding(top = 80.dp)) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+            }
+            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                // Progress Stepper
+                StepperIndicator(currentStep = 1)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Form for Personal Info
+                Text(
+                    "Step 1: Personal Information",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                CustomTextField(label = "Name", value = name, onValueChange = { name = it })
+                CustomTextField(
+                    label = "Surname",
+                    value = surname,
+                    onValueChange = { surname = it })
+                CustomTextField(
+                    label = "Speciality",
+                    value = speciality,
+                    onValueChange = { speciality = it })
+                CustomTextField(
+                    label = "Address",
+                    value = address,
+                    onValueChange = { address = it })
+                CustomTextField(label = "Phone", value = phone, onValueChange = { phone = it })
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Next Button
+                IconButton(
+                    onClick = { onNextStep() },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
+                }
+            }
+        }
+    }
+}
+
+// Progress Stepper UI
+@Composable
+fun StepperIndicator(currentStep: Int) {
+    val steps = listOf("Info", "Schedule", "Off Days")
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        steps.forEachIndexed { index, step ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (index + 1 <= currentStep) MaterialTheme.colorScheme.primary else Color.Gray,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            if (index + 1 < currentStep) {
+                                Icon(Icons.Default.Check, contentDescription = "Completed", tint = Color.White)
+                            } else {
+                                Text(text = "${index + 1}", color = Color.White, fontSize = 18.sp)
+                            }
+                        }
+                    }
+                }
+                Text(text = step, fontSize = 14.sp)
+            }
+        }
+    }
+}
+
+// Custom TextField
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomTextField(label: String, value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SmallTopAppBarExample() {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text(
+                        "Add Doctor",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { /* do something */ }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Localized description"
+                        )
+                    }
+                },
+            )
+        },
+    ){
+        Box(modifier = Modifier.padding(it))
+    }
+}
+
+
+@Preview
+@Composable
+fun AddDoctorScreenPreview() {
+    CareConnectTheme {
+        val uiState = HomeUiState()
+        AddDoctorScreenContent(
+        )
+    }
+}
