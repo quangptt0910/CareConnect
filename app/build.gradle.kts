@@ -75,6 +75,8 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     // google icons core
     implementation("androidx.compose.material:material-icons-core:1.7.8")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
