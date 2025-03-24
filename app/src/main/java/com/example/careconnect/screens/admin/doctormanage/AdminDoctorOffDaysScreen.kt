@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
 import java.time.YearMonth
-
 
 
 @Composable
@@ -82,12 +81,12 @@ fun AdminDoctorOffDaysScreenContent(onNextStep: () -> Unit, onBack: () -> Unit) 
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     Text("Back")
                 }
                 Button(onClick = { onNextStep() }) {
                     Text("Finish")
-                    Icon(Icons.Default.ArrowForward, contentDescription = "Finish Setup")
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Finish Setup")
                 }
             }
         }

@@ -52,8 +52,6 @@ import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
 
-@Serializable
-object HomePatientRoute
 
 data class CarouselItem(
     val id: Int,
