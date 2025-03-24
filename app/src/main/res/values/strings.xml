@@ -45,4 +45,8 @@
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 
+
+    <!-- Firebase cloud messaging -->
+    <string name="default_notification_channel_id">default_notification_channel_id</string>"
+
 </resources>

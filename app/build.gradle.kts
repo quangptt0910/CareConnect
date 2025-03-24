@@ -96,6 +96,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.56")
     ksp("com.google.dagger:hilt-android-compiler:2.56")
 
+    // Cloud messaging
+    implementation("com.google.firebase:firebase-messaging:24.1.1")
+
 
 
 }
