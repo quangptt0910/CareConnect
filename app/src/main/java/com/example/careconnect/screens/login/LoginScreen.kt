@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,48 +47,28 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.common.ext.fieldModifier
 import com.example.careconnect.dataclass.ErrorMessage
-import com.example.careconnect.dataclass.Role
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
-import kotlinx.serialization.Serializable
-
-@Serializable
-object LoginRoute
-
 
 @Composable
 fun LoginScreen(
-    openHomeScreenPatient: () -> Unit,
-    openHomeScreenDoctor: () -> Unit,
-    openHomeScreenAdmin: () -> Unit,
     openSignUpScreen: () -> Unit,
+    openSplashScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-    val isLoggedIn by viewModel.isLoggedIn.collectAsStateWithLifecycle()
-    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
-    // Using both shouldRestartApp and isLoggedIn for compatibility
-    val shouldNavigate = shouldRestartApp && isLoggedIn
 
-    // Handle navigation based on user role
-    LaunchedEffect(shouldNavigate) {
-        if (shouldNavigate) {
-            when (currentUser) {
-                Role.PATIENT -> openHomeScreenPatient()
-                Role.DOCTOR -> openHomeScreenDoctor()
-                Role.ADMIN -> openHomeScreenAdmin()
-                // Handle any new roles that might be added in the future
-                else -> openHomeScreenPatient() // Default to patient screen as fallback
-            }
-
+        println("Debug: LoginScreen")
+        if (shouldRestartApp) {
+            openSplashScreen()
+        } else {
+            LoginScreenContent(
+                openSignUpScreen = openSignUpScreen,
+                login = viewModel::login,
+                showErrorSnackbar = showErrorSnackbar
+            )
         }
-    }
-        LoginScreenContent(
-            openSignUpScreen = openSignUpScreen,
-            login = viewModel::login,
-            showErrorSnackbar = showErrorSnackbar
-        )
 
 }
 

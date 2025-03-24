@@ -43,11 +43,7 @@ import com.example.careconnect.common.ext.fieldModifier
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.login.EmailField
 import com.example.careconnect.ui.theme.CareConnectTheme
-import kotlinx.serialization.Serializable
 
-
-@Serializable
-object SignUpRoute
 
 /**
  * Composable function for the Sign-Up screen.
@@ -62,7 +58,7 @@ fun SignUpScreen(
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-
+    println("Debug: SignUpScreen")
     if (shouldRestartApp) {
         openHomeScreen()
     } else {
@@ -143,17 +139,18 @@ fun SignUpScreenContent(
                             .fillMaxWidth()
                             .height(40.dp),
                         onClick = {
-                            when {
-                                name.isBlank() -> errorMessage = "Name is required"
-                                surname.isBlank() -> errorMessage = "Surname is required"
-                                email.isBlank() -> errorMessage = "Email is required"
-                                password.isBlank() -> errorMessage = "Password is required"
-
-                                else -> {
-                                    errorMessage = null
-                                    signUp(name, surname, email, password, showErrorSnackbar)
-                                }
-                            }
+//                            when {
+//                                name.isBlank() -> errorMessage = "Name is required"
+//                                surname.isBlank() -> errorMessage = "Surname is required"
+//                                email.isBlank() -> errorMessage = "Email is required"
+//                                password.isBlank() -> errorMessage = "Password is required"
+//
+//                                else -> {
+//                                    errorMessage = null
+//                                    signUp(name, surname, email, password, showErrorSnackbar)
+//                                }
+//                            }
+                            signUp(name, surname, email, password, showErrorSnackbar)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -169,7 +166,7 @@ fun SignUpScreenContent(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(Modifier.height(30.dp))
 
                     // Navigate to login if already have an account
                     Text(
@@ -200,7 +197,7 @@ fun SignUpScreenContent(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(Modifier.height(30.dp))
                 }
             }
         }
@@ -235,7 +232,7 @@ fun SignUpTopSection() {
             )
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(Modifier.height(10.dp))
 
         Text(
             modifier = Modifier
@@ -255,22 +252,12 @@ fun SignUpTopSection() {
 @Preview(showSystemUi = true)
 fun SignUpScreenPreview() {
     CareConnectTheme {
-        val name = "nicky"
-        val surname = "bb"
-        val email = "emailtest.com"
-        val password = "password"
-
         SignUpScreenContent(
             openLoginScreen = {},
             signUp = { _, _, _, _, _ ->},
             showErrorSnackbar = {}
         )
 
-        SignUpScreenContent(
-            openLoginScreen = {},
-            signUp = {name, surname, email, password, _ ->},
-            showErrorSnackbar = {},
-        )
     }
 
 }

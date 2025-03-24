@@ -6,10 +6,9 @@ import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.dataclass.ErrorMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.example.careconnect.dataclass.Role
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -29,9 +28,6 @@ class LoginViewModel @Inject constructor(
         initialValue = null
     )
 
-    private val _isLoggedIn = MutableStateFlow(false)
-    val isLoggedIn: StateFlow<Boolean>
-        get() = _isLoggedIn.asStateFlow()
 
     fun login(
         email: String,
@@ -40,9 +36,7 @@ class LoginViewModel @Inject constructor(
     ) {
         launchCatching(showErrorSnackbar) {
             authRepository.login(email, password)
-           _isLoggedIn.value = true
             _shouldRestartApp.value = true
-
         }
     }
 }

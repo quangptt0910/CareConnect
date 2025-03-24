@@ -1,8 +1,7 @@
 package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
-import com.example.careconnect.dataclass.Role
-
+import com.example.careconnect.data.datasource.AuthRemoteDataSource.UserData
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -13,7 +12,7 @@ class AuthRepository @Inject constructor(
     val currentUser: FirebaseUser? = authRemoteDataSource.currentUser
     val currentUserIdFlow: Flow<String?> = authRemoteDataSource.currentUserIdFlow
 
-    val currentUserFlow: Flow<Any?> = authRemoteDataSource.currentUserFlow
+    val currentUserFlow: Flow<UserData> = authRemoteDataSource.currentUserFlow
 
     // simply login using the authRemoteDataSource with email password auth provider
     // and return the result
@@ -24,7 +23,7 @@ class AuthRepository @Inject constructor(
     // signUp using the authRemoteDataSource with email password auth provider
     // link account with name and surname (Patient)
     suspend fun signUp(name: String, surname: String, email: String, password: String) {
-        authRemoteDataSource.linkAccount(name, surname, email, password)
+        authRemoteDataSource.signUp(name, surname, email, password)
     }
 
     fun signOut() {

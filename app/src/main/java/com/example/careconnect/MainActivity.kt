@@ -24,14 +24,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.home.HomeAdminRoute
-import com.example.careconnect.screens.doctor.home.HomeDoctorRoute
-import com.example.careconnect.screens.login.LoginRoute
 import com.example.careconnect.screens.login.LoginScreen
-import com.example.careconnect.screens.patient.home.HomePatientRoute
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
-import com.example.careconnect.screens.signup.SignUpRoute
 import com.example.careconnect.screens.signup.SignUpScreen
+import com.example.careconnect.screens.splash.SplashScreen
 import com.example.careconnect.ui.theme.CareConnectTheme
+import com.example.careconnect.ui.theme.navigation.Route.HomeDoctorRoute
+import com.example.careconnect.ui.theme.navigation.Route.HomePatientRoute
+import com.example.careconnect.ui.theme.navigation.Route.LoginRoute
+import com.example.careconnect.ui.theme.navigation.Route.SignUpRoute
+import com.example.careconnect.ui.theme.navigation.Route.SplashRoute
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -88,23 +90,36 @@ class MainActivity : ComponentActivity() {
                     ) { innerPadding ->
                         NavHost(
                             navController = navController,
-                            startDestination = HomePatientRoute,
+                            startDestination = SplashRoute,
                             modifier = Modifier.padding(innerPadding)
                         ) {
-
-                            composable<LoginRoute> {
-                                LoginScreen(
-                                    openHomeScreenPatient = {
+                            composable<SplashRoute> {
+                                SplashScreen(
+                                    openLoginScreen = {
+                                        navController.navigate(LoginRoute) { launchSingleTop = true }
+                                    },
+                                    openPatientScreen = {
                                         navController.navigate(HomePatientRoute) { launchSingleTop = true }
                                     },
-                                    openHomeScreenDoctor = {
+                                    openDoctorScreen = {
                                         navController.navigate(HomeDoctorRoute) { launchSingleTop = true }
                                     },
-                                    openHomeScreenAdmin = {
+                                    openAdminScreen = {
                                         navController.navigate(HomeAdminRoute) { launchSingleTop = true }
                                     },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
+                            composable<LoginRoute> {
+                                LoginScreen(
                                     openSignUpScreen = {
                                         navController.navigate(SignUpRoute) { launchSingleTop = true }
+                                    },
+                                    openSplashScreen = {
+                                        navController.navigate(SplashRoute) { launchSingleTop = true }
                                     },
                                     showErrorSnackbar = { errorMessage ->
                                         val message = getErrorMessage(errorMessage)

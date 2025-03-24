@@ -1,6 +1,5 @@
 package com.example.careconnect.screens.signup
 
-import android.R.attr.password
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
@@ -36,7 +35,9 @@ class SignUpViewModel @Inject constructor(
         }
 
         launchCatching(showSnackbar) {
+            println("Debug: SignUp clicked")
             authRepository.signUp(name, surname, email, password)
+            println("Debug: SignUp success")
             _shouldRestartApp.value = true
         }
     }

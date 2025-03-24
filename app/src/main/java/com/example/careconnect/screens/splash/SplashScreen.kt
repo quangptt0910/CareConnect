@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
@@ -13,60 +12,97 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
-import kotlinx.serialization.Serializable
+import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.delay
 
-
-@Serializable
-object SplashScreen
 
 @Composable
-fun SplashScreenContent(
-    openAndPopUp: (String, String) -> Unit,
-    modifier: Modifier = Modifier,
+fun SplashScreen(
+    openAdminScreen: () -> Unit,
+    openDoctorScreen: () -> Unit,
+    openPatientScreen: () -> Unit,
+    openLoginScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
+    println("Debug: SplashScreen")
+    val navigateRoute by viewModel.navigationRoute.collectAsStateWithLifecycle()
 
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .background(color = MaterialTheme.colorScheme.primary),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(id = R.mipmap.ic_launcher_round),
-            contentDescription = stringResource(R.string.app_name),
-            tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.size(100.dp).align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Text(text = stringResource(R.string.app_name),
-            color = MaterialTheme.colorScheme.onPrimary,
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Text(text = stringResource(R.string.app_catchphrase),
-            color = MaterialTheme.colorScheme.onPrimary,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(modifier = Modifier.height(30.dp))
-        CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+    SplashScreenContent(showErrorSnackbar = showErrorSnackbar)
+
+    LaunchedEffect(navigateRoute) {
+        delay(1000L)
+        if (navigateRoute != null) {
+            when (navigateRoute) {
+                "admin" -> openAdminScreen()
+                "doctor" -> openDoctorScreen()
+                "patient" -> openPatientScreen()
+                "login" -> openLoginScreen()
+                else -> openLoginScreen()
+            }
+        }
     }
 }
 
-@Preview(showSystemUi = true)
+
+@Composable
+private fun SplashScreenContent(
+    showErrorSnackbar: (ErrorMessage) -> Unit
+) {
+    ConstraintLayout {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.home_health_24px),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(100.dp)
+            )
+            Spacer(Modifier.height(14.dp))
+
+            Text(
+                text = stringResource(R.string.app_name),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(Modifier.height(14.dp))
+            Text(
+                text = stringResource(R.string.app_catchphrase),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(30.dp))
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SplashScreenPreview() {
-    SplashScreenContent(openAndPopUp = { _, _ -> })
-
+    CareConnectTheme {
+        SplashScreenContent(
+            showErrorSnackbar = {}
+        )
+    }
 }
