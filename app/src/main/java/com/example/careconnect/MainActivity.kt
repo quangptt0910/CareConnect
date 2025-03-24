@@ -26,12 +26,14 @@ import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.home.HomeAdminRoute
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
+import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.screens.splash.SplashScreen
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.navigation.Route.HomeDoctorRoute
 import com.example.careconnect.ui.theme.navigation.Route.HomePatientRoute
 import com.example.careconnect.ui.theme.navigation.Route.LoginRoute
+import com.example.careconnect.ui.theme.navigation.Route.SettingsRoute
 import com.example.careconnect.ui.theme.navigation.Route.SignUpRoute
 import com.example.careconnect.ui.theme.navigation.Route.SplashRoute
 import dagger.hilt.android.AndroidEntryPoint
@@ -131,7 +133,7 @@ class MainActivity : ComponentActivity() {
                             composable<HomePatientRoute> {
                                 HomeScreenPatient(
                                     openSettingsScreen = {
-                                        navController.navigate(LoginRoute) { launchSingleTop = true }
+                                        navController.navigate(SettingsRoute) { launchSingleTop = true }
                                     }
                                 )
 
@@ -144,6 +146,18 @@ class MainActivity : ComponentActivity() {
                                     },
                                     openLoginScreen = {
                                         navController.navigate(LoginRoute) { launchSingleTop = true }
+                                    },
+                                    showErrorSnackbar = { errorMessage ->
+                                        val message = getErrorMessage(errorMessage)
+                                        scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
+
+                            composable<SettingsRoute> {
+                                SettingsScreen(
+                                    openSplashScreen = {
+                                        navController.navigate(SplashRoute) { launchSingleTop = true }
                                     },
                                     showErrorSnackbar = { errorMessage ->
                                         val message = getErrorMessage(errorMessage)

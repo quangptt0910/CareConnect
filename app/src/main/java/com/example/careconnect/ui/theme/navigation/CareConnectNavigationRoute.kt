@@ -11,6 +11,7 @@ sealed class Route {
     @Serializable data object HomePatientRoute : Route()
     @Serializable data object HomeDoctorRoute : Route()
     @Serializable data object HomeAdminRoute : Route()
+    @Serializable data object SettingsRoute : Route()
 }
 
 @Stable

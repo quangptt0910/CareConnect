@@ -10,6 +10,11 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 
+/*
+ * ViewModel for the Splash screen.
+ * Used to determine the next screen to navigate to based on the user's authentication status and role
+ * navigationRoute is a StateFlow that represents the route to navigate to.
+ */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val authRepository: AuthRepository

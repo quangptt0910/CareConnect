@@ -44,7 +44,7 @@ fun SplashScreen(
     SplashScreenContent(showErrorSnackbar = showErrorSnackbar)
 
     LaunchedEffect(navigateRoute) {
-        delay(1000L)
+        delay(500L)
         if (navigateRoute != null) {
             when (navigateRoute) {
                 "admin" -> openAdminScreen()

@@ -59,16 +59,16 @@ fun LoginScreen(
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
 
-        println("Debug: LoginScreen")
-        if (shouldRestartApp) {
-            openSplashScreen()
-        } else {
-            LoginScreenContent(
-                openSignUpScreen = openSignUpScreen,
-                login = viewModel::login,
-                showErrorSnackbar = showErrorSnackbar
-            )
-        }
+    println("Debug: LoginScreen")
+    if (shouldRestartApp) {
+        openSplashScreen()
+    } else {
+        LoginScreenContent(
+            openSignUpScreen = openSignUpScreen,
+            login = viewModel::login,
+            showErrorSnackbar = showErrorSnackbar
+        )
+    }
 
 }
 
