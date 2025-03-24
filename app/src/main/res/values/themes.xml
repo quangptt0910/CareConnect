@@ -3,11 +3,11 @@
 
     <style name="Theme.CareConnect" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="Theme.CareConnect.Splash" parent="Theme.CareConnect" >
+    <style name="Theme.CareConnect.Splash" parent="Theme.CareConnect">
     <item name="windowSplashScreenBackground">@color/primaryContainerLight</item>
     <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_round</item>
     <item name="windowSplashScreenAnimationDuration">500</item>
-    </style>>
+    </style>
 
 
 </resources>

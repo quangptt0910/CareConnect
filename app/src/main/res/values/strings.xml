@@ -15,7 +15,7 @@
     <string name="create_account">Create account</string>
     <string name="password_error">Password does not meet the requirement. Please use a stronger password.</string>
     <string name="password_match_error">Passwords does not match.</string>
-    <string name="all_fields_required">All fields are required.</string>">
+    <string name="all_fields_required">All fields are required.</string>
 
     <string name="signup">Create Account</string>
     <string name="password_level">Password Level: </string>
@@ -47,6 +47,6 @@
 
 
     <!-- Firebase cloud messaging -->
-    <string name="default_notification_channel_id">default_notification_channel_id</string>"
+    <string name="default_notification_channel_id">default_notification_channel_id</string>
 
 </resources>
