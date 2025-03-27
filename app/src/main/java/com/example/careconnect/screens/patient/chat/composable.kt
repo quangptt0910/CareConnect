@@ -1,21 +1,24 @@
-package com.example.careconnect.screens.patient.home
+package com.example.careconnect.screens.patient.chat
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
@@ -24,11 +27,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.screens.patient.home.ErrorMessage
+import com.example.careconnect.screens.patient.home.LoadingIndicator
+import com.example.careconnect.screens.patient.home.SuggestionsList
 
 /**
  * Composable function for displaying a search bar and search results.
@@ -39,8 +46,8 @@ import com.example.careconnect.dataclass.Doctor
  */
 @ExperimentalMaterial3Api
 @Composable
-fun SearchSection(
-    uiState: HomeUiState,
+fun SearchSectionMenu(
+    uiState: ChatMenuUiState,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
     onSearchQueryChange: (String) -> Unit
 ) {
@@ -49,7 +56,7 @@ fun SearchSection(
 
     SearchBar(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().height(50.dp)
             .padding(horizontal = 16.dp),
         inputField = {
             SearchBarDefaults.InputField(
@@ -75,13 +82,12 @@ fun SearchSection(
         expanded = expanded,
         onExpandedChange = { expanded = it },
     ) {
-        SearchResults(
+        SearchMenuResults(
             uiState = uiState,
             onDoctorSelected = onDoctorSelected
         )
     }
 }
-
 
 /**
  * Displays the search results for food products.
@@ -90,8 +96,8 @@ fun SearchSection(
  * @param onProductSelected Callback invoked when a product is selected or deselected.
  */
 @Composable
-fun SearchResults(
-    uiState: HomeUiState,
+fun SearchMenuResults(
+    uiState: ChatMenuUiState,
     onDoctorSelected: (Doctor, Boolean) -> Unit
 ) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -107,66 +113,54 @@ fun SearchResults(
     }
 }
 
-
-/**
- * Displays a loading indicator while search results are being fetched.
- */
 @Composable
-fun LoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-/**
- * Displays an error message when there is an issue fetching search results.
- *
- * @param message The error message to display.
- */
-@Composable
-fun ErrorMessage(message: String) {
-    Text(
-        text = message,
-        color = MaterialTheme.colorScheme.error,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        textAlign = TextAlign.Center
-    )
-}
-
-/**
- * Displays a list of suggested food products based on the search query.
- *
- * @param suggestions List of suggested products retrieved from the search.
- * @param selectedProducts List of products currently selected by the user.
- * @param onProductSelected Callback invoked when a product is selected or deselected.
- */
-@Composable
-fun SuggestionsList(
-    suggestions: List<Doctor>,
-    selectedDoctors: List<Doctor>,
-    onDoctorSelected: (Doctor, Boolean) -> Unit
+fun ChatListItem(
+    name: String,
+    message: String,
+    time: String,
+    imageRes: Int // Resource ID of the profile image
 ) {
-    suggestions.forEach { doctor ->
-        val isSelected = selectedDoctors.contains(doctor)
+    Column {
         ListItem(
-            headlineContent = {
-                Text(doctor.name ?: "Unknown doctor")
-            },
+            modifier = Modifier.padding(8.dp),
+            headlineContent = { Text(text = name) },
+            supportingContent = { Text(text = message) },
             leadingContent = {
-                Checkbox(
-                    checked = isSelected,
-                    onCheckedChange = { checked ->
-                        onDoctorSelected(doctor, checked)
-                    }
+                Image(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(55.dp) // Ensures width and height are the same
+                        .clip(CircleShape) // Clips the image into a circle
                 )
+            },
+            trailingContent = {
+                Text(text = time)
             }
         )
+        HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
     }
 }
+
+
+@Composable
+fun ChatListScreen(messages: List<ChatMessage>) {
+    LazyColumn {
+        items(messages) { message ->
+            ChatListItem(
+                name = message.name,
+                message = message.latestMessage,
+                time = message.time,
+                imageRes = message.imageRes
+            )
+        }
+    }
+}
+
+data class ChatMessage(
+    val name: String,
+    val latestMessage: String,
+    val time: String,
+    val imageRes: Int // Image resource ID
+)
