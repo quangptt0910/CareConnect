@@ -180,6 +180,7 @@ fun LabelTextField(
 
     OutlinedTextField(
         value = value,
+        modifier = modifier.fillMaxWidth(),
         onValueChange = onValueChange,
         label = { Text(text = label) },
         trailingIcon = {
