@@ -1,11 +1,17 @@
 package com.example.careconnect.data.datasource
 
 import android.util.Log
+import androidx.credentials.Credential
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
 import com.example.careconnect.dataclass.Admin
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -99,7 +105,39 @@ class AuthRemoteDataSource @Inject constructor(
         auth.currentUser!!.delete().await()
     }
 
-    public sealed class UserData {
+    suspend fun googleLogin(): GetCredentialRequest {
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId("1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com")
+            .build()
+
+        val notAuthGoogleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId("1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com")
+            .build()
+
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .addCredentialOption(notAuthGoogleIdOption)
+            .build()
+        return request
+    }
+
+    suspend fun handleGoogleLogin(credential: Credential) {
+        if(credential is CustomCredential && credential.type == "google") {
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+        } else {
+            Log.w("TAG", "Credential is not of type Google ID!")
+        }
+    }
+
+    suspend fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential).await()
+    }
+
+    sealed class UserData {
         data class AdminData(val admin: Admin) : UserData()
         data class DoctorData(val doctor: Doctor) : UserData()
         data class PatientData(val patient: Patient) : UserData()

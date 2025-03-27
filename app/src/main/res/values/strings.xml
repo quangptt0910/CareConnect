@@ -4,6 +4,13 @@
 
     <string name="name">Name</string>
     <string name="surname">Surname</string>
+    <string name="sign_out">Sign out</string>
+
+    <!-- Role -->
+    <string name="patient">Patient</string>
+    <string name="doctor">Doctor</string>
+    <string name="admin">Admin</string>
+
     <!-- ErrorMessage -->
     <string name="generic_error">Something went wrong. Please try again later.</string>
 

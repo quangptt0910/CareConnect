@@ -33,7 +33,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailedDrawerExample(
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
+    openSettingsScreen: () -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -77,7 +78,7 @@ fun DetailedDrawerExample(
                         selected = false,
                         icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         badge = { Text("20") }, // Placeholder
-                        onClick = { /* Handle click */ }
+                        onClick = { openSettingsScreen() }
                     )
                     NavigationDrawerItem(
                         label = { Text("Help and feedback") },

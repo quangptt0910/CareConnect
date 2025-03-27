@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.home.HomeAdminRoute
+import com.example.careconnect.screens.admin.home.HomeScreenAdmin
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.settings.SettingsScreen
@@ -162,6 +163,14 @@ class MainActivity : ComponentActivity() {
                                     showErrorSnackbar = { errorMessage ->
                                         val message = getErrorMessage(errorMessage)
                                         scope.launch { snackbarHostState.showSnackbar(message) }
+                                    }
+                                )
+                            }
+
+                            composable<HomeAdminRoute> {
+                                HomeScreenAdmin(
+                                    openSettingsScreen = {
+                                        navController.navigate(SettingsRoute) { launchSingleTop = true }
                                     }
                                 )
                             }
