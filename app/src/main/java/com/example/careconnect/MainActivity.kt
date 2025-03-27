@@ -23,7 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
-import com.example.careconnect.screens.admin.home.HomeAdminRoute
+
 import com.example.careconnect.screens.admin.home.HomeScreenAdmin
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
@@ -31,12 +31,13 @@ import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.screens.splash.SplashScreen
 import com.example.careconnect.ui.theme.CareConnectTheme
-import com.example.careconnect.ui.theme.navigation.Route.HomeDoctorRoute
-import com.example.careconnect.ui.theme.navigation.Route.HomePatientRoute
-import com.example.careconnect.ui.theme.navigation.Route.LoginRoute
-import com.example.careconnect.ui.theme.navigation.Route.SettingsRoute
-import com.example.careconnect.ui.theme.navigation.Route.SignUpRoute
-import com.example.careconnect.ui.theme.navigation.Route.SplashRoute
+import com.example.careconnect.ui.navigation.Route.HomeDoctorRoute
+import com.example.careconnect.ui.navigation.Route.HomePatientRoute
+import com.example.careconnect.ui.navigation.Route.LoginRoute
+import com.example.careconnect.ui.navigation.Route.SettingsRoute
+import com.example.careconnect.ui.navigation.Route.SignUpRoute
+import com.example.careconnect.ui.navigation.Route.SplashRoute
+import com.example.careconnect.ui.navigation.Route.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

@@ -27,14 +27,21 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.careconnect.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailedDrawerExample(
     content: @Composable (PaddingValues) -> Unit,
-    openSettingsScreen: () -> Unit
+    openSettingsScreen: () -> Unit,
+    openOverviewScreen: () -> Unit,
+    openDoctorManageScreen: () -> Unit,
+    openPatientManageScreen: () -> Unit,
+    openAppointmentsScreen: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -47,41 +54,41 @@ fun DetailedDrawerExample(
                         .verticalScroll(rememberScrollState())
                 ) {
                     Spacer(Modifier.height(12.dp))
-                    Text("Menu", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                    Text(text = stringResource(R.string.menu), modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
                     HorizontalDivider()
 
                     NavigationDrawerItem(
-                        label = { Text("Overview") },
+                        label = { Text(stringResource(R.string.overview)) },
                         selected = false,
                         onClick = { /* Handle click */ }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Doctors") },
+                        label = { Text(stringResource(R.string.doctors)) },
                         selected = false,
-                        onClick = { /* Handle click */ }
+                        onClick = { openDoctorManageScreen() }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Patients") },
+                        label = { Text(stringResource(R.string.patients)) },
                         selected = false,
-                        onClick = { /* Handle click */ }
+                        onClick = { openPatientManageScreen }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Appointments") },
+                        label = { Text(stringResource(R.string.appointments)) },
                         selected = false,
-                        onClick = { /* Handle click */ }
+                        onClick = { openAppointmentsScreen() }
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     NavigationDrawerItem(
-                        label = { Text("Settings") },
+                        label = { Text(stringResource(R.string.settings)) },
                         selected = false,
                         icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         badge = { Text("20") }, // Placeholder
                         onClick = { openSettingsScreen() }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Help and feedback") },
+                        label = { Text(stringResource(R.string.help_and_feedback)) },
                         selected = false,
                         icon = { Icon(Icons.AutoMirrored.Outlined.Help, contentDescription = null) },
                         onClick = { /* Handle click */ },

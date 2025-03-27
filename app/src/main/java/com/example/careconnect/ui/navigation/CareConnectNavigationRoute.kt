@@ -1,4 +1,4 @@
-package com.example.careconnect.ui.theme.navigation
+package com.example.careconnect.ui.navigation
 
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
@@ -12,6 +12,13 @@ sealed class Route {
     @Serializable data object HomeDoctorRoute : Route()
     @Serializable data object HomeAdminRoute : Route()
     @Serializable data object SettingsRoute : Route()
+
+    @Serializable data object DoctorManageRoute : Route()
+    @Serializable data object PatientManageRoute : Route()
+    @Serializable data object ProfileRoute : Route()
+
+    @Serializable data object AddDoctorRoute : Route()
+    @Serializable data object EditDoctorRoute : Route()
 }
 
 @Stable
@@ -44,3 +51,8 @@ class CareConnectNavigation(
         }
     }
 }
+
+/*
+ * TODO()
+ *  make navBuilder for each Roles
+ */

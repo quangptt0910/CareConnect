@@ -33,7 +33,9 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun DoctorManageScreen(
 
 ){
-
+    DoctorManageScreenContent(
+        onAddDoctorClick = {}
+    )
 }
 
 

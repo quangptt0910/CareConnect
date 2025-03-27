@@ -27,7 +27,8 @@ data class Doctor(
     val address: String = "",
     val specialization: String = "",
     val experience: Int = 2025, // Year start to work
-    val schedule: DoctorSchedule = DoctorSchedule()
+    val schedule: DoctorSchedule = DoctorSchedule(),
+    val profilePhoto: String = "",
 )
 
 data class Patient(
