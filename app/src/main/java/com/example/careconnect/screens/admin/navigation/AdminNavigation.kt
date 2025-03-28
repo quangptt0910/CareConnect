@@ -32,4 +32,12 @@ class AdminNavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
+    val openAppointmentsScreen: () -> Unit = {
+        navController.navigate(Route.AppointmentManageRoute) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+        }
+    }
 }

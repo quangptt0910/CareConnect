@@ -15,6 +15,7 @@ sealed class Route {
 
     @Serializable data object DoctorManageRoute : Route()
     @Serializable data object PatientManageRoute : Route()
+    @Serializable data object AppointmentManageRoute : Route()
     @Serializable data object ProfileRoute : Route()
 
     @Serializable data object AddDoctorRoute : Route()

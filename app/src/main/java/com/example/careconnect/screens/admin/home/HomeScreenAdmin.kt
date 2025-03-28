@@ -31,7 +31,7 @@ fun HomeScreenAdmin(
         openSettingsScreen = openSettingsScreen,
         openDoctorManageScreen = {},
         openPatientManageScreen = {},
-        openAppointmentsScreen = {},
+        openAppointmentManageScreen = {},
     )
 }
 
@@ -41,7 +41,7 @@ fun HomeScreenAdminContent(
     openSettingsScreen: () -> Unit,
     openDoctorManageScreen: () -> Unit,
     openPatientManageScreen: () -> Unit,
-    openAppointmentsScreen: () -> Unit,
+    openAppointmentManageScreen: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -59,7 +59,7 @@ fun HomeScreenAdminContent(
             openOverviewScreen = TODO(),
             openDoctorManageScreen = { openDoctorManageScreen() },
             openPatientManageScreen = { openPatientManageScreen },
-            openAppointmentsScreen = { openAppointmentsScreen },
+            openAppointmentsScreen = { openAppointmentManageScreen },
             modifier = TODO(),
         )
 
@@ -76,7 +76,7 @@ fun HomeScreenPreview() {
             openSettingsScreen = {},
             openDoctorManageScreen = {},
             openPatientManageScreen = {},
-            openAppointmentsScreen = {},
+            openAppointmentManageScreen = {},
         )
     }
 }
