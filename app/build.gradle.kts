@@ -105,6 +105,10 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.56")
 
 
+    // Glide image + async image
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
 
 

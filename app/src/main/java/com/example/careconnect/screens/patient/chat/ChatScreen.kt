@@ -1,12 +1,18 @@
 package com.example.careconnect.screens.patient.chat
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,11 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.text.SimpleDateFormat
@@ -139,11 +147,29 @@ fun ChatItem(message: Message) {
                 .background(if (message.isFromMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                 .padding(12.dp)
         ) {
-            Text(
-                text = message.text,
-                color = if (message.isFromMe) Color.White else Color.Black
-            )
+            // Display text if it's not null or empty
+            message.text?.let {
+                Text(
+                    text = it,
+                    color = if (message.isFromMe) Color.White else Color.Black
+                )
+            }
+
+            // Display image if the message contains an image URI
+            message.imageUri?.let { uri ->
+                Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Sent Image",
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
+
+
 
         if (!message.isFromMe) {
             // Right-aligned timestamp (You)
@@ -199,10 +225,19 @@ fun SmallTopAppBarExample() {
 @Composable
 fun ChatBox(
     modifier: Modifier = Modifier,
-    onSend: (String) -> Unit
+    onSend: (String) -> Unit,
+    viewModel: ChatViewModel = viewModel()
 ) {
     var expanded by remember { mutableStateOf(false) } // Controls dropdown visibility
     var text by remember { mutableStateOf("") }
+
+    // for image
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.sendImage(it) }
+    }
 
     Row(
         modifier = modifier
@@ -220,7 +255,10 @@ fun ChatBox(
                 Icon(Icons.Filled.Add, contentDescription = "Attachments")
             }
 
-            MinimalDropdownMenu(expanded, onDismissRequest = { expanded = false })
+            MinimalDropdownMenu(
+                expanded,
+                onDismissRequest = { expanded = false },
+                onImageSend = { launcher.launch("image/*") })
         }
 
         TextField(
@@ -249,7 +287,7 @@ fun ChatBox(
 }
 
 @Composable
-fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
+fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImageSend: () -> Unit) {
     //var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -261,20 +299,23 @@ fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
         ) {
             DropdownMenuItem(
                 text = { Text("Send image") },
-                onClick = { /* Do something... */ }
+                onClick = { onImageSend() }
             )
             DropdownMenuItem(
                 text = { Text("Send document") },
-                onClick = { /* Do something... */ }
+                onClick = { }
             )
         }
     }
 }
 
+
+
 data class Message(
     val text: String,
     val author: Author,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val imageUri: Uri? = null
 ) {
     val isFromMe: Boolean
         get() = author.id == MY_ID

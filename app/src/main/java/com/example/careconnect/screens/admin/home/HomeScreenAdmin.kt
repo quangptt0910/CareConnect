@@ -54,13 +54,15 @@ fun HomeScreenAdminContent(
                     stringResource(R.string.admin),
                     modifier = Modifier.padding(padding)
                 )
+
+
             },
             openSettingsScreen = { openSettingsScreen() },
-            openOverviewScreen = TODO(),
+            openOverviewScreen = {},
             openDoctorManageScreen = { openDoctorManageScreen() },
             openPatientManageScreen = { openPatientManageScreen },
             openAppointmentsScreen = { openAppointmentManageScreen },
-            modifier = TODO(),
+            modifier = Modifier,
         )
 
     }
