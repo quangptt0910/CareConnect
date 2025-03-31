@@ -1,5 +1,6 @@
 package com.example.careconnect.screens.patient.chat
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 
@@ -29,4 +30,10 @@ class ChatViewModel: ViewModel() {
             _messages.add(Message(text, me, System.currentTimeMillis()))
         }
     }
+
+    // Function to send an image
+    fun sendImage(uri: Uri) {
+        _messages.add(Message("", me, System.currentTimeMillis(), imageUri = uri))
+    }
+
 }
