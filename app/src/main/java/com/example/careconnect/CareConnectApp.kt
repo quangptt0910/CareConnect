@@ -111,23 +111,7 @@ fun CareConnectNavHost(
         }
 
         composable(ADMIN_APP) {
-            AdminApp(
-
-
-
-
-                
-
-
-
-
-
-
-
-
-
-
-            )
+            AdminApp()
         }
 
 
