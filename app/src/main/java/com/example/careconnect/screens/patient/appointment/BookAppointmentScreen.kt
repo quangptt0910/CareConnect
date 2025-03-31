@@ -99,8 +99,8 @@ fun SmallTopAppBarExample() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
                     Text(
@@ -111,6 +111,7 @@ fun SmallTopAppBarExample() {
                 navigationIcon = {
                     IconButton(onClick = { /* do something */ }) {
                         Icon(
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description"
                         )

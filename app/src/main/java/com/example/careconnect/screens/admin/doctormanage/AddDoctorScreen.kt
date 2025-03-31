@@ -45,7 +45,9 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun AddDoctorScreen(
 
 ){
+    AddDoctorScreenContent(
 
+    )
 }
 
 
@@ -119,11 +121,11 @@ fun AddDoctorScreenContent(
 // Progress Stepper UI
 @Composable
 fun StepperIndicator(currentStep: Int) {
-    val steps = listOf("Info", "Schedule", "Off Days")
+    val steps = listOf("Info", "Schedule")
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         steps.forEachIndexed { index, step ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -145,6 +147,7 @@ fun StepperIndicator(currentStep: Int) {
                                 Text(text = "${index + 1}", color = Color.White, fontSize = 18.sp)
                             }
                         }
+
                     }
                 }
                 Text(text = step, fontSize = 14.sp)
@@ -172,18 +175,20 @@ fun SmallTopAppBarExample() {
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
                     Text(
                         "Add Doctor",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* do something */ }) {
                         Icon(
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description"
                         )

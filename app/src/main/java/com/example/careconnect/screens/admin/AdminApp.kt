@@ -32,34 +32,41 @@ fun AdminApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Route.HOME_ADMIN_ROUTE
 
+    // Define routes where the top bar and drawer should be hidden
+    val noTopBarRoutes = setOf(Route.ADMIN_DOCTOR_ADD_ROUTE)
+
     ModalNavigationDrawer(
         drawerContent = {
-            AdminDrawerContent(
-                currentRoute = currentRoute,
-                openSettingsScreen = { navActions.navigateToSettings() },
-                openOverviewScreen = { navActions.navigateToOverview() },
-                openDoctorManageScreen = { navActions.navigateToDoctorManage() },
-                openPatientManageScreen = { navActions.navigateToPatientManage() },
-                openAppointmentsScreen = { navActions.navigateToAppointments() },
-                closeDrawer = { scope.launch { drawerState.close() } }
-            )
+            if (currentRoute !in noTopBarRoutes) {
+                AdminDrawerContent(
+                    currentRoute = currentRoute,
+                    openSettingsScreen = { navActions.navigateToSettings() },
+                    openOverviewScreen = { navActions.navigateToOverview() },
+                    openDoctorManageScreen = { navActions.navigateToDoctorManage() },
+                    openPatientManageScreen = { navActions.navigateToPatientManage() },
+                    openAppointmentsScreen = { navActions.navigateToAppointments() },
+                    closeDrawer = { scope.launch { drawerState.close() } }
+                )
+            }
         },
         drawerState = drawerState,
 
     ) {
         Scaffold(
             topBar = {
-                AdminTopAppBar(
-                    onMenuClick = {
-                        scope.launch {
-                            if (drawerState.isClosed) {
-                                drawerState.open()
-                            } else {
-                                drawerState.close()
+                if (currentRoute !in noTopBarRoutes) {
+                    AdminTopAppBar(
+                        onMenuClick = {
+                            scope.launch {
+                                if (drawerState.isClosed) {
+                                    drawerState.open()
+                                } else {
+                                    drawerState.close()
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         ) { padding ->
             AdminNavHost(

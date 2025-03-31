@@ -2,9 +2,9 @@ package com.example.careconnect.screens.patient.chat
 
 import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
-import androidx.lifecycle.ViewModel
+import com.example.careconnect.MainViewModel
 
-class ChatViewModel: ViewModel() {
+class ChatViewModel: MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
     val messages: List<Message> get() = _messages  // Publicly exposed list
 

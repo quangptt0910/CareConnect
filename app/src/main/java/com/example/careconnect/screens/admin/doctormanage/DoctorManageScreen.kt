@@ -31,10 +31,10 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun DoctorManageScreen(
-
+    onAddDoctorClick: () -> Unit = {}
 ){
     DoctorManageScreenContent(
-        onAddDoctorClick = {}
+        onAddDoctorClick = onAddDoctorClick
     )
 }
 

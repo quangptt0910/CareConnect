@@ -47,7 +47,7 @@ fun PatientManageScreenContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Patient Profile",
+                    text = "Patients",
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)

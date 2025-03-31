@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
 import com.example.careconnect.screens.admin.doctormanage.DoctorManageScreen
 import com.example.careconnect.screens.admin.home.HomeScreenAdmin
 import com.example.careconnect.screens.admin.patientsmanage.PatientManageScreen
@@ -24,13 +25,19 @@ fun AdminNavHost(
             HomeScreenAdmin()
         }
         composable(Route.ADMIN_DOCTOR_MANAGE_ROUTE) {
-            DoctorManageScreen()
+            DoctorManageScreen(
+                onAddDoctorClick = { navController.navigate(Route.ADMIN_DOCTOR_ADD_ROUTE) }
+            )
         }
         composable(Route.ADMIN_PATIENT_MANAGE_ROUTE) {
             PatientManageScreen()
         }
         composable(Route.ADMIN_APPOINTMENTS_ROUTE) {
             PatientManageScreen()
+        }
+        composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
+            AddDoctorScreen(
+            )
         }
 
     }

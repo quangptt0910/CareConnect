@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,7 +51,9 @@ fun AdminDoctorScheduleScreenContent(onNextStep: () -> Unit, onBack: () -> Unit)
         color = MaterialTheme.colorScheme.background
     ) {
 
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        SmallTopAppBarExample()
+
+        Column(modifier = Modifier.fillMaxSize().padding(top = 100.dp, start = 16.dp, end = 16.dp)) {
             // Progress Stepper
             StepperIndicator(currentStep = 2)
 
@@ -61,7 +63,7 @@ fun AdminDoctorScheduleScreenContent(onNextStep: () -> Unit, onBack: () -> Unit)
                 "Step 2: Select Work Days for the Doctor",
                 style = MaterialTheme.typography.headlineMedium
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(25.dp))
 
             // Calendar View for Selecting Work Days
             CalendarSelector(selectedDays) { date ->
@@ -79,13 +81,16 @@ fun AdminDoctorScheduleScreenContent(onNextStep: () -> Unit, onBack: () -> Unit)
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    Text("Back")
+                IconButton(
+                    onClick = { onNextStep() }
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Next Step")
                 }
-                Button(onClick = { onNextStep() }) {
-                    Text("Next")
-                    Icon(Icons.Default.ArrowForward, contentDescription = "Next Step")
+
+                IconButton(
+                    onClick = { onNextStep() }
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
                 }
             }
         }
