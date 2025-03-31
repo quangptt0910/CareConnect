@@ -25,15 +25,15 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
-fun PatientsManageScreen(
+fun PatientManageScreen(
 
 ){
-
+    PatientManageScreenContent()
 }
 
 
 @Composable
-fun PatientsManageScreenContent(
+fun PatientManageScreenContent(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -91,7 +91,7 @@ fun PatientsManageScreenContent(
 fun PatientsManageScreenPreview() {
     CareConnectTheme {
         val uiState = HomeUiState()
-        PatientsManageScreenContent(
+        PatientManageScreenContent(
         )
     }
 }

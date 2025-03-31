@@ -2,24 +2,32 @@ package com.example.careconnect.ui.navigation
 
 import androidx.compose.runtime.Stable
 import androidx.navigation.NavHostController
-import kotlinx.serialization.Serializable
 
-sealed class Route {
-    @Serializable data object SplashRoute : Route()
-    @Serializable data object LoginRoute : Route()
-    @Serializable data object SignUpRoute : Route()
-    @Serializable data object HomePatientRoute : Route()
-    @Serializable data object HomeDoctorRoute : Route()
-    @Serializable data object HomeAdminRoute : Route()
-    @Serializable data object SettingsRoute : Route()
+object Route {
+    // Shared Routes
+    const val SPLASH_ROUTE = "splash"
+    const val LOGIN_ROUTE = "login"
+    const val SIGNUP_ROUTE = "signup"
+    const val SETTINGS_ROUTE = "settings"
 
-    @Serializable data object DoctorManageRoute : Route()
-    @Serializable data object PatientManageRoute : Route()
-    @Serializable data object AppointmentManageRoute : Route()
-    @Serializable data object ProfileRoute : Route()
+    // Role-based Home Routes
+    const val HOME_PATIENT_ROUTE = "patient/home"
+    const val HOME_DOCTOR_ROUTE = "doctor/home"
+    const val HOME_ADMIN_ROUTE = "admin/home"
 
-    @Serializable data object AddDoctorRoute : Route()
-    @Serializable data object EditDoctorRoute : Route()
+    // Admin-specific Routes
+    const val ADMIN_APP = "admin_app"
+    const val ADMIN_GRAPH = "admin_graph"
+    const val ADMIN_DOCTOR_MANAGE_ROUTE = "admin/doctors"
+    const val ADMIN_DOCTOR_ADD_ROUTE = "admin/doctors/add"
+    const val ADMIN_DOCTOR_EDIT_ROUTE = "admin/doctors/edit/{doctorId}"
+    const val ADMIN_PATIENT_MANAGE_ROUTE = "admin/patients"
+    const val ADMIN_APPOINTMENTS_ROUTE = "admin/appointments"
+    const val ADMIN_PROFILE_ROUTE = "admin/profile"
+
+    // Route with parameter helper
+    fun adminDoctorEditRoute(doctorId: String) =
+        ADMIN_DOCTOR_EDIT_ROUTE.replace("{doctorId}", doctorId)
 }
 
 @Stable

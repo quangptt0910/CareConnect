@@ -16,30 +16,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.careconnect.dataclass.ErrorMessage
-
-import com.example.careconnect.screens.admin.home.HomeScreenAdmin
-import com.example.careconnect.screens.login.LoginScreen
-import com.example.careconnect.screens.patient.home.HomeScreenPatient
-import com.example.careconnect.screens.settings.SettingsScreen
-import com.example.careconnect.screens.signup.SignUpScreen
-import com.example.careconnect.screens.splash.SplashScreen
+import com.example.careconnect.ui.navigation.Route.SPLASH_ROUTE
 import com.example.careconnect.ui.theme.CareConnectTheme
-import com.example.careconnect.ui.navigation.Route.HomeDoctorRoute
-import com.example.careconnect.ui.navigation.Route.HomePatientRoute
-import com.example.careconnect.ui.navigation.Route.LoginRoute
-import com.example.careconnect.ui.navigation.Route.SettingsRoute
-import com.example.careconnect.ui.navigation.Route.SignUpRoute
-import com.example.careconnect.ui.navigation.Route.SplashRoute
-import com.example.careconnect.ui.navigation.Route.*
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -79,7 +61,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val scope = rememberCoroutineScope()
+
             val snackbarHostState = remember { SnackbarHostState() }
             val navController = rememberNavController()
 
@@ -92,104 +74,14 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                     ) { innerPadding ->
-                        NavHost(
+                        CareConnectNavHost(
                             navController = navController,
-                            startDestination = SplashRoute,
+                            startDestination = SPLASH_ROUTE,
                             modifier = Modifier.padding(innerPadding)
-                        ) {
-                            composable<SplashRoute> {
-                                SplashScreen(
-                                    openLoginScreen = {
-                                        navController.navigate(LoginRoute) { launchSingleTop = true }
-                                    },
-                                    openPatientScreen = {
-                                        navController.navigate(HomePatientRoute) { launchSingleTop = true }
-                                    },
-                                    openDoctorScreen = {
-                                        navController.navigate(HomeDoctorRoute) { launchSingleTop = true }
-                                    },
-                                    openAdminScreen = {
-                                        navController.navigate(HomeAdminRoute) { launchSingleTop = true }
-                                    },
-                                    showErrorSnackbar = { errorMessage ->
-                                        val message = getErrorMessage(errorMessage)
-                                        scope.launch { snackbarHostState.showSnackbar(message) }
-                                    }
-                                )
-                            }
-                            composable<LoginRoute> {
-                                LoginScreen(
-                                    openSignUpScreen = {
-                                        navController.navigate(SignUpRoute) { launchSingleTop = true }
-                                    },
-                                    openSplashScreen = {
-                                        navController.navigate(SplashRoute) { launchSingleTop = true }
-                                    },
-                                    showErrorSnackbar = { errorMessage ->
-                                        val message = getErrorMessage(errorMessage)
-                                        scope.launch { snackbarHostState.showSnackbar(message) }
-                                    }
-                                )
-                            }
-
-                            composable<HomePatientRoute> {
-                                HomeScreenPatient(
-                                    openSettingsScreen = {
-                                        navController.navigate(SettingsRoute) { launchSingleTop = true }
-                                    }
-                                )
-
-                            }
-
-                            composable<SignUpRoute> {
-                                SignUpScreen(
-                                    openHomeScreen = {
-                                        navController.navigate(HomePatientRoute) { launchSingleTop = true }
-                                    },
-                                    openLoginScreen = {
-                                        navController.navigate(LoginRoute) { launchSingleTop = true }
-                                    },
-                                    showErrorSnackbar = { errorMessage ->
-                                        val message = getErrorMessage(errorMessage)
-                                        scope.launch { snackbarHostState.showSnackbar(message) }
-                                    }
-                                )
-                            }
-
-                            composable<SettingsRoute> {
-                                SettingsScreen(
-                                    openSplashScreen = {
-                                        navController.navigate(SplashRoute) { launchSingleTop = true }
-                                    },
-                                    showErrorSnackbar = { errorMessage ->
-                                        val message = getErrorMessage(errorMessage)
-                                        scope.launch { snackbarHostState.showSnackbar(message) }
-                                    }
-                                )
-                            }
-
-                            composable<HomeAdminRoute> {
-                                HomeScreenAdmin(
-                                    openSettingsScreen = {
-                                        navController.navigate(SettingsRoute) { launchSingleTop = true }
-                                    }
-                                )
-                            }
-
-                        }
+                        )
                     }
                 }
             }
         }
-
-    }
-
-    private fun getErrorMessage(error: ErrorMessage): String {
-        return when (error) {
-            is ErrorMessage.StringError -> error.message
-            is ErrorMessage.IdError -> this@MainActivity.getString(error.message)
-        }
     }
 }
-
-
