@@ -31,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,8 +55,14 @@ fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),
     openHomeScreen: () -> Unit
 ) {
+    val userId by viewModel.userId.collectAsState()
+
     ProfileInfoScreenContent(
-        linkAccount = viewModel::linkAccount,
+        linkAccount = { gender, weight, height, dob, address ->
+            if (userId != null) {
+                viewModel.linkAccount(gender, weight, height, dob, address)
+            }
+        },
         openHomeScreen = openHomeScreen,
         onWeightChange = {},
         onHeightChange = {},
@@ -70,7 +77,7 @@ fun ProfileInfoScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileInfoScreenContent(
-    linkAccount: (String, String, Double, Double, String, String) -> Unit,
+    linkAccount: (String, Double, Double, String, String) -> Unit,
     openHomeScreen: () -> Unit,
     onWeightChange: (Double) -> Unit = {},
     onHeightChange: (Double) -> Unit = {},
@@ -260,7 +267,6 @@ fun ProfileInfoScreenContent(
 
                     if (userId != null) {
                         linkAccount(
-                            userId!!,
                             gender,
                             weight.toDoubleOrNull() ?: 0.0,
                             height.toDoubleOrNull() ?: 0.0,
@@ -355,7 +361,7 @@ fun ProfileInfoPreview() {
 
     CareConnectTheme {
         ProfileInfoScreenContent(
-            linkAccount = { _, _, _, _, _, _ -> },
+            linkAccount = { _, _, _, _, _ -> },
             openHomeScreen = {},
             onWeightChange = {},
             onHeightChange = {},
