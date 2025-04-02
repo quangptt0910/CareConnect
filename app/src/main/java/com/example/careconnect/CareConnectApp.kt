@@ -13,6 +13,7 @@ import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.AdminApp
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
+import com.example.careconnect.screens.patient.profileinfo.ProfileInfoScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.screens.splash.SplashScreen
@@ -20,6 +21,7 @@ import com.example.careconnect.ui.navigation.Route.ADMIN_APP
 import com.example.careconnect.ui.navigation.Route.HOME_DOCTOR_ROUTE
 import com.example.careconnect.ui.navigation.Route.HOME_PATIENT_ROUTE
 import com.example.careconnect.ui.navigation.Route.LOGIN_ROUTE
+import com.example.careconnect.ui.navigation.Route.PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.SIGNUP_ROUTE
 import com.example.careconnect.ui.navigation.Route.SPLASH_ROUTE
@@ -85,6 +87,9 @@ fun CareConnectNavHost(
 
         composable(SIGNUP_ROUTE) {
             SignUpScreen(
+                openProfileScreen = {
+                    navController.navigate(PROFILE_ROUTE) { launchSingleTop = true }
+                },
                 openHomeScreen = {
                     navController.navigate(HOME_PATIENT_ROUTE) { launchSingleTop = true }
                 },
@@ -94,6 +99,13 @@ fun CareConnectNavHost(
                 showErrorSnackbar = { errorMessage ->
                     val message = getErrorMessage(errorMessage)
                     scope.launch { snackbarHostState.showSnackbar(message) }
+                }
+            )
+        }
+        composable(PROFILE_ROUTE) {
+            ProfileInfoScreen(
+                openHomeScreen = {
+                    navController.navigate(HOME_PATIENT_ROUTE) { launchSingleTop = true }
                 }
             )
         }

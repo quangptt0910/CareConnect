@@ -26,6 +26,10 @@ class AuthRepository @Inject constructor(
         authRemoteDataSource.signUp(name, surname, email, password)
     }
 
+    suspend fun linkAccount(userId: String, weight: Double, height: Double, dob: String, address: String, gender: String) {
+        authRemoteDataSource.linkAccount(userId, weight, height, dob, address, gender)
+    }
+
     fun signOut() {
         authRemoteDataSource.signOut()
     }

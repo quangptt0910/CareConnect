@@ -42,30 +42,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.ui.theme.CareConnectTheme
+import com.google.firebase.auth.FirebaseAuth
 import java.util.Calendar
 import java.util.Locale
 
 
 @Composable
-fun MoreAboutYouScreen(
-
+fun ProfileInfoScreen(
+    viewModel: ProfileInforViewModel = hiltViewModel(),
+    openHomeScreen: () -> Unit
 ) {
-
+    ProfileInfoScreenContent(
+        linkAccount = viewModel::linkAccount,
+        openHomeScreen = openHomeScreen,
+        onWeightChange = {},
+        onHeightChange = {},
+        onGenderChange = {},
+        onDobChange = {},
+        onAgeChange = {}
+    )
 }
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MoreAboutYouContent(
-    weight: String,
-    height: String,
-    address: String,
-    gender: String,
-    dob: String,
-    age: String,
-    onContinueClick: () -> Unit = {},
+fun ProfileInfoScreenContent(
+    linkAccount: (String, String, Double, Double, String, String) -> Unit,
+    openHomeScreen: () -> Unit,
     onWeightChange: (Double) -> Unit = {},
     onHeightChange: (Double) -> Unit = {},
     onGenderChange: (String) -> Unit = {},
@@ -74,18 +80,27 @@ fun MoreAboutYouContent(
     onAddressChange: (String) -> Unit = {},
 
     ) {
-    var weightText by remember { mutableStateOf(weight) }
-    var heightText by remember { mutableStateOf(height) }
-    var addressText by remember { mutableStateOf(address) }
+    var weight by remember { mutableStateOf("") }
+    var height by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") } // Store the selected date as a string
     var ageText by remember { mutableStateOf("") }
-    var genderText by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf("") }
     var genderExpanded by remember { mutableStateOf(false) }
     val genderList = listOf("Male", "Female", "Other")
     var showDatePicker by remember { mutableStateOf(false) }
-    var selectedDateText by remember { mutableStateOf(dob) }
+    var dob by remember { mutableStateOf("") }
 
     val datePickerState = rememberDatePickerState()
+    val auth = FirebaseAuth.getInstance()
+    var userId by remember { mutableStateOf<String?>(null) }
+
+//    LaunchedEffect(Unit) {
+//        auth.currentUser?.reload()?.addOnCompleteListener {
+//            userId = auth.currentUser?.uid
+//        }
+//    }
+//    println("userId: $userId")
 
     // Context for the date picker
     val context = LocalContext.current
@@ -114,7 +129,7 @@ fun MoreAboutYouContent(
             ) {
                 OutlinedTextField(
                     value = gender,
-                    onValueChange = { genderText = it },
+                    onValueChange = { gender = it },
                     label = { Text("Gender") },
                     readOnly = true,
                     trailingIcon = {
@@ -157,9 +172,9 @@ fun MoreAboutYouContent(
             Spacer(modifier = Modifier.height(25.dp))
 
             InformationTextField(
-                value = weightText,
+                value = weight,
                 onValueChange = {
-                    weightText = it
+                    weight = it
                     onWeightChange(it.toDoubleOrNull() ?: 0.0) // Update ViewModel
                 },
                 label = "Weight",
@@ -170,9 +185,9 @@ fun MoreAboutYouContent(
             Spacer(modifier = Modifier.height(25.dp))
 
             InformationTextField(
-                value = heightText,
+                value = height,
                 onValueChange = {
-                    heightText = it
+                    height = it
                     onHeightChange(it.toDoubleOrNull() ?: 0.0)},
                 label = "Height",
                 unit = "cm",
@@ -182,9 +197,9 @@ fun MoreAboutYouContent(
             Spacer(modifier = Modifier.height(25.dp))
 
             InformationTextField(
-                value = addressText,
+                value = address,
                 onValueChange = {
-                    addressText = it
+                    address = it
                     onAddressChange((it.toDoubleOrNull() ?: 0.0).toString())},
                 label = "Address",
                 unit = "",
@@ -195,7 +210,7 @@ fun MoreAboutYouContent(
 
             // Date of Birth Picker (Instead of Age Input)
             OutlinedTextField(
-                value = selectedDateText,
+                value = dob,
                 onValueChange = {},
                 label = { Text("Date of Birth") },
                 readOnly = true,
@@ -222,7 +237,7 @@ fun MoreAboutYouContent(
                             if (selectedMillis != null) {
                                 val formattedDate = convertMillisToDate(selectedMillis)
                                 val calculatedAge = calculateAge(selectedMillis)
-                                selectedDateText = formattedDate
+                                dob = formattedDate
                                 onDobChange(formattedDate)
                                 onAgeChange(calculatedAge)
                             }
@@ -241,7 +256,20 @@ fun MoreAboutYouContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                onClick = { onContinueClick()},
+                onClick = {
+
+                    if (userId != null) {
+                        linkAccount(
+                            userId!!,
+                            gender,
+                            weight.toDoubleOrNull() ?: 0.0,
+                            height.toDoubleOrNull() ?: 0.0,
+                            dob,
+                            address
+                        )
+                    }
+                    openHomeScreen()
+                          },
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
@@ -323,21 +351,16 @@ fun showDatePicker(context: android.content.Context, onDateSelected: (String, In
  */
 @Preview(showBackground = true)
 @Composable
-fun MoreAboutYouPreview() {
+fun ProfileInfoPreview() {
 
     CareConnectTheme {
-        MoreAboutYouContent(
-            onContinueClick = {},
+        ProfileInfoScreenContent(
+            linkAccount = { _, _, _, _, _, _ -> },
+            openHomeScreen = {},
             onWeightChange = {},
-            weight = "70",
-            height = "180",
-            address = "Sample Address",
             onHeightChange = {},
-            gender = "Male",
             onGenderChange = {},
-            dob = "01/01/2000",
             onDobChange = {},
-            age = "23",
             onAgeChange = {}
         )
     }

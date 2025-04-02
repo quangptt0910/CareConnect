@@ -97,6 +97,21 @@ class AuthRemoteDataSource @Inject constructor(
         db.collection("patients").document(userId).set(patient).await()
     }
 
+    suspend fun linkAccount(userId: String, weight: Double, height: Double, dob: String, address: String, gender: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        firestore.collection("patients")
+            .document(userId)
+            .update(
+                "weight", weight,
+                "height", height,
+                "dob", dob,
+                "address", address,
+                "gender", gender
+            )
+            .await()
+    }
+
     fun signOut() {
         auth.signOut()
     }

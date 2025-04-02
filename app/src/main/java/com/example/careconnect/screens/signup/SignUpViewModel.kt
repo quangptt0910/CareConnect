@@ -38,7 +38,7 @@ class SignUpViewModel @Inject constructor(
             println("Debug: SignUp clicked")
             authRepository.signUp(name, surname, email, password)
             println("Debug: SignUp success")
-            _shouldRestartApp.value = true
+            //_shouldRestartApp.value = true
         }
     }
 }

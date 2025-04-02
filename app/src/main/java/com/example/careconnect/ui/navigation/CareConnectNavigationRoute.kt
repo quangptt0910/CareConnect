@@ -8,6 +8,7 @@ object Route {
     const val SPLASH_ROUTE = "splash"
     const val LOGIN_ROUTE = "login"
     const val SIGNUP_ROUTE = "signup"
+    const val PROFILE_ROUTE = "profile"
     const val SETTINGS_ROUTE = "settings"
 
     // Role-based Home Routes
