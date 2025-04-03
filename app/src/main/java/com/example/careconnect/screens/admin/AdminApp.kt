@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminApp(
+    openSplashScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -71,6 +72,7 @@ fun AdminApp(
         ) { padding ->
             AdminNavHost(
                 navController = navController,
+                openSplashScreen = openSplashScreen,
                 modifier = Modifier.padding(padding)
             )
         }

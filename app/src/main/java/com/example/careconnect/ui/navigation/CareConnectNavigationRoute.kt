@@ -16,6 +16,7 @@ object Route {
     const val HOME_DOCTOR_ROUTE = "doctor/home"
     const val HOME_ADMIN_ROUTE = "admin/home"
 
+
     // Admin-specific Routes
     const val ADMIN_APP = "admin_app"
     const val ADMIN_GRAPH = "admin_graph"

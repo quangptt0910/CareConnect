@@ -123,12 +123,12 @@ fun CareConnectNavHost(
         }
 
         composable(ADMIN_APP) {
-            AdminApp()
+            AdminApp(
+                openSplashScreen = {
+                    navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+                }
+            )
         }
-
-
-
-
     }
 }
 

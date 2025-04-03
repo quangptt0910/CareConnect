@@ -51,6 +51,11 @@
     <string name="admin_screen_title">Admin Screen</string>
     <string name="menu">Menu</string>
     <string name="overview">Overview</string>"
+    <string name="recent_activities">Recent Activities</string>
+    <string name="quick_actions">Quick Actions</string>
+    <string name="add_new_doctor">Add New Doctor</string>
+    <string name="today_s_overview">Today\'s Overview</string>"
+
     <!-- Dialogs -->
     <string name="sign_out_title">Sign out?</string>
     <string name="sign_out_description">You will have to sign in again to see your data.</string>

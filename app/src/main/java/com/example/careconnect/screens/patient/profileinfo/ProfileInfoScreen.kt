@@ -31,7 +31,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.google.firebase.auth.FirebaseAuth
 import java.util.Calendar
@@ -55,11 +55,12 @@ fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),
     openHomeScreen: () -> Unit
 ) {
-    val userId by viewModel.userId.collectAsState()
+
+    val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
 
     ProfileInfoScreenContent(
         linkAccount = { gender, weight, height, dob, address ->
-            if (userId != null) {
+            if (currentUserId != null) {
                 viewModel.linkAccount(gender, weight, height, dob, address)
             }
         },

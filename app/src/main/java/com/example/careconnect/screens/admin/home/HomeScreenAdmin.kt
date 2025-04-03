@@ -18,10 +18,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.careconnect.R
 import com.example.careconnect.ui.theme.CareConnectTheme
-
 
 // Overview admin screen
 @Composable
@@ -40,21 +41,21 @@ fun HomeScreenAdminContent(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Today's Overview
-            Text(text = "Today's Overview", style = MaterialTheme.typography.headlineLarge)
+            Text(text = stringResource(R.string.today_s_overview), style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
             OverviewSection()
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // Recent Activities
-            Text(text = "Recent Activities", style = MaterialTheme.typography.headlineLarge)
+            Text(text = stringResource(R.string.recent_activities), style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
             RecentActivities()
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Quick Actions
-            Text(text = "Quick Actions", style = MaterialTheme.typography.headlineLarge)
+            // Quick Actions (add doctor)
+            Text(text = stringResource(R.string.quick_actions), style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
             QuickActions()
         }
@@ -103,7 +104,7 @@ fun RecentActivities() {
 fun QuickActions() {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
         Button(onClick = { /* Navigate to Add Doctor */ }) {
-            Text("Add New Doctor")
+            Text(stringResource(R.string.add_new_doctor))
         }
     }
 }

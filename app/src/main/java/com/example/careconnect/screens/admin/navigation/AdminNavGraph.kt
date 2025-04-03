@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdminNavHost(
     navController: NavHostController,
+    openSplashScreen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -46,13 +47,16 @@ fun AdminNavHost(
         }
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
+                onNextStep = { _, _, _, _, _, _ ->},
+                showErrorSnackbar = { errorMessage ->
+                    val message = getErrorMessage(errorMessage)
+                    scope.launch { snackbarHostState.showSnackbar(message) }
+                }
             )
         }
         composable(Route.SETTINGS_ROUTE) {
             SettingsScreen(
-                openSplashScreen = {
-                    navController.navigate(Route.SPLASH_ROUTE) { launchSingleTop = true }
-                },
+                openSplashScreen = openSplashScreen,
                 showErrorSnackbar = { errorMessage ->
                     val message = getErrorMessage(errorMessage)
                     scope.launch { snackbarHostState.showSnackbar(message) }
