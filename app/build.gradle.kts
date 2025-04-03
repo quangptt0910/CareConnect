@@ -97,6 +97,8 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:24.1.1")
 
 
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+
     // Kotlin coroutine
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.0")
 

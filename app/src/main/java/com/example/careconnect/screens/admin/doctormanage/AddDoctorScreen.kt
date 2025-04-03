@@ -33,34 +33,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.careconnect.R
+import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
-
 @Composable
 fun AddDoctorScreen(
-
+    onNextStep: (String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit,
 ){
     AddDoctorScreenContent(
-
+        onNextStep = { _, _, _, _, _, _ ->},
+        showErrorSnackbar = showErrorSnackbar
     )
 }
 
 
 @Composable
 fun AddDoctorScreenContent(
-    onNextStep: () -> Unit = {}
+    onNextStep: (String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit = {}
 ) {
 
-    var name by remember { mutableStateOf(TextFieldValue("")) }
-    var surname by remember { mutableStateOf(TextFieldValue("")) }
-    var speciality by remember { mutableStateOf(TextFieldValue("")) }
-    var address by remember { mutableStateOf(TextFieldValue("")) }
-    var phone by remember { mutableStateOf(TextFieldValue("")) }
+    var name by remember { mutableStateOf("") }
+    var surname by remember { mutableStateOf("") }
+    var speciality by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -89,9 +93,12 @@ fun AddDoctorScreenContent(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                CustomTextField(label = "Name", value = name, onValueChange = { name = it })
                 CustomTextField(
-                    label = "Surname",
+                    label = stringResource(R.string.name),
+                    value = name,
+                    onValueChange = { name = it })
+                CustomTextField(
+                    label = stringResource(R.string.surname),
                     value = surname,
                     onValueChange = { surname = it })
                 CustomTextField(
@@ -108,7 +115,7 @@ fun AddDoctorScreenContent(
 
                 // Next Button
                 IconButton(
-                    onClick = { onNextStep() },
+                    onClick = { onNextStep(name, surname, speciality, address, phone, showErrorSnackbar) },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
@@ -159,7 +166,7 @@ fun StepperIndicator(currentStep: Int) {
 // Custom TextField
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTextField(label: String, value: TextFieldValue, onValueChange: (TextFieldValue) -> Unit) {
+fun CustomTextField(label: String, value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -208,6 +215,8 @@ fun AddDoctorScreenPreview() {
     CareConnectTheme {
         val uiState = HomeUiState()
         AddDoctorScreenContent(
+            onNextStep = { _, _, _, _, _, _ ->},
+            showErrorSnackbar = {}
         )
     }
 }
