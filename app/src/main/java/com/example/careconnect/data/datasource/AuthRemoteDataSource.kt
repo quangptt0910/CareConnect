@@ -6,6 +6,7 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import com.example.careconnect.dataclass.Admin
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Gender
 import com.example.careconnect.dataclass.Patient
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -71,6 +72,7 @@ class AuthRemoteDataSource @Inject constructor(
                         trySend(UserData.Error)
                     } catch (e: Exception) {
                         Log.e("AuthRemoteDataSource", "Error getting user data", e)
+                        println("Debug: Error getting user data")
                         trySend(UserData.Error)
                     }
                 }
@@ -97,17 +99,17 @@ class AuthRemoteDataSource @Inject constructor(
         db.collection("patients").document(userId).set(patient).await()
     }
 
-    suspend fun linkAccount(userId: String, weight: Double, height: Double, dob: String, address: String, gender: String) {
-        val db = FirebaseFirestore.getInstance()
+    suspend fun linkAccount(userId: String, gender: String, weight: Double, height: Double, dob: String, address: String) {
+        val genderEnum = Gender.valueOf(gender)
 
         firestore.collection("patients")
             .document(userId)
             .update(
+                "gender", genderEnum,
                 "weight", weight,
                 "height", height,
                 "dob", dob,
-                "address", address,
-                "gender", gender
+                "address", address
             )
             .await()
     }

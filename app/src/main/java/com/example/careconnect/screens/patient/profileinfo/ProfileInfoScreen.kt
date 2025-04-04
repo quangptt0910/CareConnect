@@ -31,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,8 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
-import com.google.firebase.auth.FirebaseAuth
 import java.util.Calendar
 import java.util.Locale
 
@@ -53,23 +54,23 @@ import java.util.Locale
 @Composable
 fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),
-    openHomeScreen: () -> Unit
+    openSplashScreen: () -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit
 ) {
 
-    val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
+    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+    LaunchedEffect(shouldRestartApp) {
+        if (shouldRestartApp) {
+            openSplashScreen()
+        }
+    }
 
     ProfileInfoScreenContent(
-        linkAccount = { gender, weight, height, dob, address ->
-            if (currentUserId != null) {
-                viewModel.linkAccount(gender, weight, height, dob, address)
-            }
-        },
-        openHomeScreen = openHomeScreen,
-        onWeightChange = {},
-        onHeightChange = {},
+        linkAccount = viewModel::linkAccount,
         onGenderChange = {},
         onDobChange = {},
-        onAgeChange = {}
+        onAgeChange = {},
+        showErrorSnackbar = showErrorSnackbar
     )
 }
 
@@ -78,16 +79,12 @@ fun ProfileInfoScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileInfoScreenContent(
-    linkAccount: (String, Double, Double, String, String) -> Unit,
-    openHomeScreen: () -> Unit,
-    onWeightChange: (Double) -> Unit = {},
-    onHeightChange: (Double) -> Unit = {},
+    linkAccount: (String, Double, Double, String, String, (ErrorMessage) -> Unit) -> Unit,
     onGenderChange: (String) -> Unit = {},
     onDobChange: (String) -> Unit = {},
     onAgeChange: (Int) -> Unit = {},
-    onAddressChange: (String) -> Unit = {},
-
-    ) {
+    showErrorSnackbar: (ErrorMessage) -> Unit
+) {
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
@@ -95,20 +92,11 @@ fun ProfileInfoScreenContent(
     var ageText by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("") }
     var genderExpanded by remember { mutableStateOf(false) }
-    val genderList = listOf("Male", "Female", "Other")
+    val genderList = listOf("MALE", "FEMALE", "OTHER")
     var showDatePicker by remember { mutableStateOf(false) }
     var dob by remember { mutableStateOf("") }
 
     val datePickerState = rememberDatePickerState()
-    val auth = FirebaseAuth.getInstance()
-    var userId by remember { mutableStateOf<String?>(null) }
-
-//    LaunchedEffect(Unit) {
-//        auth.currentUser?.reload()?.addOnCompleteListener {
-//            userId = auth.currentUser?.uid
-//        }
-//    }
-//    println("userId: $userId")
 
     // Context for the date picker
     val context = LocalContext.current
@@ -169,7 +157,8 @@ fun ProfileInfoScreenContent(
                         DropdownMenuItem(
                             text = { Text(text = label) },
                             onClick = {
-                                onGenderChange(label)
+                                gender = label
+                                //onGenderChange(label)
                                 genderExpanded = false
                             }
                         )
@@ -181,10 +170,7 @@ fun ProfileInfoScreenContent(
 
             InformationTextField(
                 value = weight,
-                onValueChange = {
-                    weight = it
-                    onWeightChange(it.toDoubleOrNull() ?: 0.0) // Update ViewModel
-                },
+                onValueChange = { weight = it },
                 label = "Weight",
                 unit = "kg",
                 modifier = Modifier.fillMaxWidth()
@@ -194,9 +180,7 @@ fun ProfileInfoScreenContent(
 
             InformationTextField(
                 value = height,
-                onValueChange = {
-                    height = it
-                    onHeightChange(it.toDoubleOrNull() ?: 0.0)},
+                onValueChange = { height = it },
                 label = "Height",
                 unit = "cm",
                 modifier = Modifier.fillMaxWidth()
@@ -206,9 +190,7 @@ fun ProfileInfoScreenContent(
 
             InformationTextField(
                 value = address,
-                onValueChange = {
-                    address = it
-                    onAddressChange((it.toDoubleOrNull() ?: 0.0).toString())},
+                onValueChange = { address = it },
                 label = "Address",
                 unit = "",
                 modifier = Modifier.fillMaxWidth()
@@ -246,8 +228,8 @@ fun ProfileInfoScreenContent(
                                 val formattedDate = convertMillisToDate(selectedMillis)
                                 val calculatedAge = calculateAge(selectedMillis)
                                 dob = formattedDate
-                                onDobChange(formattedDate)
-                                onAgeChange(calculatedAge)
+                                // onDobChange(formattedDate)
+                                //onAgeChange(calculatedAge)
                             }
                         }) {
                             Text("OK")
@@ -265,18 +247,14 @@ fun ProfileInfoScreenContent(
                     .fillMaxWidth()
                     .height(50.dp),
                 onClick = {
-
-                    if (userId != null) {
                         linkAccount(
                             gender,
                             weight.toDoubleOrNull() ?: 0.0,
                             height.toDoubleOrNull() ?: 0.0,
                             dob,
-                            address
-                        )
-                    }
-                    openHomeScreen()
-                          },
+                            address,
+                            showErrorSnackbar)
+                    },
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
@@ -362,13 +340,11 @@ fun ProfileInfoPreview() {
 
     CareConnectTheme {
         ProfileInfoScreenContent(
-            linkAccount = { _, _, _, _, _ -> },
-            openHomeScreen = {},
-            onWeightChange = {},
-            onHeightChange = {},
+            linkAccount = { _, _, _, _, _, _ -> },
             onGenderChange = {},
             onDobChange = {},
-            onAgeChange = {}
+            onAgeChange = {},
+            showErrorSnackbar = {}
         )
     }
 }

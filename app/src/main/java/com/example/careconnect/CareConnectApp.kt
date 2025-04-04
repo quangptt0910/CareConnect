@@ -93,9 +93,6 @@ fun CareConnectNavHost(
                 openProfileScreen = {
                     navController.navigate(PROFILE_ROUTE) { launchSingleTop = true }
                 },
-                openHomeScreen = {
-                    navController.navigate(HOME_PATIENT_ROUTE) { launchSingleTop = true }
-                },
                 openLoginScreen = {
                     navController.navigate(LOGIN_ROUTE) { launchSingleTop = true }
                 },
@@ -107,8 +104,12 @@ fun CareConnectNavHost(
         }
         composable(PROFILE_ROUTE) {
             ProfileInfoScreen(
-                openHomeScreen = {
-                    navController.navigate(HOME_PATIENT_ROUTE) { launchSingleTop = true }
+                openSplashScreen = {
+                    navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+                },
+                showErrorSnackbar = { errorMessage ->
+                    val message = getErrorMessage(errorMessage)
+                    scope.launch { snackbarHostState.showSnackbar(message) }
                 }
             )
         }
@@ -126,7 +127,11 @@ fun CareConnectNavHost(
         }
 
         composable(PATIENT_APP){
-            PatientApp()
+            PatientApp(
+                openSplashScreen = {
+                    navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+                }
+            )
         }
 
         composable(ADMIN_APP) {

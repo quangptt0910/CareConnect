@@ -14,9 +14,9 @@ import javax.inject.Inject
 class SignUpViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ): MainViewModel() {
-    private val _shouldRestartApp = MutableStateFlow(false)
-    val shouldRestartApp: StateFlow<Boolean>
-        get() = _shouldRestartApp.asStateFlow()
+    private val _navigateToProfile = MutableStateFlow(false)
+    val navigateToProfile: StateFlow<Boolean>
+        get() = _navigateToProfile.asStateFlow()
 
     fun signUp(
         name: String,
@@ -38,6 +38,7 @@ class SignUpViewModel @Inject constructor(
             println("Debug: SignUp clicked")
             authRepository.signUp(name, surname, email, password)
             println("Debug: SignUp success")
+            _navigateToProfile.value = true
             //_shouldRestartApp.value = true
         }
     }

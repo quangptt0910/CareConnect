@@ -52,22 +52,20 @@ import com.example.careconnect.ui.theme.CareConnectTheme
  */
 @Composable
 fun SignUpScreen(
-    openHomeScreen: () -> Unit,
     openProfileScreen: () -> Unit,
     openLoginScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
-    val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+    val navigateToProfile by viewModel.navigateToProfile.collectAsStateWithLifecycle()
     println("Debug: SignUpScreen")
-    if (shouldRestartApp) {
-        openHomeScreen()
+    if (navigateToProfile) {
+        openProfileScreen()
     } else {
         SignUpScreenContent(
             signUp = viewModel::signUp,
             openLoginScreen = openLoginScreen,
-            showErrorSnackbar = showErrorSnackbar,
-            openProfileScreen = openProfileScreen
+            showErrorSnackbar = showErrorSnackbar
         )
     }
 }
@@ -82,7 +80,6 @@ fun SignUpScreen(
 fun SignUpScreenContent(
     signUp: (String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
     openLoginScreen: () -> Unit,
-    openProfileScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -154,7 +151,6 @@ fun SignUpScreenContent(
 //                                }
 //                            }
                             signUp(name, surname, email, password, showErrorSnackbar)
-                            openProfileScreen()
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -259,8 +255,7 @@ fun SignUpScreenPreview() {
         SignUpScreenContent(
             openLoginScreen = {},
             signUp = { _, _, _, _, _ ->},
-            showErrorSnackbar = {},
-            openProfileScreen = {}
+            showErrorSnackbar = {}
         )
 
     }
