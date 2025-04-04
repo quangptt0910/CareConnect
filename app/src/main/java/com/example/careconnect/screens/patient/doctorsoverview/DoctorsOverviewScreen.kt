@@ -23,7 +23,8 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun DoctorsOverviewScreen(
 
 ){
-
+    DoctorsOverviewScreenContent(
+    )
 }
 
 

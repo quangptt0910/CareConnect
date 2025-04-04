@@ -71,4 +71,10 @@
     <!-- Firebase cloud messaging -->
     <string name="default_notification_channel_id">default_notification_channel_id</string>
 
+
+    <!-- BottomBar -->
+    <string name="feed">Feed</string>
+    <string name="chat">Chat</string>
+    <string name="booking">Booking</string>
+    <string name="profile">Profile</string>
 </resources>

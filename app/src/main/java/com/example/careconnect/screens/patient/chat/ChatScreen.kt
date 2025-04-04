@@ -61,7 +61,9 @@ const val MY_ID = "user_me"
 fun ChatScreen(
 
 ){
-
+    ChatScreenContent(
+        model = viewModel()
+    )
 }
 
 

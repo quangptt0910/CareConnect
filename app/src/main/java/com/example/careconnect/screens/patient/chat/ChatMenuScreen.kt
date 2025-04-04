@@ -40,7 +40,11 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun ChatMenuScreen(
 
 ){
-
+    ChatMenuScreenContent(
+        uiState = ChatMenuUiState(),
+        onDoctorSelected = { _, _ -> },
+        onChatClicked = {}
+    )
 }
 
 
