@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -30,8 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.screens.patient.home.ErrorMessage
 import com.example.careconnect.screens.patient.home.LoadingIndicator
@@ -118,7 +116,7 @@ fun ChatListItem(
     name: String,
     message: String,
     time: String,
-    imageRes: Int // Resource ID of the profile image
+    imageRes: String // Resource ID of the profile image
 ) {
     Column {
         ListItem(
@@ -127,7 +125,7 @@ fun ChatListItem(
             supportingContent = { Text(text = message) },
             leadingContent = {
                 Image(
-                    painter = painterResource(id = imageRes),
+                    painter = rememberAsyncImagePainter(imageRes),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -142,25 +140,3 @@ fun ChatListItem(
         HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
     }
 }
-
-
-@Composable
-fun ChatListScreen(messages: List<ChatMessage>) {
-    LazyColumn {
-        items(messages) { message ->
-            ChatListItem(
-                name = message.name,
-                message = message.latestMessage,
-                time = message.time,
-                imageRes = message.imageRes
-            )
-        }
-    }
-}
-
-data class ChatMessage(
-    val name: String,
-    val latestMessage: String,
-    val time: String,
-    val imageRes: Int // Image resource ID
-)

@@ -49,6 +49,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.careconnect.dataclass.chat.Message
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.text.SimpleDateFormat
@@ -313,23 +314,6 @@ fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImage
     }
 }
 
-
-
-data class Message(
-    val text: String,
-    val author: Author,
-    val timestamp: Long = System.currentTimeMillis(),
-    val imageUri: Uri? = null
-) {
-    val isFromMe: Boolean
-        get() = author.id == MY_ID
-}
-
-
-data class Author(
-    val id: String,  // Unique ID for each author
-    val name: String // Display name (optional)
-)
 
 @Preview
 @Composable

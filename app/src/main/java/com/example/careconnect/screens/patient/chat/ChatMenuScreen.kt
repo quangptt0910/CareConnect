@@ -1,7 +1,5 @@
 package com.example.careconnect.screens.patient.chat
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
@@ -18,7 +15,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -26,13 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.chat.ChatRoomPatient
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
@@ -43,7 +38,8 @@ fun ChatMenuScreen(
     ChatMenuScreenContent(
         uiState = ChatMenuUiState(),
         onDoctorSelected = { _, _ -> },
-        onChatClicked = {}
+        onChatClicked = {},
+        chatRoom = listOf(),
     )
 }
 
@@ -52,8 +48,9 @@ fun ChatMenuScreen(
 @Composable
 fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
+    chatRoom: List<ChatRoomPatient>,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
-    onChatClicked: (Doctor) -> Unit,
+    onChatClicked: (ChatRoomPatient) -> Unit,
 
     ) {
     Surface(
@@ -82,60 +79,20 @@ fun ChatMenuScreenContent(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            val chatMessages = listOf(
-                ChatMessage(
-                    "Dr Salem",
-                    "Hello patient A. HOW YOU DOING TODAY",
-                    "10:00",
-                    R.drawable.carousel_image_1
-                ),
-                ChatMessage(
-                    "Dr Emma",
-                    "Your test results are ready",
-                    "09:45",
-                    R.drawable.carousel_image_2
-                ),
-                ChatMessage(
-                    "Dr John",
-                    "Let's schedule a follow-up",
-                    "08:30",
-                    R.drawable.carousel_image_3
-                )
-            )
+            LazyColumn {
+                items(chatRoom.size) { index ->
+                    val chat = chatRoom[index]
+                    ChatListItem(
+                        name = chat.doctor.name,
+                        message = chat.lastMessage,
+                        time = formatTimestamp(chat.lastUpdated),
+                        imageRes = chat.doctor.profilePhoto
+                    )
 
-            ChatListScreen(messages = chatMessages)
+                    HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
+                }
+            }
         }
-    }
-}
-
-@Composable
-fun MessageList(messages: List<Message>) {
-    val listState = rememberLazyListState()
-    // Remember a CoroutineScope to be able to launch
-    val coroutineScope = rememberCoroutineScope()
-
-    LazyColumn(state = listState) {
-        // ...
-    }
-
-    ListItem(
-        headlineContent = { Text(text = "message.text") },
-        supportingContent = { Text(text = "message.timestamp") },
-    )
-}
-
-@Composable
-fun HorizontalDividerExample() {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.carousel_image_1),
-            contentDescription = null,
-            modifier = Modifier.width(50.dp).height(50.dp)
-        )
-        HorizontalDivider(thickness = 2.dp)
-        Text("Second item in list")
     }
 }
 
@@ -191,8 +148,42 @@ fun SmallTopAppBarExample1() {
 fun ChatMenuScreenPreview() {
     CareConnectTheme {
         val uiState = ChatMenuUiState()
+        val sampleChatRooms = listOf(
+            ChatRoomPatient(
+                chatId = "chat_001",
+                doctor = Doctor(
+                    id = "doc_001",
+                    name = "Dr. Emma Thompson",
+                    profilePhoto = R.drawable.carousel_image_1.toString()
+                ),
+                lastMessage = "Please remember to take your meds.",
+                lastUpdated = System.currentTimeMillis() - 600_000 // 10 min ago
+            ),
+            ChatRoomPatient(
+                chatId = "chat_002",
+                doctor = Doctor(
+                    id = "doc_002",
+                    name = "Dr. John Miller",
+                    profilePhoto = "https://via.placeholder.com/150"
+                ),
+                lastMessage = "Your blood test came back normal.",
+                lastUpdated = System.currentTimeMillis() - 3_600_000 // 1 hour ago
+            ),
+            ChatRoomPatient(
+                chatId = "chat_003",
+                doctor = Doctor(
+                    id = "doc_003",
+                    name = "Dr. Sarah Patel",
+                    profilePhoto = "https://via.placeholder.com/150"
+                ),
+                lastMessage = "Let's schedule your next checkup.",
+                lastUpdated = System.currentTimeMillis() - 86_400_000 // 1 day ago
+            )
+        )
+
         ChatMenuScreenContent(
             uiState = uiState,
+            chatRoom = sampleChatRooms,
             onDoctorSelected = { _, _ -> },
             onChatClicked = {}
         )
