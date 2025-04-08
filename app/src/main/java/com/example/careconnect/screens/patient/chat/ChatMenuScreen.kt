@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.dataclass.chat.ChatRoomPatient
+import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
@@ -48,9 +48,9 @@ fun ChatMenuScreen(
 @Composable
 fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
-    chatRoom: List<ChatRoomPatient>,
+    chatRoom: List<ChatRoom>,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
-    onChatClicked: (ChatRoomPatient) -> Unit,
+    onChatClicked: (ChatRoom) -> Unit,
 
     ) {
     Surface(
@@ -149,7 +149,7 @@ fun ChatMenuScreenPreview() {
     CareConnectTheme {
         val uiState = ChatMenuUiState()
         val sampleChatRooms = listOf(
-            ChatRoomPatient(
+            ChatRoom(
                 chatId = "chat_001",
                 doctor = Doctor(
                     id = "doc_001",
@@ -159,7 +159,7 @@ fun ChatMenuScreenPreview() {
                 lastMessage = "Please remember to take your meds.",
                 lastUpdated = System.currentTimeMillis() - 600_000 // 10 min ago
             ),
-            ChatRoomPatient(
+            ChatRoom(
                 chatId = "chat_002",
                 doctor = Doctor(
                     id = "doc_002",
@@ -169,7 +169,7 @@ fun ChatMenuScreenPreview() {
                 lastMessage = "Your blood test came back normal.",
                 lastUpdated = System.currentTimeMillis() - 3_600_000 // 1 hour ago
             ),
-            ChatRoomPatient(
+            ChatRoom(
                 chatId = "chat_003",
                 doctor = Doctor(
                     id = "doc_003",
