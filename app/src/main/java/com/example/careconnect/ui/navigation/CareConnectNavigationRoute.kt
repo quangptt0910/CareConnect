@@ -26,6 +26,8 @@ object Route {
     const val ADMIN_PATIENT_MANAGE_ROUTE = "admin/patients"
     const val ADMIN_APPOINTMENTS_ROUTE = "admin/appointments"
     const val ADMIN_PROFILE_ROUTE = "admin/profile"
+    const val ADMIN_DOCTOR_SCHEDULE_ROUTE = "admin/doctors/schedule"
+    const val ADMIN_DOCTOR_SCHEDULE_EDIT_ROUTE = "admin/doctors/schedule/edit"
 
     // Patient-specific Routes
     const val PATIENT_APP = "patient_app"

@@ -50,9 +50,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
 
-/**
- * TODO() Adjust the onGenderChange, onDobChange and onAge change - to remove it
- */
+
 @Composable
 fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),
@@ -69,9 +67,6 @@ fun ProfileInfoScreen(
 
     ProfileInfoScreenContent(
         linkAccount = viewModel::linkAccount,
-        onGenderChange = {},
-        onDobChange = {},
-        onAgeChange = {},
         showErrorSnackbar = showErrorSnackbar
     )
 }
@@ -82,9 +77,6 @@ fun ProfileInfoScreen(
 @Composable
 fun ProfileInfoScreenContent(
     linkAccount: (String, Double, Double, String, String, (ErrorMessage) -> Unit) -> Unit,
-    onGenderChange: (String) -> Unit = {},
-    onDobChange: (String) -> Unit = {},
-    onAgeChange: (Int) -> Unit = {},
     showErrorSnackbar: (ErrorMessage) -> Unit
 ) {
     var weight by remember { mutableStateOf("") }
@@ -343,9 +335,6 @@ fun ProfileInfoPreview() {
     CareConnectTheme {
         ProfileInfoScreenContent(
             linkAccount = { _, _, _, _, _, _ -> },
-            onGenderChange = {},
-            onDobChange = {},
-            onAgeChange = {},
             showErrorSnackbar = {}
         )
     }

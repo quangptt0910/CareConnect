@@ -38,12 +38,12 @@ import java.time.YearMonth
 
 
 @Composable
-fun AdminDoctorScheduleScreen() {
-
+fun AddDoctorScheduleScreen() {
+    AddDoctorScheduleScreenContent(onNextStep = {}, onBack = {})
 }
 
 @Composable
-fun AdminDoctorScheduleScreenContent(onNextStep: () -> Unit, onBack: () -> Unit) {
+fun AddDoctorScheduleScreenContent(onNextStep: () -> Unit, onBack: () -> Unit) {
     var selectedDays by remember { mutableStateOf(setOf<LocalDate>()) }
 
     Surface(
@@ -147,6 +147,6 @@ fun CalendarSelector(selectedDays: Set<LocalDate>, onDaySelected: (LocalDate) ->
 @Composable
 fun AdminDoctorScheduleScreenPreview() {
     CareConnectTheme {
-        AdminDoctorScheduleScreenContent(onNextStep = {}, onBack = {})
+        AddDoctorScheduleScreenContent(onNextStep = {}, onBack = {})
     }
 }

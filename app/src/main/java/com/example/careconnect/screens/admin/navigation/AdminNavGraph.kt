@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.careconnect.getErrorMessage
+import com.example.careconnect.screens.admin.doctormanage.AddDoctorScheduleScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
 import com.example.careconnect.screens.admin.doctormanage.DoctorManageScreen
 import com.example.careconnect.screens.admin.home.HomeScreenAdmin
@@ -45,14 +46,19 @@ fun AdminNavHost(
         composable(Route.ADMIN_APPOINTMENTS_ROUTE) {
             PatientManageScreen()
         }
+
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
-                onNextStep = { _, _, _, _, _, _, _, _, _ ->},
+                onAddScheduleScreen = { navController.navigate(Route.ADMIN_DOCTOR_SCHEDULE_ROUTE) },
                 showErrorSnackbar = { errorMessage ->
                     val message = getErrorMessage(errorMessage)
                     scope.launch { snackbarHostState.showSnackbar(message) }
                 }
             )
+        }
+
+        composable(Route.ADMIN_DOCTOR_SCHEDULE_ROUTE){
+            AddDoctorScheduleScreen()
         }
         composable(Route.SETTINGS_ROUTE) {
             SettingsScreen(

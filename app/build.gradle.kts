@@ -43,14 +43,16 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xlint:deprecation")
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
-}
 
+}
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:deprecation")
+}
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -90,7 +92,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-perf:21.0.5")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     // Cloud messaging
