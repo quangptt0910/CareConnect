@@ -47,7 +47,7 @@ fun AdminNavHost(
         }
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
-                onNextStep = { _, _, _, _, _, _ ->},
+                onNextStep = { _, _, _, _, _, _, _, _, _ ->},
                 showErrorSnackbar = { errorMessage ->
                     val message = getErrorMessage(errorMessage)
                     scope.launch { snackbarHostState.showSnackbar(message) }

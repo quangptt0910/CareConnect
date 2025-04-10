@@ -2,8 +2,18 @@
     <string name="app_name">CareConnect</string>
     <string name="app_catchphrase">Connect with care</string>
 
+    <!-- Profile -->
     <string name="name">Name</string>
     <string name="surname">Surname</string>
+    <string name="phone">Phone</string>
+    <string name="email">Email</string>
+    <string name="address">Address</string>
+    <string name="specialization">Specialization</string>
+    <string name="experience">Experience</string>
+    <string name="role">Role</string>
+    <string name="password">Password</string>
+
+    <string name="sign_up">Sign up</string>
     <string name="sign_out">Sign out</string>
 
     <!-- Common -->
@@ -22,7 +32,7 @@
     <string name="generic_error">Something went wrong. Please try again later.</string>
 
     <!-- LoginScreen -->
-    <string name="email">Email</string>
+
     <string name="login">Log In</string>
 
     <!-- SignUpScreen -->
@@ -30,6 +40,8 @@
     <string name="password_error">Password does not meet the requirement. Please use a stronger password.</string>
     <string name="password_match_error">Passwords does not match.</string>
     <string name="all_fields_required">All fields are required.</string>
+
+
 
     <string name="signup">Create Account</string>
     <string name="password_level">Password Level: </string>

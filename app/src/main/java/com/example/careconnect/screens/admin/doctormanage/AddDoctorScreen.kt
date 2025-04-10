@@ -37,34 +37,44 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.ErrorMessage
-import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun AddDoctorScreen(
-    onNextStep: (String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    onAddScheduleScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
+    viewModel: AddDoctorViewModel = hiltViewModel()
 ){
-    AddDoctorScreenContent(
-        onNextStep = { _, _, _, _, _, _ ->},
-        showErrorSnackbar = showErrorSnackbar
-    )
+    val navigateToAddSchedule by viewModel.navigateToAddSchedule.collectAsStateWithLifecycle()
+    if (navigateToAddSchedule) {
+        onAddScheduleScreen()
+    } else {
+        AddDoctorScreenContent(
+            createDoctorInfo = viewModel::createDoctorInfo,
+            showErrorSnackbar = showErrorSnackbar
+        )
+    }
 }
 
 
 @Composable
 fun AddDoctorScreenContent(
-    onNextStep: (String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    createDoctorInfo: (String, String, String, String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit = {}
 ) {
 
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
-    var speciality by remember { mutableStateOf("") }
+    var specialization by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var experience by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -93,29 +103,27 @@ fun AddDoctorScreenContent(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                CustomTextField(
-                    label = stringResource(R.string.name),
-                    value = name,
-                    onValueChange = { name = it })
-                CustomTextField(
-                    label = stringResource(R.string.surname),
-                    value = surname,
-                    onValueChange = { surname = it })
-                CustomTextField(
-                    label = "Speciality",
-                    value = speciality,
-                    onValueChange = { speciality = it })
-                CustomTextField(
-                    label = "Address",
-                    value = address,
-                    onValueChange = { address = it })
-                CustomTextField(label = "Phone", value = phone, onValueChange = { phone = it })
+                /**
+                 * TextFields for doctor information
+                 * Validation in viewModel
+                 * TODO(): Create drop down menu for specialization - instead of typing
+                 * TODO(): Generate a random password that is strong
+                 * TODO(): Send the password to the email (of the doctor)
+                 */
+                CustomTextField(label = stringResource(R.string.name), value = name, onValueChange = { name = it })
+                CustomTextField(label = stringResource(R.string.surname), value = surname, onValueChange = { surname = it })
+                CustomTextField(label = stringResource(R.string.email), value = email, onValueChange = { email = it })
+                CustomTextField(label = stringResource(R.string.specialization), value = specialization, onValueChange = { specialization = it })
+                CustomTextField(label = stringResource(R.string.experience), value = experience, onValueChange = { experience = it })
+                CustomTextField(label = stringResource(R.string.address), value = address, onValueChange = { address = it })
+                CustomTextField(label = stringResource(R.string.phone), value = phone, onValueChange = { phone = it })
+                CustomTextField(label = stringResource(R.string.password), value = password, onValueChange = { password = it })
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Next Button
                 IconButton(
-                    onClick = { onNextStep(name, surname, speciality, address, phone, showErrorSnackbar) },
+                    onClick = { createDoctorInfo(name, surname, email, phone, address, specialization, experience, password, showErrorSnackbar) },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
@@ -213,9 +221,8 @@ fun SmallTopAppBarExample() {
 @Composable
 fun AddDoctorScreenPreview() {
     CareConnectTheme {
-        val uiState = HomeUiState()
         AddDoctorScreenContent(
-            onNextStep = { _, _, _, _, _, _ ->},
+            createDoctorInfo = { _, _, _, _, _, _, _, _, _->},
             showErrorSnackbar = {}
         )
     }

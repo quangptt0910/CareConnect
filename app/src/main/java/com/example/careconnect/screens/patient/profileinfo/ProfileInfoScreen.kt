@@ -50,7 +50,9 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
 
-
+/**
+ * TODO() Adjust the onGenderChange, onDobChange and onAge change - to remove it
+ */
 @Composable
 fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),

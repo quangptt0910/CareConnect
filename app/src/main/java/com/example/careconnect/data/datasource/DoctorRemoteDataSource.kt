@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class AddDoctorRemoteDataSource @Inject constructor(
+class DoctorRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
@@ -18,13 +18,12 @@ class AddDoctorRemoteDataSource @Inject constructor(
         firestore.collection(DOCTORS_COLLECTION).document(doctor.id).set(doctor).await()
     }
 
-    suspend fun authDoctor(email: String, password: String) {
+    suspend fun signupDoctor(email: String, password: String) {
         val authResult = auth.createUserWithEmailAndPassword(email, password).await()
         val userId = auth.currentUser!!.uid
         val doctor = Doctor(id = userId, email = email)
         firestore.collection("doctors").document(userId).set(doctor).await()
     }
-
 
     companion object {
         private const val DOCTORS_COLLECTION = "doctors"

@@ -20,14 +20,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
-
 
 @Composable
 fun DoctorManageScreen(
@@ -64,17 +65,6 @@ fun DoctorManageScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-//            val doctors = listOf(
-////                Doctor("John", "Doe", "133","123","123","Cardiologist"),
-////                Doctor("Jane", "Smith","133","123","123", "Dermatologist"),
-////                Doctor("Bob", "Johnson","133","123","123", "Neurologist"),
-////                Doctor("Alice", "Williams","133","123","123", "Pediatrician"),
-////                Doctor("David", "Brown","133","123","123", "Orthopedic Surgeon"),
-////                Doctor("Emily", "Jones","133","123","123", "Gynecologist"),
-//                //Doctor("Michael", "Davis","133","123","123", "Ophthalmologist"),
-//                //Doctor("Sarah", "Miller","133","123","123", "Dentist")
-//            )
-
             val doctors = listOf(
                 Doctor(
                     id = "doctor123",
@@ -87,11 +77,23 @@ fun DoctorManageScreenContent(
                     specialization = "Cardiology",
                     experience = 2015,
                     schedule = DoctorSchedule() // Assuming DoctorSchedule has a default constructor
+                ),
+                Doctor(
+                    id = "doctor456",
+                    name = "Jane",
+                    surname = "Smith",
+                    email = "jane.smith@example.com",
+                    role = Role.DOCTOR,
+                    phone = "987-654-3210",
+                    address = "456 Health Rd, Cityville",
+                    specialization = "Dermatology",
+                    experience = 2010,
+                    schedule = DoctorSchedule()
                 )
             )
 
             FilledCardExample(
-                title = "Doctors",
+                title = stringResource(R.string.doctor),
                 doctors = doctors,
                 onDeleteProduct = {}
             )

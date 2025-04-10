@@ -41,7 +41,7 @@ data class Patient(
     val address: String = "",
     val dateOfBirth: String = "",
     val gender: Gender = Gender.MALE,
-
+    val pesel: String = "",
     val height: Double = 0.0,
     val weight: Double = 0.0,
     val medicalHistory: MedicalHistory = MedicalHistory(),  // Patient's medical history or conditions
