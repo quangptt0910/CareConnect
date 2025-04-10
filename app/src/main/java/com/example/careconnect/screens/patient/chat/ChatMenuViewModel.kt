@@ -27,4 +27,15 @@ class ChatMenuViewModel @Inject constructor(
             onSuccess(chatId)
         }
     }
+
+    fun updateChatRoom(
+        chatId: String,
+        lastMessage: String,
+        lastUpdated: Long
+        ) {
+        launchCatching(
+        ) {
+            addChatRoomRepository.updateChatRoom(chatId, lastMessage, lastUpdated)
+        }
+    }
 }

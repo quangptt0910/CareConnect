@@ -14,8 +14,11 @@ class AddChatRoomDataSource @Inject constructor(
         return firestore.collection(CHATROOMS_COLLECTION).add(chatRoom).await().id
     }
 
-    suspend fun updateChatRoom(chatRoom: ChatRoom) {
-        firestore.collection(CHATROOMS_COLLECTION).document(chatRoom.chatId).set(chatRoom).await()
+    suspend fun updateChatRoom(chatId: String, lastMessage: String, lastUpdated: Long) {
+        firestore.collection(CHATROOMS_COLLECTION).document(chatId).update(
+            "lastMessage", lastMessage,
+            "lastUpdated", lastUpdated
+        ).await()
     }
 
     suspend fun getChatRooms(): List<ChatRoom> {

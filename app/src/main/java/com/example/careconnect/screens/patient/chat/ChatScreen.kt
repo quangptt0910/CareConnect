@@ -34,6 +34,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,24 +61,35 @@ const val MY_ID = "user_me"
 
 @Composable
 fun ChatScreen(
-
+    chatId: String,
 ){
     ChatScreenContent(
-        model = viewModel()
+        model = viewModel(),
+        chatId = chatId
     )
 }
 
-
 @Composable
 fun ChatScreenContent(
-    model: ChatViewModel = viewModel()
+    model: ChatViewModel = viewModel(),
+    chatId: String
 ) {
+    LaunchedEffect(chatId) {
+        model.loadChat(chatId)
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
 
-        SmallTopAppBarExample()
+        val chatName = model.chatRoom?.let {
+            if (it.doctor.id == MY_ID) it.patient.name else it.doctor.name
+        } ?: "Chat"
+
+        SmallTopAppBarExample(
+            name = chatName
+        )
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (messages, chatBox) = createRefs()
@@ -111,7 +123,11 @@ fun ChatScreenContent(
                         end.linkTo(parent.end)
                     },
                 onSend = { text ->
-                    model.sendMessage(text)
+                    model.sendMessage(
+                        message = Message(text = text, author = (model.me)),
+                        chatId = chatId
+
+                    )
                 }
             )
         }
@@ -195,7 +211,9 @@ fun formatTimestamp(timestamp: Long): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample() {
+fun SmallTopAppBarExample(
+    name: String = "Chat"
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -205,7 +223,7 @@ fun SmallTopAppBarExample() {
                 ),
                 title = {
                     Text(
-                        "Quang",
+                        text = name,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -241,7 +259,15 @@ fun ChatBox(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { viewModel.sendImage(it) }
+        uri?.let { viewModel.sendImage(
+            it,
+            message = Message(
+                text = "",
+                author = viewModel.me,
+                imageUri = it
+            ),
+            chatId = viewModel.chatRoom?.chatId ?: ""
+        ) }
     }
 
     Row(
@@ -321,6 +347,8 @@ fun ChatScreenPreview() {
     CareConnectTheme {
         val uiState = HomeUiState()
         ChatScreenContent(
+            model = viewModel(),
+            chatId = "1"
         )
     }
 }
