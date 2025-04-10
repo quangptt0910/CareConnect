@@ -32,11 +32,15 @@ object Route {
     const val PATIENT_GRAPH = "patient_graph"
     const val PATIENT_PROFILE_ROUTE = "patient/profile"
     const val PATIENT_APPOINTMENTS_ROUTE = "patient/appointments"
-    const val PATIENT_CHAT_ROUTE = "patient/chat"
+    const val PATIENT_CHAT_MENU_ROUTE = "patient/chat/menu"
+    const val PATIENT_CHAT_ROUTE = "patient/chat/{chatId}"
 
     // Route with parameter helper
     fun adminDoctorEditRoute(doctorId: String) =
         ADMIN_DOCTOR_EDIT_ROUTE.replace("{doctorId}", doctorId)
+
+    fun getPatientChatRoute(chatId: String) =
+        PATIENT_CHAT_ROUTE.replace("{chatId}", chatId)
 }
 
 @Stable

@@ -12,8 +12,8 @@ class AddChatRoomRepository @Inject constructor(
         return addChatRoomRemoteDataSource.addChatRoom(chatRoom)
     }
 
-    suspend fun updateChatRoom(chatRoom: ChatRoom) {
-        addChatRoomRemoteDataSource.updateChatRoom(chatRoom)
+    suspend fun updateChatRoom(chatId: String, lastMessage: String, lastUpdated: Long) {
+        addChatRoomRemoteDataSource.updateChatRoom(chatId, lastMessage, lastUpdated)
     }
 
     suspend fun getChatRooms(): List<ChatRoom> {

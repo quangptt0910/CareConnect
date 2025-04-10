@@ -13,12 +13,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.getErrorMessage
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
+import com.example.careconnect.screens.patient.chat.ChatScreen
 import com.example.careconnect.screens.patient.doctorsoverview.DoctorsOverviewScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
+import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,6 +51,9 @@ fun PatientApp(
             }
             composable(BarRoutes.CHAT.route) {
                 ChatMenuScreen(
+                    openChatScreen = { chatId ->
+                        navController.navigate(getPatientChatRoute(chatId))
+                    }
                 )
             }
             composable(BarRoutes.PROFILE.route) {
@@ -63,6 +70,20 @@ fun PatientApp(
                         val message = getErrorMessage(errorMessage)
                         scope.launch { snackbarHostState.showSnackbar(message) }
                     }
+                )
+            }
+
+            composable(PATIENT_CHAT_MENU_ROUTE){
+                ChatMenuScreen(
+                    openChatScreen = { chatId ->
+                        navController.navigate(getPatientChatRoute(chatId))
+                    }
+                )
+            }
+
+            composable(PATIENT_CHAT_ROUTE){
+                ChatScreen(
+                    chatId = it.arguments?.getString("chatId") ?: ""
                 )
             }
         }
