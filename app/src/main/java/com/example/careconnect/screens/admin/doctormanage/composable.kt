@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,28 +33,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.DoctorSchedule
-import com.example.careconnect.dataclass.Role
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import com.example.careconnect.R.string as AppText
 
 /**
- * Composable function to display a filled card with a title, expandable list of user products, and delete functionality.
+ * Composable function to display a filled card of doctors
  *
- * @param title The title of the card.
- * @param users List of user-added products to be displayed.
- * @param onDeleteProduct Callback function to handle product deletion.
+ * @param doctor the doctor to be displayed
+ * @param onDeleteDoc Callback function to handle product deletion.
  */
 @Composable
-fun FilledCardExample(
-    title: String,
+fun DoctorCard(
     modifier: Modifier = Modifier,
-    doctors: List<Doctor>,
-    onDeleteProduct: (Doctor) -> Unit,
+    doctor: Doctor,
+    onOpenProfile: () -> Unit,
+    onDeleteDoc: (Doctor) -> Unit,
 ) {
-
-    var expanded by rememberSaveable { mutableStateOf(false) }
+    //var expanded by rememberSaveable { mutableStateOf(false) }
     var showWarningDialog by remember { mutableStateOf(false) }
     var doctorToDelete by remember { mutableStateOf<Doctor?>(null) }
 
@@ -74,15 +70,12 @@ fun FilledCardExample(
         ) {
 
             Column {
-                doctors.forEach { doctor ->
                     ListItem(
                         headlineContent = { Text(doctor.name + " " + doctor.surname) },
                         supportingContent = {
                             Column {
-                                // take the specialization from the userData of the doctor (ensure the userData is .Doctor
-                                Text(doctor.specialization)
-
-                            } },
+                                Text(doctor.specialization) }
+                        },
                         trailingContent = {
 
                             Row(
@@ -90,14 +83,9 @@ fun FilledCardExample(
                                 horizontalArrangement = Arrangement.End
                             ){
                                 IconButton(
-                                    onClick = {
-
-                                    }
+                                    onClick = { onOpenProfile() }
                                 ){
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Edit"
-                                    )
+                                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
                                 }
 
                                 Spacer(modifier = Modifier.width(2.dp))
@@ -117,22 +105,17 @@ fun FilledCardExample(
 
                         }
                     )
-                }
-        }
-
-        if (expanded) {
-
             }
         }
 
         if (showWarningDialog && doctorToDelete != null) {
             AlertDialog(
-                title = { Text(stringResource(AppText.delete_product_title)) },
-                text = { Text(stringResource(AppText.delete_product_description)) },
+                title = { Text(stringResource(AppText.delete_doctor_title) )},
+                text = { Text(stringResource(AppText.delete_doctor_description)) },
                 dismissButton = { DialogCancelButton(AppText.cancel) { showWarningDialog = false } },
                 confirmButton = {
                     DialogConfirmButton(AppText.delete) {
-                        onDeleteProduct(doctorToDelete!!)
+                        onDeleteDoc(doctorToDelete!!)
                         showWarningDialog = false
                     }
                 },

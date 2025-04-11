@@ -10,19 +10,25 @@ class DoctorRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
-    suspend fun createDoctor(doctor: Doctor): String {
-        return firestore.collection(DOCTORS_COLLECTION).add(doctor).await().id
+    suspend fun createDoctor(email: String, password: String, doctor: Doctor) {
+        val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+        println("DEBUG createDoctor: create user EMAIL PASSWORD authResult = $authResult")
+        val doctorId = authResult.user?.uid ?: throw IllegalStateException("Failed to create user")
+        println("DEBUG createDoctor: doctorId = $doctorId")
+        val newDoctor = doctor.copy(id = doctorId)
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).set(newDoctor).await()
     }
 
     suspend fun updateDoctor(doctor: Doctor) {
         firestore.collection(DOCTORS_COLLECTION).document(doctor.id).set(doctor).await()
     }
 
-    suspend fun signupDoctor(email: String, password: String) {
-        val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-        val userId = auth.currentUser!!.uid
-        val doctor = Doctor(id = userId, email = email)
-        firestore.collection("doctors").document(userId).set(doctor).await()
+    suspend fun getDoctors(): List<Doctor> {
+        return firestore.collection(DOCTORS_COLLECTION).get().await().toObjects(Doctor::class.java)
+    }
+
+    suspend fun getDoctorById(doctorId: String): Doctor? {
+        return firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await().toObject(Doctor::class.java)
     }
 
     companion object {

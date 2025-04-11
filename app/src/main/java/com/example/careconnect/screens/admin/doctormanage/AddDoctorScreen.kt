@@ -43,15 +43,18 @@ import com.example.careconnect.R
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+
 @Composable
 fun AddDoctorScreen(
-    onAddScheduleScreen: () -> Unit,
+    openDoctorManageScreen: () -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: AddDoctorViewModel = hiltViewModel()
 ){
-    val navigateToAddSchedule by viewModel.navigateToAddSchedule.collectAsStateWithLifecycle()
-    if (navigateToAddSchedule) {
-        onAddScheduleScreen()
+    val navigateToDoctorManage by viewModel.navigateToDoctorManage.collectAsStateWithLifecycle()
+    val adminId = viewModel.adminId
+    println("DEBUG_AddDoctorScreen: admin $adminId ")
+    if (navigateToDoctorManage) {
+        openDoctorManageScreen()
     } else {
         AddDoctorScreenContent(
             createDoctorInfo = viewModel::createDoctorInfo,

@@ -117,8 +117,8 @@ fun FilledCardPatients(
 
         if (showWarningDialog && productToDelete != null) {
             AlertDialog(
-                title = { Text(stringResource(R.string.delete_product_title)) },
-                text = { Text(stringResource(R.string.delete_product_description)) },
+                title = { Text(stringResource(R.string.delete_patient_title)) },
+                text = { Text(stringResource(R.string.delete_patient_description)) },
                 dismissButton = {
                     DialogCancelButton(R.string.cancel) {
                         showWarningDialog = false

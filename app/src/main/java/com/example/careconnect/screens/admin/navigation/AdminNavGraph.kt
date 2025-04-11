@@ -37,7 +37,11 @@ fun AdminNavHost(
         }
         composable(Route.ADMIN_DOCTOR_MANAGE_ROUTE) {
             DoctorManageScreen(
-                onAddDoctorClick = { navController.navigate(Route.ADMIN_DOCTOR_ADD_ROUTE) }
+                openAddDoctorScreen = { navController.navigate(Route.ADMIN_DOCTOR_ADD_ROUTE) },
+                showErrorSnackbar = { errorMessage ->
+                    val message = getErrorMessage(errorMessage)
+                    scope.launch { snackbarHostState.showSnackbar(message) }
+                }
             )
         }
         composable(Route.ADMIN_PATIENT_MANAGE_ROUTE) {
@@ -49,7 +53,7 @@ fun AdminNavHost(
 
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
-                onAddScheduleScreen = { navController.navigate(Route.ADMIN_DOCTOR_SCHEDULE_ROUTE) },
+                openDoctorManageScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) },
                 showErrorSnackbar = { errorMessage ->
                     val message = getErrorMessage(errorMessage)
                     scope.launch { snackbarHostState.showSnackbar(message) }

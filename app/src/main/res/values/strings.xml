@@ -70,12 +70,13 @@
 
     <!-- Dialogs -->
     <string name="sign_out_title">Sign out?</string>
-    <string name="sign_out_description">You will have to sign in again to see your data.</string>
-    <string name="delete_product_title">Delete product?</string>
-    <string name="delete_product_description">Are you sure you want to delete this product?</string>
-    <string name="delete_all_product_description">Are you sure you want to delete all products?</string>
+    <string name="sign_out_description">You will have to sign in again to see the data.</string>
+    <string name="delete_doctor_title">Delete this doctor?</string>
+    <string name="delete_doctor_description">Are you sure you want to delete this product?</string>
+    <string name="delete_patient_title">Delete this patient?</string>
+    <string name="delete_patient_description">Are you sure you want to delete this product?</string>
     <string name="delete">Delete</string>
-    <string name="add_to_meal_today">Add to your meal today</string>
+    <string name="add_doctor">Add Doctor</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 

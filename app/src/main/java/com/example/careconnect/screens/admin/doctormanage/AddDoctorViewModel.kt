@@ -2,6 +2,7 @@ package com.example.careconnect.screens.admin.doctormanage
 
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
+import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.ErrorMessage
@@ -16,12 +17,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddDoctorViewModel @Inject constructor(
-    private val doctorRepository: DoctorRepository
+    private val doctorRepository: DoctorRepository,
+    private val authRepository: AuthRepository
 ): MainViewModel() {
 
-    private val _navigateToAddSchedule = MutableStateFlow(false)
-    val navigateToAddSchedule: StateFlow<Boolean>
-        get() = _navigateToAddSchedule.asStateFlow()
+    private val _navigateToDoctorManage= MutableStateFlow(false)
+    val navigateToDoctorManage: StateFlow<Boolean>
+        get() = _navigateToDoctorManage.asStateFlow()
+
+    val adminId = authRepository.currentUser?.uid
 
     fun createDoctorInfo(
         name: String,
@@ -59,10 +63,10 @@ class AddDoctorViewModel @Inject constructor(
                 email = email,
                 role = Role.DOCTOR,
                 phone = phone, address = address, specialization = specialization, experience = experience.toInt())
-            doctorRepository.createDoctor(doctorInfo)
-            doctorRepository.signupDoctor(email, password)
+            doctorRepository.createDoctor(email = email, password = password, doctor = doctorInfo)
+            println("DEBUG:: PROFILE Doctor created successfully!!")
             println("DEBUG:: Doctor created successfully!!")
-            _navigateToAddSchedule.value = true
+            _navigateToDoctorManage.value = true
         }
     }
 }
