@@ -4,7 +4,6 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
-import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.signup.isValidEmail
@@ -39,6 +38,7 @@ class AddDoctorViewModel @Inject constructor(
         showErrorSnackbar: (ErrorMessage) -> Unit
     ) {
         if (!email.isValidEmail()) {
+            println("DEBUG:: Invalid email")
             showErrorSnackbar(ErrorMessage.IdError(R.string.invalid_email))
             return
         }
@@ -50,20 +50,26 @@ class AddDoctorViewModel @Inject constructor(
 
         if (experience.toIntOrNull() == null) {
             showErrorSnackbar(ErrorMessage.IdError(R.string.experience))
+            return
         }
 
         if (phone.toLongOrNull() == null) {
             showErrorSnackbar(ErrorMessage.IdError(R.string.phone))
+            return
         }
 
-        launchCatching {
-            val doctorInfo = Doctor(
-                name = name,
-                surname = surname,
-                email = email,
-                role = Role.DOCTOR,
-                phone = phone, address = address, specialization = specialization, experience = experience.toInt())
-            doctorRepository.createDoctor(email = email, password = password, doctor = doctorInfo)
+        launchCatching(showErrorSnackbar) {
+            val doctorDataMap = mapOf(
+                "name" to name,
+                "surname" to surname,
+                "email" to email,
+                "role" to Role.DOCTOR.name,  // Send as string; your cloud function can decide how to parse it
+                "phone" to phone,
+                "address" to address,
+                "specialization" to specialization,
+                "experience" to experience.toInt()
+            )
+            doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             println("DEBUG:: PROFILE Doctor created successfully!!")
             println("DEBUG:: Doctor created successfully!!")
             _navigateToDoctorManage.value = true

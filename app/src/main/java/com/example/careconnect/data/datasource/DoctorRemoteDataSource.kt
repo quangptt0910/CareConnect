@@ -3,20 +3,25 @@ package com.example.careconnect.data.datasource
 import com.example.careconnect.dataclass.Doctor
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class DoctorRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val functions: FirebaseFunctions
 ) {
-    suspend fun createDoctor(email: String, password: String, doctor: Doctor) {
-        val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-        println("DEBUG createDoctor: create user EMAIL PASSWORD authResult = $authResult")
-        val doctorId = authResult.user?.uid ?: throw IllegalStateException("Failed to create user")
-        println("DEBUG createDoctor: doctorId = $doctorId")
-        val newDoctor = doctor.copy(id = doctorId)
-        firestore.collection(DOCTORS_COLLECTION).document(doctorId).set(newDoctor).await()
+    suspend fun createDoctor(email: String, password: String, doctorData: Map<String, Any>) {
+        val data = mapOf(
+            "email" to email,
+            "password" to password,
+            "doctorData" to doctorData
+        )
+
+        functions.getHttpsCallable("createDoctor")
+            .call(data)
+            .await()
     }
 
     suspend fun updateDoctor(doctor: Doctor) {

@@ -93,7 +93,9 @@ fun AddDoctorScreenContent(
             ) {
 
             }
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)) {
                 // Progress Stepper
                 StepperIndicator(currentStep = 1)
 

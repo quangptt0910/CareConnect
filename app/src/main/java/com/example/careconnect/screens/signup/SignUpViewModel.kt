@@ -25,6 +25,12 @@ class SignUpViewModel @Inject constructor(
         password: String,
         showSnackbar: (ErrorMessage) -> Unit
     ) {
+
+        if (name.isBlank() || surname.isBlank() || email.isBlank() || password.isBlank()) {
+            showSnackbar(ErrorMessage.IdError(R.string.all_fields_required))
+            return
+        }
+
         if (!email.isValidEmail()) {
             showSnackbar(ErrorMessage.IdError(R.string.invalid_email))
             return

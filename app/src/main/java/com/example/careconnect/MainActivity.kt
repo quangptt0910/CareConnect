@@ -8,19 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.rememberNavController
-import com.example.careconnect.ui.navigation.Route.SPLASH_ROUTE
-import com.example.careconnect.ui.theme.CareConnectTheme
+import com.example.careconnect.dataclass.ErrorMessage
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -61,27 +50,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-
-            val snackbarHostState = remember { SnackbarHostState() }
-            val navController = rememberNavController()
-
-            CareConnectTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-                    ) { innerPadding ->
-                        CareConnectNavHost(
-                            navController = navController,
-                            startDestination = SPLASH_ROUTE,
-                            modifier = Modifier.padding(innerPadding)
-                        )
+            CareConnectApp(
+                getErrorMessage = { error ->
+                    when (error) {
+                        is ErrorMessage.StringError -> error.message
+                        is ErrorMessage.IdError ->  this@MainActivity.getString(error.message)
                     }
                 }
-            }
+            )
         }
     }
+
 }

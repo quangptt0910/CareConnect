@@ -8,8 +8,8 @@ import javax.inject.Inject
 class DoctorRepository @Inject constructor(
     private val addDoctorRemoteDataSource: DoctorRemoteDataSource
 ) {
-    suspend fun createDoctor(email: String, password: String, doctor: Doctor){
-        return addDoctorRemoteDataSource.createDoctor(email, password, doctor)
+    suspend fun createDoctor(email: String, password: String,  doctorData: Map<String, Any>){
+        return addDoctorRemoteDataSource.createDoctor(email, password,  doctorData)
     }
     suspend fun updateDoctor(doctor: Doctor) {
         addDoctorRemoteDataSource.updateDoctor(doctor)
