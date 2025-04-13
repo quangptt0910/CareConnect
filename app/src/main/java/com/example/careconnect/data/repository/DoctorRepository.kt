@@ -2,6 +2,7 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.DoctorRemoteDataSource
 import com.example.careconnect.dataclass.Doctor
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
@@ -15,8 +16,12 @@ class DoctorRepository @Inject constructor(
         addDoctorRemoteDataSource.updateDoctor(doctor)
     }
 
-    suspend fun getDoctors(): List<Doctor> {
-        return addDoctorRemoteDataSource.getDoctors()
+    suspend fun getAllDoctors(): List<Doctor> {
+        return addDoctorRemoteDataSource.getAllDoctors()
+    }
+
+    fun getAllDoctorsFlow(): Flow<List<Doctor>> {
+        return addDoctorRemoteDataSource.getAllDoctorsFlow()
     }
 
     suspend fun getDoctorById(doctorId: String): Doctor? {

@@ -9,6 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+
+sealed interface DoctorManageUiState {
+    data class Success(val doctors: List<Doctor>) : DoctorManageUiState
+    object Error : DoctorManageUiState
+    object Loading : DoctorManageUiState
+}
+
 @HiltViewModel
 class DoctorManageViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository
@@ -22,20 +29,15 @@ class DoctorManageViewModel @Inject constructor(
     val doctorsList: StateFlow<List<Doctor>>
         get() = _doctorsList.asStateFlow()
 
-    private val _isLoadingDoctors = MutableStateFlow(false)
-    val isLoadingDoctors: StateFlow<Boolean>
-        get() = _isLoadingDoctors.asStateFlow()
+//    private val _isLoadingDoctors = MutableStateFlow(true)
+//    val isLoadingDoctors: StateFlow<Boolean>
+//        get() = _isLoadingDoctors.asStateFlow()
 
-    init {
-        loadDoctors()
-    }
+    val allDoctors = doctorRepository.getAllDoctorsFlow()
 
     fun loadDoctors() {
         launchCatching {
-            _isLoadingDoctors.value = true
-            _doctorsList.value = doctorRepository.getDoctors()
+            _doctorsList.value = doctorRepository.getAllDoctors()
         }
-        _isLoadingDoctors.value = false
     }
-
 }

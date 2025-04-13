@@ -1,16 +1,16 @@
 package com.example.careconnect.dataclass
 
-import com.google.firebase.firestore.DocumentId
-
 data class DoctorSchedule(
-    @DocumentId val id: String = "",  // Firestore document ID (optional)
-    val doctorId: String = "",
-    val availability: List<DaySchedule> = listOf(),  // List of available days with time slots
-)
+    //@DocumentId val id: String = "",  // Firestore document ID (optional)
+    //val doctorId: String = "",
+    val availability: List<DaySchedule> = emptyList(),  // List of available days with time slots
+) {
+    fun isEmpty(): Boolean = availability.isEmpty()
+}
 
 data class DaySchedule(
     val date: String = "",  // Date in format "yyyy-MM-dd"
-    val availableSlots: List<TimeSlot> = listOf()  // List of time slots for the specific day
+    val availableSlots: List<TimeSlot> = emptyList()  // List of time slots for the specific day
 )
 
 data class TimeSlot(

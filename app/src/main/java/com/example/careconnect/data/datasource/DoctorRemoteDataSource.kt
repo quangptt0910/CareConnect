@@ -1,9 +1,13 @@
 package com.example.careconnect.data.datasource
 
+import android.util.Log
 import com.example.careconnect.dataclass.Doctor
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.dataObjects
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -28,8 +32,25 @@ class DoctorRemoteDataSource @Inject constructor(
         firestore.collection(DOCTORS_COLLECTION).document(doctor.id).set(doctor).await()
     }
 
-    suspend fun getDoctors(): List<Doctor> {
-        return firestore.collection(DOCTORS_COLLECTION).get().await().toObjects(Doctor::class.java)
+    suspend fun getAllDoctors(): List<Doctor> {
+        val snapshot = firestore.collection(DOCTORS_COLLECTION)
+            .orderBy("name", Query.Direction.ASCENDING)
+            .get().await()
+        return snapshot.documents.mapNotNull { document ->
+            try {
+                val doctor = document.toObject(Doctor::class.java)
+                doctor?.copy(id = document.id)
+            } catch (e: Exception) {
+                Log.e("DoctorRemoteDataSource", "Error converting document to Doctor", e)
+                null
+            }
+        }
+    }
+
+    fun getAllDoctorsFlow(): Flow<List<Doctor>> {
+        return firestore.collection(DOCTORS_COLLECTION)
+            .orderBy("name", Query.Direction.ASCENDING)
+            .dataObjects()
     }
 
     suspend fun getDoctorById(doctorId: String): Doctor? {

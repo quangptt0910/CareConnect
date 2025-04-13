@@ -6,7 +6,6 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
-import com.google.firebase.functions.functions
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,5 +21,8 @@ object FirebaseHiltModule {
     fun firestore(): FirebaseFirestore = Firebase.firestore
 
     @Provides
-    fun firebaseFunctions(): FirebaseFunctions = Firebase.functions
+    fun firebaseFunctions(): FirebaseFunctions {
+        return FirebaseFunctions.getInstance()
+    }
+
 }

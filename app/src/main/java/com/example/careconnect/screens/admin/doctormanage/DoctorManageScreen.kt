@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
-import com.example.careconnect.common.LoadingIndicator
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.ErrorMessage
@@ -43,24 +42,23 @@ fun DoctorManageScreen(
     viewModel: DoctorManageViewModel = hiltViewModel(),
     showErrorSnackbar: (ErrorMessage) -> Unit
 ){
-    val isLoadingDoctors by viewModel.isLoadingDoctors.collectAsStateWithLifecycle()
-    if (isLoadingDoctors) {
-        LoadingIndicator()
-    } else {
-        DoctorManageScreenContent(
-            openAddDoctorScreen = openAddDoctorScreen
-        )
-    }
+    val allDoctors by viewModel.allDoctors.collectAsStateWithLifecycle(emptyList())
+    println("DEBUG:: DoctorManageScreen: doctorsList = $allDoctors")
     LaunchedEffect(true) {
         viewModel.loadDoctors()
     }
+    DoctorManageScreenContent(
+        openAddDoctorScreen = openAddDoctorScreen,
+        doctors = allDoctors
+    )
+
 }
 
 
 @Composable
 fun DoctorManageScreenContent(
     openAddDoctorScreen: () -> Unit = {},
-    doctors: List<Doctor> = emptyList()
+    doctors: List<Doctor>
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -86,12 +84,12 @@ fun DoctorManageScreenContent(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-
-            FilledCardStats(
-                title = "Total hours worked",
-                userProducts = doctors,
-                onDeleteProduct = {}
-            )
+//
+//            FilledCardStats(
+//                title = "Total hours worked",
+//                userProducts = doctors,
+//                onDeleteProduct = {}
+//            )
         }
 
         Box(

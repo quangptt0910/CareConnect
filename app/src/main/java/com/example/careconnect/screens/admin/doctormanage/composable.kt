@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -125,49 +124,49 @@ fun DoctorCard(
     }
 }
 
-
-@Composable
-fun FilledCardStats(
-    title: String,
-    modifier: Modifier = Modifier,
-    userProducts: List<Doctor>,
-    onDeleteProduct: (Doctor) -> Unit,
-) {
-    // Calculate statistics
-    val totalDoctors = userProducts.size
-    val totalHoursWorked = userProducts.sumOf { doctor ->
-        calculateTotalHoursWorked(doctor.schedule)
-    }
-
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Title
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Statistics List
-            Text(text = "• Total hours worked: $totalHoursWorked hours")
-            Text(text = "• Total doctors: $totalDoctors")
-
-            // Additional statistics can be added here
-        }
-    }
-}
+//
+//@Composable
+//fun FilledCardStats(
+//    title: String,
+//    modifier: Modifier = Modifier,
+//    userProducts: List<Doctor>,
+//    onDeleteProduct: (Doctor) -> Unit,
+//) {
+//    // Calculate statistics
+//    val totalDoctors = userProducts.size
+//    val totalHoursWorked = userProducts.sumOf { doctor ->
+//        calculateTotalHoursWorked(doctor.schedule)
+//    }
+//
+//    Card(
+//        colors = CardDefaults.cardColors(
+//            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+//        ),
+//        modifier = modifier
+//            .fillMaxWidth()
+//            .padding(8.dp)
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(16.dp)
+//        ) {
+//            // Title
+//            Text(
+//                text = title,
+//                style = MaterialTheme.typography.headlineSmall
+//            )
+//
+//            Spacer(modifier = Modifier.height(8.dp))
+//
+//            // Statistics List
+//            Text(text = "• Total hours worked: $totalHoursWorked hours")
+//            Text(text = "• Total doctors: $totalDoctors")
+//
+//            // Additional statistics can be added here
+//        }
+//    }
+//}
 
 /**
  * A confirmation button composable typically used in dialogs.

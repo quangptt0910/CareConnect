@@ -37,14 +37,22 @@ class AddDoctorViewModel @Inject constructor(
         password: String, // Give some random password and they change later
         showErrorSnackbar: (ErrorMessage) -> Unit
     ) {
-        if (!email.isValidEmail()) {
-            println("DEBUG:: Invalid email")
-            showErrorSnackbar(ErrorMessage.IdError(R.string.invalid_email))
+        if (name.isEmpty()) {
+        showErrorSnackbar(ErrorMessage.IdError(R.string.name))
+        return
+        }
+        if (surname.isEmpty()) {
+        showErrorSnackbar(ErrorMessage.IdError(R.string.surname))
+        return
+        }
+        if (email.isEmpty()) {
+            showErrorSnackbar(ErrorMessage.IdError(R.string.email))
             return
         }
 
-        if (name.isEmpty()) {
-            showErrorSnackbar(ErrorMessage.IdError(R.string.name))
+        if (!email.isValidEmail()) {
+            println("DEBUG:: Invalid email")
+            showErrorSnackbar(ErrorMessage.IdError(R.string.invalid_email))
             return
         }
 
@@ -57,6 +65,9 @@ class AddDoctorViewModel @Inject constructor(
             showErrorSnackbar(ErrorMessage.IdError(R.string.phone))
             return
         }
+        val scheduleMap = mapOf(
+            "availability" to emptyList<Map<String, Any>>()   // empty list for availability
+        )
 
         launchCatching(showErrorSnackbar) {
             val doctorDataMap = mapOf(
@@ -67,7 +78,9 @@ class AddDoctorViewModel @Inject constructor(
                 "phone" to phone,
                 "address" to address,
                 "specialization" to specialization,
-                "experience" to experience.toInt()
+                "experience" to experience.toInt(),
+                "profilePhoto" to "",
+                "schedule" to scheduleMap
             )
             doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             println("DEBUG:: PROFILE Doctor created successfully!!")
