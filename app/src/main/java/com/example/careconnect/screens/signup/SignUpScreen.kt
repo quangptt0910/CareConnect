@@ -219,7 +219,7 @@ fun SignUpTopSection() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp) // Set the desired height of the box
+                .height(220.dp) // Set the desired height of the box
                 .align(Alignment.TopCenter) // Position at the top
         ) {
             Image(

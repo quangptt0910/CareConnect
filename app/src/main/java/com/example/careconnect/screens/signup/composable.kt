@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -22,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -34,8 +37,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.careconnect.R
+import com.example.careconnect.common.ext.fieldModifier
+import com.example.careconnect.screens.login.EmailField
+import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.R.string as AppText
 
 /**
@@ -178,47 +186,55 @@ fun LabelTextField(
 ) {
     val uiColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
 
-    OutlinedTextField(
-        value = value,
-        modifier = modifier.fillMaxWidth(),
-        onValueChange = onValueChange,
-        label = { Text(text = label) },
-        trailingIcon = {
-            // Check if trailing composable is provided
-            trailing?.invoke()
-        },
-        colors = TextFieldDefaults.colors(
-            // Text colors
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-            disabledTextColor = Color.Gray,
+    Column(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = value,
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = onValueChange,
+            label = {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp
+                )
+            },
+            trailingIcon = {
+                // Check if trailing composable is provided
+                trailing?.invoke()
+            },
+            colors = TextFieldDefaults.colors(
+                // Text colors
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                disabledTextColor = Color.Gray,
 
-            // Container colors
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
+                // Container colors
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
 
-            // Border/Indicator colors
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                // Border/Indicator colors
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
 
-            // Label colors
-            focusedLabelColor = MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
+                // Label colors
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
 
-            // Cursor color
-            cursorColor = MaterialTheme.colorScheme.primary
-        ),
-        shape = RoundedCornerShape(10.dp),
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                // Cursor color
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            shape = RoundedCornerShape(10.dp),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
 
-        // Keyboard options for text
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email,
-            imeAction = ImeAction.Next
+            // Keyboard options for text
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            )
         )
-    )
-
+    }
 }
 
 /**
@@ -242,5 +258,58 @@ fun PasswordVisibilityToggleIcon(
             contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.primary
         )
+    }
+}
+
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun SignUpFieldPreview() {
+    CareConnectTheme {
+
+        var name by remember { mutableStateOf("") }
+        var surname by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        val fieldModifier = Modifier.fieldModifier()
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                SignUpTopSection()
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 50.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LabelTextField(
+                        name,
+                        { name = it },
+                        fieldModifier,
+                        stringResource(R.string.name)
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    LabelTextField(
+                        surname,
+                        { surname = it },
+                        fieldModifier,
+                        stringResource(R.string.surname)
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    EmailField(email, { email = it }, fieldModifier)
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    PasswordSignUpTextField(password, { password = it }, fieldModifier)
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
+            }
+        }
     }
 }
