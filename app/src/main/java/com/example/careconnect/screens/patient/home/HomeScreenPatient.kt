@@ -122,7 +122,7 @@ fun HomeScreenPatientContent(
 
                 ) {
                     Text(
-                        text = "Doctor Specialties",
+                        text = stringResource(R.string.specialization),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -147,8 +147,6 @@ fun HomeScreenPatientContent(
                             HorizontalDivider()
                         }
                     }
-
-
                 }
             },
             sheetPeekHeight = 400.dp, // The visible height when collapsed
@@ -227,7 +225,6 @@ fun HomeScreenPatientContent(
                             contentScale = ContentScale.Crop
                         )
 
-
                         Text(
                             text = stringResource(item.contentDescriptionResId),
                             modifier = Modifier.padding(16.dp)
@@ -239,9 +236,6 @@ fun HomeScreenPatientContent(
         }
     }
 }
-
-
-
 
 
 

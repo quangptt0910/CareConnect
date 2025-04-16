@@ -26,14 +26,14 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 // Overview admin screen
 @Composable
-fun HomeScreenAdmin(
+fun AdminHomeScreen(
 ){
-    HomeScreenAdminContent()
+    AdminHomeScreenContent()
 }
 
 
 @Composable
-fun HomeScreenAdminContent(
+fun AdminHomeScreenContent(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -64,7 +64,6 @@ fun HomeScreenAdminContent(
 
 @Composable
 fun OverviewSection() {
-
     Card(modifier = Modifier.fillMaxWidth().padding(8.dp), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("• Doctors Available: 12")
@@ -114,6 +113,6 @@ fun QuickActions() {
 @Composable
 fun HomeScreenPreview() {
     CareConnectTheme {
-        HomeScreenAdminContent()
+        AdminHomeScreenContent()
     }
 }

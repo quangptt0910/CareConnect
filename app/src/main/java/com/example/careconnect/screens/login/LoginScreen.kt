@@ -72,6 +72,7 @@ fun LoginScreen(
 
 }
 
+
 @Composable
 fun LoginScreenContent(
     openSignUpScreen: () -> Unit,

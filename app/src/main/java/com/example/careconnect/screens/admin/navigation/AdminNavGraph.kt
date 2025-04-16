@@ -1,6 +1,5 @@
 package com.example.careconnect.screens.admin.navigation
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -10,18 +9,15 @@ import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScheduleScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
 import com.example.careconnect.screens.admin.doctormanage.DoctorManageScreen
-import com.example.careconnect.screens.admin.home.HomeScreenAdmin
+import com.example.careconnect.screens.admin.home.AdminHomeScreen
 import com.example.careconnect.screens.admin.patientsmanage.PatientManageScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun AdminNavHost(
     navController: NavHostController,
     openSplashScreen: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-    scope: CoroutineScope,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -32,7 +28,7 @@ fun AdminNavHost(
         modifier = modifier
     ) {
         composable(Route.HOME_ADMIN_ROUTE) {
-            HomeScreenAdmin()
+            AdminHomeScreen()
         }
         composable(Route.ADMIN_DOCTOR_MANAGE_ROUTE) {
             DoctorManageScreen(
@@ -40,9 +36,11 @@ fun AdminNavHost(
                 showErrorSnackbar = showErrorSnackbar
             )
         }
+
         composable(Route.ADMIN_PATIENT_MANAGE_ROUTE) {
             PatientManageScreen()
         }
+
         composable(Route.ADMIN_APPOINTMENTS_ROUTE) {
             PatientManageScreen()
         }

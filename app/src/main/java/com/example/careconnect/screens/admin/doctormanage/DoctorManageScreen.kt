@@ -44,14 +44,15 @@ fun DoctorManageScreen(
 ){
     val allDoctors by viewModel.allDoctors.collectAsStateWithLifecycle(emptyList())
     println("DEBUG:: DoctorManageScreen: doctorsList = $allDoctors")
+
     LaunchedEffect(true) {
         viewModel.loadDoctors()
     }
+
     DoctorManageScreenContent(
         openAddDoctorScreen = openAddDoctorScreen,
         doctors = allDoctors
     )
-
 }
 
 

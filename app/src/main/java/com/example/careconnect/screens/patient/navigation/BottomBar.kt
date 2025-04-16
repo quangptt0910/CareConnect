@@ -24,9 +24,6 @@ fun BottomBar(
     val currentDestination = currentBackStackEntry?.destination
     val currentRoute = currentDestination?.route // Get the actual route from backstack
 
-
-
-
     NavigationBar(modifier = modifier){
         routes.forEach { route ->
             val selected = currentRoute == route

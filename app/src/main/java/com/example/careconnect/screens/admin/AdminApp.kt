@@ -79,8 +79,6 @@ fun AdminApp(
                 modifier = Modifier.padding(padding),
                 navController = navController,
                 openSplashScreen = openSplashScreen,
-                snackbarHostState = snackbarHostState,
-                scope = scope,
                 showErrorSnackbar = showErrorSnackbar
             )
         }
