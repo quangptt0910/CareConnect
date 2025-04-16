@@ -12,7 +12,7 @@ object Route {
     const val SETTINGS_ROUTE = "settings"
 
     // Role-based Home Routes
-    const val HOME_PATIENT_ROUTE = "patient/home"
+    const val HOME_PATIENT_ROUTE = "patient/home/{specialty}"
     const val HOME_DOCTOR_ROUTE = "doctor/home"
     const val HOME_ADMIN_ROUTE = "admin/home"
 
@@ -36,6 +36,8 @@ object Route {
     const val PATIENT_APPOINTMENTS_ROUTE = "patient/appointments"
     const val PATIENT_CHAT_MENU_ROUTE = "patient/chat/menu"
     const val PATIENT_CHAT_ROUTE = "patient/chat/{chatId}"
+    const val PATIENT_DOCTORS_OVERVIEW = "patient/doctors/overview/{specialty}"
+    const val PATIENT_DOCTORS_PROFILE = "patient/doctors/profile"
 
     // Route with parameter helper
     fun adminDoctorEditRoute(doctorId: String) =
@@ -43,6 +45,9 @@ object Route {
 
     fun getPatientChatRoute(chatId: String) =
         PATIENT_CHAT_ROUTE.replace("{chatId}", chatId)
+
+    fun getPatientDoctorsOverviewRoute(specialty: String) =
+        "patient/doctors/overview/$specialty"
 }
 
 @Stable

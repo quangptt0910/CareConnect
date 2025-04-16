@@ -100,6 +100,7 @@ fun CareConnectNavHost(
                 showErrorSnackbar = showErrorSnackBar
             )
         }
+
         composable(LOGIN_ROUTE) {
             LoginScreen(
                 openSignUpScreen = {
@@ -123,6 +124,7 @@ fun CareConnectNavHost(
                 showErrorSnackbar = showErrorSnackBar
             )
         }
+
         composable(PROFILE_ROUTE) {
             ProfileInfoScreen(
                 openSplashScreen = {

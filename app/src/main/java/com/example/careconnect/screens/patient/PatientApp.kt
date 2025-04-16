@@ -2,31 +2,42 @@ package com.example.careconnect.screens.patient
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.screens.patient.appointment.BookAppointmentScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
 import com.example.careconnect.screens.patient.doctorsoverview.DoctorsOverviewScreen
+import com.example.careconnect.screens.patient.doctorsoverview.DoctorsProfileViewScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.HOME_PATIENT_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_DOCTORS_PROFILE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
+import com.example.careconnect.ui.navigation.Route.getPatientDoctorsOverviewRoute
 
 @Composable
 fun PatientApp(
     openSplashScreen: () -> Unit = {},
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showErrorSnackbar: (ErrorMessage) -> Unit = {}
 ) {
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         bottomBar = { BottomBar(
             tabs = BarRoutes.entries.toTypedArray(),
@@ -41,7 +52,9 @@ fun PatientApp(
         ) {
             composable(BarRoutes.FEED.route) {
                 HomeScreenPatient(
-                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
+                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
+                    openDoctorsOverviewScreen = { specialty ->
+                        navController.navigate(getPatientDoctorsOverviewRoute(specialty)) }
                 )
             }
             composable(BarRoutes.CHAT.route) {
@@ -55,7 +68,15 @@ fun PatientApp(
 
             }
             composable(BarRoutes.BOOKING.route) {
-                DoctorsOverviewScreen()
+                BookAppointmentScreen(
+                )
+            }
+
+            composable(HOME_PATIENT_ROUTE){
+                HomeScreenPatient(
+                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
+                    openDoctorsOverviewScreen = { specialty -> navController.navigate(getPatientDoctorsOverviewRoute(specialty)) }
+                )
             }
 
             composable(SETTINGS_ROUTE) {
@@ -78,6 +99,26 @@ fun PatientApp(
                     chatId = it.arguments?.getString("chatId") ?: ""
                 )
             }
+
+            composable("patient/doctors/overview/{specialty}"){ backStackEntry ->
+                DoctorsOverviewScreen(
+                    openBookingScreen = { navController.navigate(PATIENT_APPOINTMENTS_ROUTE) },
+                    openDoctorProfileScreen = { navController.navigate(PATIENT_DOCTORS_PROFILE) },
+                    specialty = backStackEntry.arguments?.getString("specialty") ?: ""
+                )
+            }
+
+            composable(PATIENT_DOCTORS_PROFILE){
+                DoctorsProfileViewScreen(
+                    openChatScreen = { navController.navigate(PATIENT_CHAT_ROUTE) }
+                )
+            }
+
+            composable(PATIENT_APPOINTMENTS_ROUTE){
+                BookAppointmentScreen(
+
+                )
+            }
         }
 
     }
@@ -86,7 +127,5 @@ fun PatientApp(
 @Preview
 @Composable
 fun PatientAppPreview() {
-    PatientApp(
-        showErrorSnackbar = {}
-    )
+    PatientApp()
 }

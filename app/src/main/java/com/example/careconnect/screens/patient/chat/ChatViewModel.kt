@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.datasource.ChatMessagesRemoteDataSource
+import com.example.careconnect.data.repository.ChatMessagesRepository
 import com.example.careconnect.dataclass.chat.Author
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
@@ -16,7 +17,9 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
 
-class ChatViewModel: MainViewModel() {
+class ChatViewModel(
+    private val chatMessagesRepository: ChatMessagesRepository
+): MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
 //    val messages: List<Message> get() = _messages  // Publicly exposed list
 

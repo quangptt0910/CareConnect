@@ -37,7 +37,9 @@ fun FilledCardExample(
     name: String,
     speciality: String,
     address: String,
-    imageRes: Int // Resource ID of the profile image
+    imageRes: Int, // Resource ID of the profile image
+    openDoctorProfileScreen: () -> Unit = {},
+    openBookingScreen: () -> Unit = {}
 ) {
         Card(
             colors = CardDefaults.cardColors(
@@ -68,7 +70,7 @@ fun FilledCardExample(
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 Button(
-                    onClick = { /* Handle button click */ },
+                    onClick = { openDoctorProfileScreen() },
                     modifier = Modifier.padding(15.dp).height(40.dp)
                 ){
                     Text(text = "View Profile")
@@ -76,7 +78,7 @@ fun FilledCardExample(
 
 
                 Button(
-                    onClick = { /* Handle button click */ },
+                    onClick = { openBookingScreen() },
                     modifier = Modifier.padding(15.dp).height(40.dp)
                 ){
                     Text(text = "Request Appointment")

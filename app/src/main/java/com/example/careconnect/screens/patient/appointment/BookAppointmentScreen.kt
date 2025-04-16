@@ -45,7 +45,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun BookAppointmentScreen(
 
 ){
-
+    BookAppointmentScreenContent()
 }
 
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,19 +39,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import java.time.LocalDate
-
 
 
 data class CarouselItem(
@@ -61,11 +60,15 @@ data class CarouselItem(
 
 @Composable
 fun HomeScreenPatient(
-    openSettingsScreen: () -> Unit
+    openSettingsScreen: () -> Unit,
+    openDoctorsOverviewScreen: (specialty: String) -> Unit
 ) {
     HomeScreenPatientContent(
         uiState = HomeUiState(),
-        openSettingsScreen = openSettingsScreen
+        openSettingsScreen = openSettingsScreen,
+        onDoctorSelected = { _, _ -> },
+        onSearchQueryChange = {},
+        openDoctorsOverviewScreen = openDoctorsOverviewScreen,
     )
 }
 
@@ -76,7 +79,8 @@ fun HomeScreenPatientContent(
     uiState: HomeUiState,
     openSettingsScreen: () -> Unit,
     onDoctorSelected: (Doctor, Boolean) -> Unit = { _, _ -> },
-    onSearchQueryChange: (String) -> Unit = {}
+    onSearchQueryChange: (String) -> Unit = {},
+    openDoctorsOverviewScreen: (specialty: String) -> Unit = {}
 
 ) {
 
@@ -134,6 +138,11 @@ fun HomeScreenPatientContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
+                                    .clickable(
+                                        onClick = {
+                                            openDoctorsOverviewScreen(specialty)
+                                        }
+                                    )
                             )
                             HorizontalDivider()
                         }
@@ -213,7 +222,7 @@ fun HomeScreenPatientContent(
                         Image(
                             modifier = Modifier.height(205.dp)
                                 .maskClip(MaterialTheme.shapes.extraLarge),
-                            painter = painterResource(id = item.imageResId),
+                            painter = rememberAsyncImagePainter(model = item.imageResId),
                             contentDescription = stringResource(item.contentDescriptionResId),
                             contentScale = ContentScale.Crop
                         )
