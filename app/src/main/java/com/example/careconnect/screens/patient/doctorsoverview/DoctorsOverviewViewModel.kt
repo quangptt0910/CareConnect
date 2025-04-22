@@ -1,0 +1,37 @@
+package com.example.careconnect.screens.patient.doctorsoverview
+
+
+import com.example.careconnect.MainViewModel
+import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.dataclass.Doctor
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+
+@HiltViewModel
+class DoctorsOverviewViewModel @Inject constructor(
+    private val doctorRepository: DoctorRepository
+): MainViewModel() {
+    private val _specialty = MutableStateFlow("")
+    val specialty: StateFlow<String> = _specialty.asStateFlow()
+
+    private val _doctors = MutableStateFlow<List<Doctor>>(emptyList())
+    val doctors: StateFlow<List<Doctor>> = _doctors.asStateFlow()
+
+
+    fun setSpecialty(specialty: String) {
+        _specialty.value = specialty
+        fetchDoctors(specialty)
+    }
+
+    private fun fetchDoctors(specialty: String) {
+        launchCatching {
+            val allDoctors = doctorRepository.getAllDoctors()
+            _doctors.value = allDoctors.filter {
+                it.specialization.equals(specialty, ignoreCase = true)
+            }
+        }
+    }
+}

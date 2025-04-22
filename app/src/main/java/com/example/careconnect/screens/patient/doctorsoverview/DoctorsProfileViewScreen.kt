@@ -21,6 +21,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,23 +31,39 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.R
+import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
 fun DoctorsProfileViewScreen(
+    doctorId: String,
+    viewModel: DoctorsProfileViewModel = hiltViewModel(),
     openChatScreen: () -> Unit = {}
 ){
-    DoctorsProfileViewScreenContent(
+    LaunchedEffect(doctorId) {
+        viewModel.setDoctorId(doctorId)
+    }
+
+    val doctor by viewModel.doctor.collectAsState()
+
+    doctor?.let {
+        DoctorsProfileViewScreenContent(
+        doctor = it,
+        doctorId = doctorId,
         openChatScreen = openChatScreen
     )
+    }
 }
 
 
 @Composable
 fun DoctorsProfileViewScreenContent(
+    doctor: Doctor,
+    doctorId: String,
     openChatScreen: () -> Unit = {}
 ) {
     Surface(
@@ -100,18 +119,18 @@ fun DoctorsProfileViewScreenContent(
 
         ){
             Text(
-                text = "Dr. John Doe",
+                text = "Dr. ${doctor.name} ${doctor.surname}",
                 style = MaterialTheme.typography.headlineMedium,
             )
             Text(
-                text = "Cardiologist",
+                text = doctor.specialization,
                 style = MaterialTheme.typography.bodyMedium,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Experience: 10 years",
+                text = "Experience since: ${doctor.experience}",
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -125,19 +144,15 @@ fun DoctorsProfileViewScreenContent(
             horizontalAlignment = Alignment.Start
         ){
             Text(
-                text = "Located: 123 Street",
+                text = "Located: ${doctor.address}",
                 style = MaterialTheme.typography.bodyMedium,
             )
             Text(
-                text = "City, Country",
+                text = "Phone: ${doctor.phone}",
                 style = MaterialTheme.typography.bodyMedium,
             )
             Text(
-                text = "Phone: 123-456-7890",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Text(
-                text = "Email: james.s.sherman@example-pet-store.com",
+                text = "Email: ${doctor.email}",
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -198,6 +213,18 @@ fun DoctorsProfileViewScreenPreview() {
     CareConnectTheme {
         val uiState = HomeUiState()
         DoctorsProfileViewScreenContent(
+            doctorId = "1",
+            doctor = Doctor(
+                id = "1",
+                name = "John",
+                surname = "Smith",
+                email = "john.smith@example.com",
+                phone = "+123456789",
+                address = "123 Drive",
+                specialization = "Cardiologist",
+                experience = 2010,
+                profilePhoto = "https://example.com/images/doctor1.jpg"
+            )
         )
     }
 }

@@ -25,10 +25,10 @@ import com.example.careconnect.ui.navigation.Route.HOME_PATIENT_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
-import com.example.careconnect.ui.navigation.Route.PATIENT_DOCTORS_PROFILE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 import com.example.careconnect.ui.navigation.Route.getPatientDoctorsOverviewRoute
+import com.example.careconnect.ui.navigation.Route.getPatientDoctorsProfileRoute
 
 @Composable
 fun PatientApp(
@@ -103,14 +103,15 @@ fun PatientApp(
             composable("patient/doctors/overview/{specialty}"){ backStackEntry ->
                 DoctorsOverviewScreen(
                     openBookingScreen = { navController.navigate(PATIENT_APPOINTMENTS_ROUTE) },
-                    openDoctorProfileScreen = { navController.navigate(PATIENT_DOCTORS_PROFILE) },
+                    openDoctorProfileScreen = { doctorId -> navController.navigate(getPatientDoctorsProfileRoute(doctorId)) },
                     specialty = backStackEntry.arguments?.getString("specialty") ?: ""
                 )
             }
 
-            composable(PATIENT_DOCTORS_PROFILE){
+            composable("patient/doctors/profile/{doctorId}"){ backStackEntry ->
                 DoctorsProfileViewScreen(
-                    openChatScreen = { navController.navigate(PATIENT_CHAT_ROUTE) }
+                    openChatScreen = { navController.navigate(PATIENT_CHAT_ROUTE) },
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
                 )
             }
 

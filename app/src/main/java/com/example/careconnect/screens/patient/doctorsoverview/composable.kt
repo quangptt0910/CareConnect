@@ -37,8 +37,9 @@ fun FilledCardExample(
     name: String,
     speciality: String,
     address: String,
+    doctorId: String,
     imageRes: Int, // Resource ID of the profile image
-    openDoctorProfileScreen: () -> Unit = {},
+    openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     openBookingScreen: () -> Unit = {}
 ) {
         Card(
@@ -70,7 +71,7 @@ fun FilledCardExample(
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 Button(
-                    onClick = { openDoctorProfileScreen() },
+                    onClick = { openDoctorProfileScreen(doctorId) },
                     modifier = Modifier.padding(15.dp).height(40.dp)
                 ){
                     Text(text = "View Profile")
