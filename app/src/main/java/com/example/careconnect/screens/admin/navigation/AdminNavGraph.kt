@@ -28,7 +28,9 @@ fun AdminNavHost(
         modifier = modifier
     ) {
         composable(Route.HOME_ADMIN_ROUTE) {
-            AdminHomeScreen()
+            AdminHomeScreen(
+                openAddDoctorScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) }
+            )
         }
         composable(Route.ADMIN_DOCTOR_MANAGE_ROUTE) {
             DoctorManageScreen(

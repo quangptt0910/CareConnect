@@ -27,13 +27,17 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 // Overview admin screen
 @Composable
 fun AdminHomeScreen(
+    openAddDoctorScreen: () -> Unit
 ){
-    AdminHomeScreenContent()
+    AdminHomeScreenContent(
+        openAddDoctorScreen = openAddDoctorScreen
+    )
 }
 
 
 @Composable
 fun AdminHomeScreenContent(
+    openAddDoctorScreen: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -57,7 +61,7 @@ fun AdminHomeScreenContent(
             // Quick Actions (add doctor)
             Text(text = stringResource(R.string.quick_actions), style = MaterialTheme.typography.headlineLarge)
             Spacer(modifier = Modifier.height(16.dp))
-            QuickActions()
+            QuickActions(label = stringResource(R.string.add_doctor), onClick = openAddDoctorScreen)
         }
     }
 }
@@ -100,10 +104,13 @@ fun RecentActivities() {
 }
 
 @Composable
-fun QuickActions() {
+fun QuickActions(
+    label: String,
+    onClick: () -> Unit
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-        Button(onClick = { /* Navigate to Add Doctor */ }) {
-            Text(stringResource(R.string.add_new_doctor))
+        Button(onClick = { onClick() }) {
+            Text(text = label)
         }
     }
 }
@@ -113,6 +120,8 @@ fun QuickActions() {
 @Composable
 fun HomeScreenPreview() {
     CareConnectTheme {
-        AdminHomeScreenContent()
+        AdminHomeScreenContent(
+            openAddDoctorScreen = {}
+        )
     }
 }

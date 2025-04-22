@@ -10,12 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 
-sealed interface DoctorManageUiState {
-    data class Success(val doctors: List<Doctor>) : DoctorManageUiState
-    object Error : DoctorManageUiState
-    object Loading : DoctorManageUiState
-}
-
 @HiltViewModel
 class DoctorManageViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository

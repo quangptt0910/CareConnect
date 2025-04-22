@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.common.ext.fieldModifier
+import com.example.careconnect.common.ext.textButton
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
@@ -122,17 +123,20 @@ fun LoginScreenContent(
                     color = MaterialTheme.colorScheme.primary,
                 )
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(60.dp))
 
-                EmailField(email, { email = it }, Modifier.fieldModifier())
+                    EmailField(email, { email = it }, Modifier.fieldModifier())
 
-                Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                PasswordTextField(password, { password = it }, Modifier.fieldModifier())
+                    PasswordTextField(password, { password = it }, Modifier.fieldModifier())
 
-                Spacer(modifier = Modifier.height(15.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
 
-                // Forgot Password Section TODO()
+                    // Forgot Password Section TODO()
 //                Row(
 //                    modifier = Modifier.width(280.dp),
 //                    horizontalArrangement = Arrangement.End
@@ -146,16 +150,16 @@ fun LoginScreenContent(
 //                    )
 //                }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                    Spacer(modifier = Modifier.height(30.dp))
 
-                LoginButton(
-                    text = R.string.login,
-                    modifier = Modifier.fieldModifier(),
-                    onButtonClick = {
-                        login(email, password, showErrorSnackbar)
-                    }
-                )
-
+                    LoginButton(
+                        text = R.string.login,
+                        modifier = Modifier.textButton(),
+                        onButtonClick = {
+                            login(email, password, showErrorSnackbar)
+                        }
+                    )
+                }
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(

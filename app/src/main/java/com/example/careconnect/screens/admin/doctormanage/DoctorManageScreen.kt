@@ -142,6 +142,10 @@ fun DoctorManageScreenPreview() {
         )
     )
     CareConnectTheme {
+        DoctorManageScreenContent(
+            doctors = doctors
+        )
+
     }
 
 }

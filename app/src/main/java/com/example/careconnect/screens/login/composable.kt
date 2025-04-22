@@ -5,19 +5,18 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -73,8 +72,7 @@ fun PasswordTextField(
             )
         },
         modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
+            .fillMaxWidth(),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
@@ -129,7 +127,7 @@ fun EmailField(
     }
     OutlinedTextField(
         singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         value = value,
         onValueChange = { onNewValue(it) },
         label = {
@@ -165,7 +163,7 @@ fun EmailField(
         shape = RoundedCornerShape(10.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
 
-        //leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") }
+        trailingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") }
     )
 }
 
@@ -199,17 +197,18 @@ fun PreviewPasswordTextField() {
 
     CareConnectTheme {
         Column(modifier = Modifier.padding(16.dp)) {
+            EmailField(
+                value = "",
+                onNewValue = {},
+                modifier = Modifier
+            )
+
             PasswordTextField(
                 value = "",
                 onValueChange = {},
                 modifier = Modifier
             )
 
-            EmailField(
-                value = "",
-                onNewValue = {},
-                modifier = Modifier
-            )
             PasswordVisibilityToggleIcon(
                 showPassword = true,
                 onTogglePasswordVisibility = {}
@@ -228,20 +227,18 @@ fun PreviewPasswordTextField() {
  */
 @Composable
 fun LoginButton(@StringRes text: Int, modifier: Modifier, onButtonClick: () -> Unit) {
-    Button(
+    OutlinedButton(
         onClick = onButtonClick,
-        modifier = Modifier
-            .width(280.dp)
-            .height(40.dp),
-        colors = ButtonDefaults.buttonColors(
+        modifier = modifier.fillMaxWidth(),
+        colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = Color.White
         ),
-        shape = RoundedCornerShape(size = 4.dp)
+        shape = RoundedCornerShape(10.dp)
     ) {
         Text(
             text = stringResource(text),
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
         )
     }
 }
