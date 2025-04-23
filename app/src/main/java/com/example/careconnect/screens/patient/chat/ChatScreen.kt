@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.careconnect.dataclass.chat.Message
@@ -61,18 +62,21 @@ const val MY_ID = "user_me"
 
 @Composable
 fun ChatScreen(
+    viewModel: ChatViewModel = hiltViewModel(),
     chatId: String,
+    doctorId: String,
 ){
     ChatScreenContent(
-        model = viewModel(),
-        chatId = chatId
+        chatId = chatId,
+        doctorId = doctorId
     )
 }
 
 @Composable
 fun ChatScreenContent(
-    model: ChatViewModel = viewModel(),
-    chatId: String
+    model: ChatViewModel = hiltViewModel(),
+    chatId: String,
+    doctorId: String
 ) {
     LaunchedEffect(chatId) {
         model.loadChat(chatId)
@@ -126,7 +130,6 @@ fun ChatScreenContent(
                     model.sendMessage(
                         message = Message(text = text, author = (model.me)),
                         chatId = chatId
-
                     )
                 }
             )
@@ -348,7 +351,8 @@ fun ChatScreenPreview() {
         val uiState = HomeUiState()
         ChatScreenContent(
             model = viewModel(),
-            chatId = "1"
+            chatId = "1",
+            doctorId = "1"
         )
     }
 }

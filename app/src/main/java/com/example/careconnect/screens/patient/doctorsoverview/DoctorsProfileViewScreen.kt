@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,13 +37,14 @@ import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun DoctorsProfileViewScreen(
     doctorId: String,
     viewModel: DoctorsProfileViewModel = hiltViewModel(),
-    openChatScreen: () -> Unit = {}
+    openChatScreen: (chatId: String, doctorId: String) -> Unit = {_, _ ->}
 ){
     LaunchedEffect(doctorId) {
         viewModel.setDoctorId(doctorId)
@@ -54,7 +56,14 @@ fun DoctorsProfileViewScreen(
         DoctorsProfileViewScreenContent(
         doctor = it,
         doctorId = doctorId,
-        openChatScreen = openChatScreen
+            openChatScreen = { chatId -> // <-- accept chatId from the inner layer
+                openChatScreen(chatId, doctorId)
+            },
+            getChatId = {
+                viewModel.getCurrentPatient().let { patient ->
+                    viewModel.getOrCreateChatRoomId(patient, it)
+                }
+            }
     )
     }
 }
@@ -64,8 +73,11 @@ fun DoctorsProfileViewScreen(
 fun DoctorsProfileViewScreenContent(
     doctor: Doctor,
     doctorId: String,
-    openChatScreen: () -> Unit = {}
+    getChatId: suspend () -> String,
+    openChatScreen: (chatId: String) -> Unit = {}
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -102,6 +114,7 @@ fun DoctorsProfileViewScreenContent(
 //            }
 
             // Image in front of the arc
+            // Todo()
             Image(
                 painter = painterResource(id = R.drawable.carousel_image_1),
                 contentDescription = null,
@@ -163,7 +176,11 @@ fun DoctorsProfileViewScreenContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 IconButton(
-                    onClick = { openChatScreen() },
+                    onClick = {
+                        coroutineScope.launch {
+                        val chatId = getChatId()
+                        openChatScreen(chatId)
+                    } },
                     modifier = Modifier.align(Alignment.CenterVertically)
                         .size(50.dp)
                 ) {
@@ -224,7 +241,9 @@ fun DoctorsProfileViewScreenPreview() {
                 specialization = "Cardiologist",
                 experience = 2010,
                 profilePhoto = "https://example.com/images/doctor1.jpg"
-            )
+            ),
+            getChatId = { "123" },
+            openChatScreen = {}
         )
     }
 }

@@ -59,8 +59,8 @@ fun PatientApp(
             }
             composable(BarRoutes.CHAT.route) {
                 ChatMenuScreen(
-                    openChatScreen = { chatId ->
-                        navController.navigate(getPatientChatRoute(chatId))
+                    openChatScreen = { chatId, doctorId ->
+                        navController.navigate(getPatientChatRoute(doctorId, chatId))
                     }
                 )
             }
@@ -88,15 +88,16 @@ fun PatientApp(
 
             composable(PATIENT_CHAT_MENU_ROUTE){
                 ChatMenuScreen(
-                    openChatScreen = { chatId ->
-                        navController.navigate(getPatientChatRoute(chatId))
+                    openChatScreen = { doctorId, chatId ->
+                        navController.navigate(getPatientChatRoute(doctorId, chatId))
                     }
                 )
             }
 
-            composable(PATIENT_CHAT_ROUTE){
+            composable(PATIENT_CHAT_ROUTE){ backStackEntry ->
                 ChatScreen(
-                    chatId = it.arguments?.getString("chatId") ?: ""
+                    chatId = backStackEntry.arguments?.getString("chatId") ?: "",
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
                 )
             }
 
@@ -110,7 +111,8 @@ fun PatientApp(
 
             composable("patient/doctors/profile/{doctorId}"){ backStackEntry ->
                 DoctorsProfileViewScreen(
-                    openChatScreen = { navController.navigate(PATIENT_CHAT_ROUTE) },
+                    openChatScreen = { chatId, doctorId ->
+                        navController.navigate(getPatientChatRoute(doctorId, chatId)) },
                     doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
                 )
             }

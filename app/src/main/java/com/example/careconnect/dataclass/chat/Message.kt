@@ -9,6 +9,8 @@ import com.google.firebase.firestore.DocumentId
 
 data class ChatRoom(
     @DocumentId val chatId: String = "",
+    val doctorId: String = "",
+    val patientId: String = "",
     val doctor: Doctor = Doctor(),
     val patient: Patient = Patient(),
     val participants: List<String> = listOf(),

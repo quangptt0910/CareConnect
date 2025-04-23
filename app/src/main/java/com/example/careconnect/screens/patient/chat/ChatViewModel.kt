@@ -15,9 +15,13 @@ import com.example.careconnect.dataclass.chat.Message
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
-class ChatViewModel(
+
+@HiltViewModel
+class ChatViewModel @Inject constructor(
     private val chatMessagesRepository: ChatMessagesRepository
 ): MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
@@ -55,8 +59,16 @@ class ChatViewModel(
 //        )
     }
 
+    fun getMessages(chatId: String){
+        viewModelScope.launch {
+            chatMessagesRepository.getMessages(chatId)
+            messages = chatMessagesRepository.getMessages(chatId)
+        }
+
+    }
+
     fun loadChat(chatId: String) {
-        Firebase.firestore.collection("chats")
+        Firebase.firestore.collection("chatrooms")
             .document(chatId)
             .addSnapshotListener { snapshot, error ->
                 if (snapshot != null && snapshot.exists()) {

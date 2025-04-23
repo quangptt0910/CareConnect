@@ -33,7 +33,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun ChatMenuScreen(
-    openChatScreen : (chatId: String) -> Unit
+    openChatScreen : (doctorId: String, chatId: String) -> Unit
 ){
     ChatMenuScreenContent(
         uiState = ChatMenuUiState(),
@@ -50,7 +50,7 @@ fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
     chatRoom: List<ChatRoom>,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
-    openChatScreen: (chatId: String) -> Unit,
+    openChatScreen: (doctorId: String, chatId: String) -> Unit,
 
     ) {
     Surface(
@@ -87,7 +87,9 @@ fun ChatMenuScreenContent(
                         message = chat.lastMessage,
                         time = formatTimestamp(chat.lastUpdated),
                         imageRes = chat.doctor.profilePhoto,
-                        onChatClicked = openChatScreen
+                        onChatClicked = openChatScreen(
+                            chat.doctor.id, chat.chatId
+                        )
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
@@ -186,7 +188,10 @@ fun ChatMenuScreenPreview() {
             uiState = uiState,
             chatRoom = sampleChatRooms,
             onDoctorSelected = { _, _ -> },
-            openChatScreen = {}
+            openChatScreen = {
+                doctorId, chatId ->
+                println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
+            }
         )
     }
 }

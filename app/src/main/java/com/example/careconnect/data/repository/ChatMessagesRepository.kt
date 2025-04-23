@@ -10,4 +10,8 @@ class ChatMessagesRepository @Inject constructor(
     suspend fun sendMessage(chatId: String, message: Message) {
         chatMessagesRemoteDataSource.sendMessage(chatId, message)
     }
+
+    suspend fun getMessages(chatId: String): List<Message> {
+        return chatMessagesRemoteDataSource.getMessages(chatId)
+    }
 }

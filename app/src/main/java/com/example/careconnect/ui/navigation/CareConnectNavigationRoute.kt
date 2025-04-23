@@ -35,7 +35,7 @@ object Route {
     const val PATIENT_PROFILE_ROUTE = "patient/profile"
     const val PATIENT_APPOINTMENTS_ROUTE = "patient/appointments"
     const val PATIENT_CHAT_MENU_ROUTE = "patient/chat/menu"
-    const val PATIENT_CHAT_ROUTE = "patient/chat/{chatId}"
+    const val PATIENT_CHAT_ROUTE = "patient/chat/{doctorId}/{chatId}"
     const val PATIENT_DOCTORS_OVERVIEW = "patient/doctors/overview/{specialty}"
     const val PATIENT_DOCTORS_PROFILE = "patient/doctors/profile/{doctorId}"
 
@@ -43,8 +43,8 @@ object Route {
     fun adminDoctorEditRoute(doctorId: String) =
         ADMIN_DOCTOR_EDIT_ROUTE.replace("{doctorId}", doctorId)
 
-    fun getPatientChatRoute(chatId: String) =
-        PATIENT_CHAT_ROUTE.replace("{chatId}", chatId)
+    fun getPatientChatRoute(doctorId: String, chatId: String) =
+        "patient/chat/$doctorId/$chatId"
 
     fun getPatientDoctorsOverviewRoute(specialty: String) =
         "patient/doctors/overview/$specialty"

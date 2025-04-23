@@ -117,7 +117,7 @@ fun ChatListItem(
     message: String,
     time: String,
     imageRes: String, // Resource ID of the profile image
-    onChatClicked: (chatId: String) -> Unit
+    onChatClicked: Unit
 ) {
     Column {
         ListItem(
