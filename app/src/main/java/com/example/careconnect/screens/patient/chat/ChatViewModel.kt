@@ -61,22 +61,13 @@ class ChatViewModel @Inject constructor(
 
     fun getMessages(chatId: String){
         viewModelScope.launch {
-            chatMessagesRepository.getMessages(chatId)
             messages = chatMessagesRepository.getMessages(chatId)
         }
 
     }
 
     fun loadChat(chatId: String) {
-        Firebase.firestore.collection("chatrooms")
-            .document(chatId)
-            .addSnapshotListener { snapshot, error ->
-                if (snapshot != null && snapshot.exists()) {
-                    val chat = snapshot.toObject(ChatRoom::class.java)
-                    chatRoom = chat
-                    messages = chat?.messages ?: emptyList()
-                }
-            }
+        getMessages(chatId)
     }
 
     // Function to send a new message
@@ -87,6 +78,8 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch {
             chatRemoteDataSource.sendMessage(chatId, newMessage)
         }
+
+        loadChat(chatId)
     }
 
     // Function to send an image

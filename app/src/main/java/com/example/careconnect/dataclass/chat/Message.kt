@@ -21,11 +21,15 @@ data class ChatRoom(
 
 data class Message(
     @DocumentId val id: String = "",
-    val text: String,
-    val author: Author,
+    val text: String = "",
+    val author: Author = Author(),
     val timestamp: Long = System.currentTimeMillis(),
     val imageUri: Uri? = null
 ) {
+    // Empty constructor for Firebase
+    constructor() : this("", "", Author(), System.currentTimeMillis(), null)
+
     val isFromMe: Boolean
         get() = author.id == Firebase.auth.currentUser?.uid
 }
+
