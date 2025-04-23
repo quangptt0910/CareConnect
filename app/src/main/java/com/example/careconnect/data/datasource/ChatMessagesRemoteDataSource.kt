@@ -9,10 +9,13 @@ import kotlinx.coroutines.tasks.await
 
 class ChatMessagesRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val addChatRoomDataSource: AddChatRoomDataSource
 ) {
     suspend fun sendMessage(chatId: String, message: Message) {
         currentCollection(chatId).add(message).await()
+
+        addChatRoomDataSource.updateChatRoom(chatId, message.text, message.timestamp)
     }
 
     suspend fun getMessages(chatId: String): List<Message> {

@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
+import com.example.careconnect.data.datasource.AddChatRoomDataSource
 import com.example.careconnect.data.datasource.ChatMessagesRemoteDataSource
 import com.example.careconnect.data.repository.ChatMessagesRepository
 import com.example.careconnect.dataclass.chat.Author
@@ -34,7 +35,11 @@ class ChatViewModel @Inject constructor(
 
     private val chatRemoteDataSource = ChatMessagesRemoteDataSource(
         auth = Firebase.auth,
-        firestore = Firebase.firestore
+        firestore = Firebase.firestore,
+        addChatRoomDataSource = AddChatRoomDataSource(
+            auth = Firebase.auth,
+            firestore = Firebase.firestore
+        )
     )
 
     // Simulated user IDs (in a real app, get from authentication)

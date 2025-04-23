@@ -24,20 +24,13 @@ class AddChatRoomDataSource @Inject constructor(
         ).await()
     }
 
-    suspend fun getChatRooms(): List<ChatRoom> {
-        val userId = auth.currentUser?.uid ?: return emptyList()
-        return try {
-            Log.d("FirestoreDebug", "Fetching chat rooms for user $userId")
-            val result = firestore.collection(CHATROOMS_COLLECTION)
-                .whereArrayContains("participants", userId)
-                .get()
-                .await()
-            Log.d("FirestoreDebug", "Chat rooms fetched: ${result.size()}")
-            result.toObjects(ChatRoom::class.java)
-        } catch (e: Exception) {
-            Log.e("FirestoreDebug", "Error fetching chat rooms: ${e.message}", e)
-            emptyList()
-        }
+    suspend fun getChatRooms(doctorId: String, patientId: String): List<ChatRoom> {
+        val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+        return firestore.collection(CHATROOMS_COLLECTION)
+            .whereArrayContains("participants", currentUserId)
+            .get()
+            .await()
+            .toObjects(ChatRoom::class.java)
     }
 
     suspend fun getOrCreateChatRoomId(patient: Patient, doctor: Doctor): String {

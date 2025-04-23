@@ -22,9 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.chat.ChatRoom
@@ -33,13 +37,27 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun ChatMenuScreen(
-    openChatScreen : (doctorId: String, chatId: String) -> Unit
+    openChatScreen : (doctorId: String, chatId: String) -> Unit,
+    viewModel: ChatMenuViewModel = hiltViewModel()
 ){
+    val doctor by viewModel.doctor.collectAsState()
+    val patient by viewModel.currentPatient.collectAsState()
+
+    val doctorId = doctor?.id ?: ""
+    val patientId = patient?.id ?: ""
+
+    LaunchedEffect(doctorId, patientId) {
+        viewModel.getChatRooms(doctorId, patientId)
+    }
+
+    val chatRooms by viewModel.chatRooms.collectAsState()
+
+
     ChatMenuScreenContent(
         uiState = ChatMenuUiState(),
         onDoctorSelected = { _, _ -> },
         openChatScreen = openChatScreen,
-        chatRoom = listOf(),
+        chatRoom = chatRooms,
     )
 }
 
@@ -83,13 +101,13 @@ fun ChatMenuScreenContent(
                 items(chatRoom.size) { index ->
                     val chat = chatRoom[index]
                     ChatListItem(
-                        name = chat.doctor.name,
+                        name = "Dr " + chat.doctor.name + " " + chat.doctor.surname,
                         message = chat.lastMessage,
                         time = formatTimestamp(chat.lastUpdated),
                         imageRes = chat.doctor.profilePhoto,
-                        onChatClicked = openChatScreen(
+                        onChatClicked = { openChatScreen(
                             chat.doctor.id, chat.chatId
-                        )
+                        )}
                     )
 
                     HorizontalDivider(modifier = Modifier.padding(start = 90.dp))

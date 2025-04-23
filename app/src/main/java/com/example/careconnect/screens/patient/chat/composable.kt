@@ -1,6 +1,7 @@
 package com.example.careconnect.screens.patient.chat
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -117,9 +118,13 @@ fun ChatListItem(
     message: String,
     time: String,
     imageRes: String, // Resource ID of the profile image
-    onChatClicked: Unit
+    onChatClicked: () -> Unit
 ) {
-    Column {
+    Column(
+        Modifier.clickable(
+            onClick = onChatClicked
+        )
+    ) {
         ListItem(
             modifier = Modifier.padding(8.dp),
             headlineContent = { Text(text = name) },
@@ -136,7 +141,9 @@ fun ChatListItem(
             },
             trailingContent = {
                 Text(text = time)
+
             }
+
         )
         HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
     }
