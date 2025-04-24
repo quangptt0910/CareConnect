@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.AdminApp
+import com.example.careconnect.screens.doctor.DoctorApp
 import com.example.careconnect.screens.login.LoginScreen
 import com.example.careconnect.screens.patient.PatientApp
 import com.example.careconnect.screens.patient.profileinfo.ProfileInfoScreen
@@ -24,7 +25,7 @@ import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.screens.signup.SignUpScreen
 import com.example.careconnect.screens.splash.SplashScreen
 import com.example.careconnect.ui.navigation.Route.ADMIN_APP
-import com.example.careconnect.ui.navigation.Route.HOME_DOCTOR_ROUTE
+import com.example.careconnect.ui.navigation.Route.DOCTOR_APP
 import com.example.careconnect.ui.navigation.Route.LOGIN_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_APP
 import com.example.careconnect.ui.navigation.Route.PROFILE_ROUTE
@@ -92,7 +93,7 @@ fun CareConnectNavHost(
                     navController.navigate(PATIENT_APP) { launchSingleTop = true }
                 },
                 openDoctorScreen = {
-                    navController.navigate(HOME_DOCTOR_ROUTE) { launchSingleTop = true }
+                    navController.navigate(DOCTOR_APP) { launchSingleTop = true }
                 },
                 openAdminScreen = {
                     navController.navigate(ADMIN_APP) { launchSingleTop = true }
@@ -154,6 +155,15 @@ fun CareConnectNavHost(
 
         composable(ADMIN_APP) {
             AdminApp(
+                openSplashScreen = {
+                    navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+                },
+                showErrorSnackbar = showErrorSnackBar
+            )
+        }
+
+        composable(DOCTOR_APP) {
+            DoctorApp(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
