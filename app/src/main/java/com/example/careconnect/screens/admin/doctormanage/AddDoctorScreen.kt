@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,12 +19,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,15 +43,19 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun AddDoctorScreen(
-    openDoctorManageScreen: () -> Unit,
+    openDoctorScheduleScreen: (doctorId: String) -> Unit,
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: AddDoctorViewModel = hiltViewModel()
 ){
-    val navigateToDoctorManage by viewModel.navigateToDoctorManage.collectAsStateWithLifecycle()
-    val adminId = viewModel.adminId
-    println("DEBUG_AddDoctorScreen: admin $adminId ")
-    if (navigateToDoctorManage) {
-        openDoctorManageScreen()
+    val navigateToDoctorSchedule by viewModel.navigateToDoctorSchedule.collectAsStateWithLifecycle()
+    val doctorId by viewModel.newDoctorId.collectAsStateWithLifecycle()
+
+    if (navigateToDoctorSchedule) {
+        LaunchedEffect(doctorId) {
+            doctorId?.let {
+                openDoctorScheduleScreen(it)
+            }
+        }
     } else {
         AddDoctorScreenContent(
             createDoctorInfo = viewModel::createDoctorInfo,
@@ -83,7 +84,10 @@ fun AddDoctorScreenContent(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        SmallTopAppBarExample()
+        AdminTopAppBar(
+            label = stringResource(R.string.add_doctor),
+            onBack = {}
+        )
 
         Column(modifier = Modifier.padding(top = 80.dp)) {
 
@@ -188,38 +192,6 @@ fun CustomTextField(label: String, value: String, onValueChange: (String) -> Uni
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SmallTopAppBarExample() {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        "Add Doctor",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-            )
-        },
-    ){
-        Box(modifier = Modifier.padding(it))
-    }
-}
 
 
 @Preview

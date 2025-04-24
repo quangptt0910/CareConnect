@@ -4,8 +4,11 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.dataclass.Role
+import com.example.careconnect.dataclass.TimeSlot
+import com.example.careconnect.dataclass.toMap
 import com.example.careconnect.screens.signup.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,11 +23,14 @@ class AddDoctorViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ): MainViewModel() {
 
-    private val _navigateToDoctorManage= MutableStateFlow(false)
-    val navigateToDoctorManage: StateFlow<Boolean>
-        get() = _navigateToDoctorManage.asStateFlow()
+    private val _navigateToDoctorSchedule = MutableStateFlow(false)
+    val navigateToDoctorSchedule: StateFlow<Boolean>
+        get() = _navigateToDoctorSchedule.asStateFlow()
 
-    val adminId = authRepository.currentUser?.uid
+    private val _newDoctorId = MutableStateFlow<String?>(null)
+    val newDoctorId: StateFlow<String?>
+        get() = _newDoctorId.asStateFlow()
+
 
     fun createDoctorInfo(
         name: String,
@@ -65,12 +71,18 @@ class AddDoctorViewModel @Inject constructor(
             showErrorSnackbar(ErrorMessage.IdError(R.string.phone))
             return
         }
-        val scheduleMap = mapOf(
-            "availability" to emptyList<Map<String, Any>>()   // empty list for availability
+        val schedule = DoctorSchedule(
+            workingDays = emptyMap(),
+            defaultWorkingHours = listOf(
+                TimeSlot("09:00", "12:00"),
+                TimeSlot("14:00", "18:00")
+            )
         )
 
+        val scheduleMap: Map<String, Any> = schedule.toMap()
+
         launchCatching(showErrorSnackbar) {
-            val doctorDataMap = mapOf(
+            val doctorDataMap = hashMapOf(
                 "name" to name,
                 "surname" to surname,
                 "email" to email,
@@ -82,10 +94,10 @@ class AddDoctorViewModel @Inject constructor(
                 "profilePhoto" to "",
                 "schedule" to scheduleMap
             )
-            doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
+            _newDoctorId.value= doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             println("DEBUG:: PROFILE Doctor created successfully!!")
             println("DEBUG:: Doctor created successfully!!")
-            _navigateToDoctorManage.value = true
+            _navigateToDoctorSchedule.value = true
         }
     }
 }

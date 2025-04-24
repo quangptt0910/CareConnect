@@ -26,7 +26,7 @@ object Route {
     const val ADMIN_PATIENT_MANAGE_ROUTE = "admin/patients"
     const val ADMIN_APPOINTMENTS_ROUTE = "admin/appointments"
     const val ADMIN_PROFILE_ROUTE = "admin/profile"
-    const val ADMIN_DOCTOR_SCHEDULE_ROUTE = "admin/doctors/schedule"
+    const val ADMIN_DOCTOR_SCHEDULE_ROUTE = "admin/doctors/schedule/{doctorId}"
     const val ADMIN_DOCTOR_SCHEDULE_EDIT_ROUTE = "admin/doctors/schedule/edit"
 
     // Patient-specific Routes
@@ -42,6 +42,9 @@ object Route {
     // Route with parameter helper
     fun adminDoctorEditRoute(doctorId: String) =
         ADMIN_DOCTOR_EDIT_ROUTE.replace("{doctorId}", doctorId)
+
+    fun adminDoctorScheduleRoute(doctorId: String) =
+        ADMIN_DOCTOR_SCHEDULE_ROUTE.replace("{doctorId}", doctorId)
 
     fun getPatientChatRoute(doctorId: String, chatId: String) =
         "patient/chat/$doctorId/$chatId"

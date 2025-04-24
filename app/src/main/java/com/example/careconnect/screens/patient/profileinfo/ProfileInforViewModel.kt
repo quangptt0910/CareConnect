@@ -18,8 +18,7 @@ class ProfileInforViewModel @Inject constructor(
     val shouldRestartApp: StateFlow<Boolean>
         get() = _shouldRestartApp.asStateFlow()
 
-
-    val userId: String?= authRepository.currentUser?.uid
+    val userId: String? = authRepository.currentUser?.uid
 
     fun linkAccount(
         gender: String,
@@ -29,7 +28,7 @@ class ProfileInforViewModel @Inject constructor(
         address: String,
         showErrorSnackbar: (ErrorMessage) -> Unit
     ){
-        launchCatching {
+        launchCatching(showErrorSnackbar) {
             val uid = userId ?: authRepository.currentUser?.uid
             if (uid == null) {
                 showErrorSnackbar(ErrorMessage.IdError(R.string.generic_error))

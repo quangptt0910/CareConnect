@@ -3,8 +3,10 @@ package com.example.careconnect.screens.admin.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.careconnect.dataclass.ErrorMessage
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScheduleScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
@@ -49,13 +51,20 @@ fun AdminNavHost(
 
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
-                openDoctorManageScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) },
+                openDoctorScheduleScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) },
                 showErrorSnackbar = showErrorSnackbar
             )
         }
 
-        composable(Route.ADMIN_DOCTOR_SCHEDULE_ROUTE){
-            AddDoctorScheduleScreen()
+        composable(
+            route = Route.ADMIN_DOCTOR_SCHEDULE_ROUTE,
+            arguments = listOf(navArgument("doctorId") { type = NavType.StringType } )
+        ){ backStackEntry ->
+            AddDoctorScheduleScreen(
+                doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
+                onNextStep = {},
+                onBack = {}
+            )
         }
         composable(Route.SETTINGS_ROUTE) {
             SettingsScreen(
