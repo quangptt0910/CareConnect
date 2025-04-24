@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScheduleScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
 import com.example.careconnect.screens.admin.doctormanage.DoctorManageScreen
@@ -20,7 +20,7 @@ import com.example.careconnect.ui.navigation.Route
 fun AdminNavHost(
     navController: NavHostController,
     openSplashScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -37,7 +37,7 @@ fun AdminNavHost(
         composable(Route.ADMIN_DOCTOR_MANAGE_ROUTE) {
             DoctorManageScreen(
                 openAddDoctorScreen = { navController.navigate(Route.ADMIN_DOCTOR_ADD_ROUTE) },
-                showErrorSnackbar = showErrorSnackbar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -53,7 +53,7 @@ fun AdminNavHost(
             AddDoctorScreen(
                 openDoctorScheduleScreen = { doctorId ->
                     navController.navigate(Route.adminDoctorScheduleRoute(doctorId)) },
-                showErrorSnackbar = showErrorSnackbar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -70,7 +70,7 @@ fun AdminNavHost(
         composable(Route.SETTINGS_ROUTE) {
             SettingsScreen(
                 openSplashScreen = openSplashScreen,
-                showErrorSnackbar = showErrorSnackbar
+                showSnackBar = showSnackBar
             )
         }
     }

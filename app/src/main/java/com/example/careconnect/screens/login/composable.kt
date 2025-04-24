@@ -163,7 +163,7 @@ fun EmailField(
         shape = RoundedCornerShape(10.dp),
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
 
-        trailingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") }
+        trailingIcon = { Icon(imageVector = Icons.Default.Email, tint = MaterialTheme.colorScheme.primary, contentDescription = "Email") }
     )
 }
 

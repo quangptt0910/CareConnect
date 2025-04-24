@@ -97,7 +97,7 @@ fun SearchResults(
     Column(Modifier.verticalScroll(rememberScrollState())) {
         when {
             uiState.isLoading -> LoadingIndicator()
-            uiState.errorMessage != null -> ErrorMessage(uiState.errorMessage)
+            uiState.SnackBarMessage != null -> SnackBarMessage(uiState.SnackBarMessage)
             else -> SuggestionsList(
                 suggestions = uiState.suggestions,
                 selectedDoctors = uiState.selectedDoctors,
@@ -129,7 +129,7 @@ fun LoadingIndicator() {
  * @param message The error message to display.
  */
 @Composable
-fun ErrorMessage(message: String) {
+fun SnackBarMessage(message: String) {
     Text(
         text = message,
         color = MaterialTheme.colorScheme.error,

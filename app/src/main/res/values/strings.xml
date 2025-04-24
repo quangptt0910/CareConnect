@@ -30,8 +30,10 @@
     <string name="doctor">Doctor</string>
     <string name="admin">Admin</string>
 
-    <!-- ErrorMessage -->
+    <!-- SnackBarMessage -->
     <string name="generic_error">Something went wrong. Please try again later.</string>
+    <string name="incorrect_email_or_password">Incorrect email or password.</string>
+    <string name="network_error">Network error. Please check your connection</string>
 
     <!-- LoginScreen -->
     <string name="login">Log In</string>

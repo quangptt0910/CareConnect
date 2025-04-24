@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.patient.appointment.BookAppointmentScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
@@ -33,7 +33,7 @@ import com.example.careconnect.ui.navigation.Route.getPatientDoctorsProfileRoute
 @Composable
 fun PatientApp(
     openSplashScreen: () -> Unit = {},
-    showErrorSnackbar: (ErrorMessage) -> Unit = {}
+    showSnackBar: (SnackBarMessage) -> Unit = {}
 ) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
@@ -82,7 +82,7 @@ fun PatientApp(
             composable(SETTINGS_ROUTE) {
                 SettingsScreen(
                     openSplashScreen = openSplashScreen,
-                    showErrorSnackbar = showErrorSnackbar
+                    showSnackBar = showSnackBar
                 )
             }
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
  * @param unit A string representing the measurement unit (e.g., "kg", "cm").
  * @param modifier Modifier for styling and layout customization.
  * @param isError Boolean indicating whether the field contains an error.
- * @param errorMessage The error message displayed below the text field if `isError` is true.
+ * @param SnackBarMessage The error message displayed below the text field if `isError` is true.
  * @param keyboardType The type of keyboard to display (default is `KeyboardType.Number`).
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +36,7 @@ fun InformationTextField(
     unit: String,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    errorMessage: String? = null,
+    SnackBarMessage: String? = null,
     keyboardType: KeyboardType = KeyboardType.Number
 ) {
     Row(
@@ -79,9 +79,9 @@ fun InformationTextField(
         )
     }
 
-    if (isError && errorMessage != null) {
+    if (isError && SnackBarMessage != null) {
         Text(
-            text = errorMessage,
+            text = SnackBarMessage,
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -99,7 +99,7 @@ fun InformationTextField(
  * @param trailingIcon An optional composable displayed as an icon on the right side.
  * @param modifier Modifier for styling and layout customization.
  * @param isError Boolean indicating whether the field contains an error.
- * @param errorMessage The error message displayed below the text field if `isError` is true.
+ * @param SnackBarMessage The error message displayed below the text field if `isError` is true.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +110,7 @@ fun InformationTextFieldGender(
     trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    errorMessage: String? = null
+    SnackBarMessage: String? = null
 ) {
     Row(
         modifier = modifier,
@@ -146,9 +146,9 @@ fun InformationTextFieldGender(
         )
     }
 
-    if (isError && errorMessage != null) {
+    if (isError && SnackBarMessage != null) {
         Text(
-            text = errorMessage,
+            text = SnackBarMessage,
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(start = 16.dp, top = 4.dp)

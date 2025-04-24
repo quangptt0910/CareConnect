@@ -2,7 +2,7 @@ package com.example.careconnect
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -11,18 +11,18 @@ import kotlinx.coroutines.launch
 
 open class MainViewModel : ViewModel() {
     fun launchCatching(
-        showErrorSnackbar: (ErrorMessage) -> Unit = {},
+        showSnackbar: (SnackBarMessage) -> Unit = {},
         block: suspend CoroutineScope.() -> Unit
     ) =
         viewModelScope.launch(
             CoroutineExceptionHandler { _, throwable ->
                 Firebase.crashlytics.recordException(throwable)
                 val error = if (throwable.message.isNullOrBlank()) {
-                    ErrorMessage.IdError(R.string.generic_error)
+                    SnackBarMessage.IdMessage(R.string.generic_error)
                 } else {
-                    ErrorMessage.StringError(throwable.message!!)
+                    SnackBarMessage.StringMessage(throwable.message!!)
                 }
-                showErrorSnackbar(error)
+                showSnackbar(error)
             },
             block = block
         )

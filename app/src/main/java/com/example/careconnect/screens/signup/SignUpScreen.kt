@@ -39,8 +39,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
+import com.example.careconnect.common.ext.buttonField
 import com.example.careconnect.common.ext.fieldModifier
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.common.ext.textFieldModifier
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.login.EmailField
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -54,7 +56,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun SignUpScreen(
     openProfileScreen: () -> Unit,
     openLoginScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val navigateToProfile by viewModel.navigateToProfile.collectAsStateWithLifecycle()
@@ -65,7 +67,7 @@ fun SignUpScreen(
         SignUpScreenContent(
             signUp = viewModel::signUp,
             openLoginScreen = openLoginScreen,
-            showErrorSnackbar = showErrorSnackbar
+            showSnackBar = showSnackBar
         )
     }
 }
@@ -78,16 +80,16 @@ fun SignUpScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignUpScreenContent(
-    signUp: (String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
+    signUp: (String, String, String, String, (SnackBarMessage) -> Unit) -> Unit,
     openLoginScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var snackBarMessage by remember { mutableStateOf<String?>(null) }
     val isLoading by remember { mutableStateOf(false) }
 
     val fieldModifier = Modifier.fieldModifier()
@@ -120,11 +122,11 @@ fun SignUpScreenContent(
                     EmailField(email, { email = it }, fieldModifier)
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    PasswordSignUpTextField(password, { password = it }, fieldModifier)
+                    PasswordSignUpTextField(password, { password = it }, Modifier.textFieldModifier())
                     Spacer(modifier = Modifier.height(40.dp))
 
                     // Display error message if exists
-                    errorMessage?.let { error ->
+                    snackBarMessage?.let { error ->
                         Text(
                             text = error,
                             color = MaterialTheme.colorScheme.error,
@@ -135,29 +137,16 @@ fun SignUpScreenContent(
 
                     // Sign-up button
                     Button(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp),
+                        modifier = Modifier.buttonField(),
                         onClick = {
-//                            when {
-//                                name.isBlank() -> errorMessage = "Name is required"
-//                                surname.isBlank() -> errorMessage = "Surname is required"
-//                                email.isBlank() -> errorMessage = "Email is required"
-//                                password.isBlank() -> errorMessage = "Password is required"
-//
-//                                else -> {
-//                                    errorMessage = null
-//                                    signUp(name, surname, email, password, showErrorSnackbar)
-//                                }
-//                            }
-                            signUp(name, surname, email, password, showErrorSnackbar)
+                            signUp(name, surname, email, password, showSnackBar)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = Color.White
                         ),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(size = 4.dp)
+                        shape = RoundedCornerShape(size = 10.dp)
                     ) {
                         Text(
                             fontSize = 14.sp,
@@ -255,7 +244,7 @@ fun SignUpScreenPreview() {
         SignUpScreenContent(
             openLoginScreen = {},
             signUp = { _, _, _, _, _ ->},
-            showErrorSnackbar = {}
+            showSnackBar = {}
         )
 
     }

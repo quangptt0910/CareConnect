@@ -73,7 +73,7 @@ fun PasswordSignUpTextField(
 
     // OutlinedTextField for entering user password
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = value,
@@ -186,10 +186,10 @@ fun LabelTextField(
 ) {
     val uiColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = value,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             onValueChange = onValueChange,
             label = {
                 Text(

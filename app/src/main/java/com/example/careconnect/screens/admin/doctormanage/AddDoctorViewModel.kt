@@ -5,7 +5,7 @@ import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.dataclass.DoctorSchedule
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toMap
@@ -41,34 +41,34 @@ class AddDoctorViewModel @Inject constructor(
         specialization: String,
         experience: String,
         password: String, // Give some random password and they change later
-        showErrorSnackbar: (ErrorMessage) -> Unit
+        showSnackBar: (SnackBarMessage) -> Unit
     ) {
         if (name.isEmpty()) {
-        showErrorSnackbar(ErrorMessage.IdError(R.string.name))
+        showSnackBar(SnackBarMessage.IdMessage(R.string.name))
         return
         }
         if (surname.isEmpty()) {
-        showErrorSnackbar(ErrorMessage.IdError(R.string.surname))
+        showSnackBar(SnackBarMessage.IdMessage(R.string.surname))
         return
         }
         if (email.isEmpty()) {
-            showErrorSnackbar(ErrorMessage.IdError(R.string.email))
+            showSnackBar(SnackBarMessage.IdMessage(R.string.email))
             return
         }
 
         if (!email.isValidEmail()) {
             println("DEBUG:: Invalid email")
-            showErrorSnackbar(ErrorMessage.IdError(R.string.invalid_email))
+            showSnackBar(SnackBarMessage.IdMessage(R.string.invalid_email))
             return
         }
 
         if (experience.toIntOrNull() == null) {
-            showErrorSnackbar(ErrorMessage.IdError(R.string.experience))
+            showSnackBar(SnackBarMessage.IdMessage(R.string.experience))
             return
         }
 
         if (phone.toLongOrNull() == null) {
-            showErrorSnackbar(ErrorMessage.IdError(R.string.phone))
+            showSnackBar(SnackBarMessage.IdMessage(R.string.phone))
             return
         }
         val schedule = DoctorSchedule(
@@ -81,7 +81,7 @@ class AddDoctorViewModel @Inject constructor(
 
         val scheduleMap: Map<String, Any> = schedule.toMap()
 
-        launchCatching(showErrorSnackbar) {
+        launchCatching(showSnackBar) {
             val doctorDataMap = hashMapOf(
                 "name" to name,
                 "surname" to surname,

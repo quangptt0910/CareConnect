@@ -15,7 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.admin.navigation.AdminNavHost
 import com.example.careconnect.screens.admin.navigation.AdminNavigationActions
 import com.example.careconnect.ui.navigation.Route
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdminApp(
     openSplashScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -79,7 +79,7 @@ fun AdminApp(
                 modifier = Modifier.padding(padding),
                 navController = navController,
                 openSplashScreen = openSplashScreen,
-                showErrorSnackbar = showErrorSnackbar
+                showSnackBar = showSnackBar
             )
         }
 

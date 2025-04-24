@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
+import com.example.careconnect.common.ext.buttonField
 import com.example.careconnect.common.ext.fieldModifier
-import com.example.careconnect.common.ext.textButton
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
 
@@ -55,7 +55,7 @@ import com.example.careconnect.ui.theme.primaryLight
 fun LoginScreen(
     openSignUpScreen: () -> Unit,
     openSplashScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
@@ -67,7 +67,7 @@ fun LoginScreen(
         LoginScreenContent(
             openSignUpScreen = openSignUpScreen,
             login = viewModel::login,
-            showErrorSnackbar = showErrorSnackbar
+            showSnackBar = showSnackBar
         )
     }
 
@@ -77,11 +77,11 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     openSignUpScreen: () -> Unit,
-    login: (String, String, (ErrorMessage) -> Unit) -> Unit,
+    login: (String, String, (SnackBarMessage) -> Unit) -> Unit,
     onForgotPasswordClick: () -> Unit = {},
     onGoogleSignInClick: () -> Unit = {},
     onFacebookSignInClick: () -> Unit = {},
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -154,9 +154,9 @@ fun LoginScreenContent(
 
                     LoginButton(
                         text = R.string.login,
-                        modifier = Modifier.textButton(),
+                        modifier = Modifier.buttonField(),
                         onButtonClick = {
-                            login(email, password, showErrorSnackbar)
+                            login(email, password, showSnackBar)
                         }
                     )
                 }
@@ -306,8 +306,8 @@ fun LoginScreenPreview(){
     CareConnectTheme {
         LoginScreenContent(
             openSignUpScreen = {},
-            login = { _, _, showErrorSnackbar -> },
-            showErrorSnackbar = {}
+            login = { _, _, showSnackBar -> },
+            showSnackBar = {}
         )
     }
 }

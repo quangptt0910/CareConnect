@@ -2,6 +2,7 @@ package com.example.careconnect.common.ext
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -13,6 +14,15 @@ import androidx.compose.ui.unit.dp
 fun Modifier.fieldModifier(): Modifier {
     return this.width(300.dp).height(64.dp)
 }
+
+fun Modifier.textFieldModifier(): Modifier {
+    return this.width(300.dp).heightIn(min = 64.dp)
+}
+
+fun Modifier.buttonField(): Modifier {
+    return this.width(300.dp).height(40.dp)
+}
+
 fun Modifier.textButton(): Modifier {
     return this.width(240.dp).height(48.dp)
 }

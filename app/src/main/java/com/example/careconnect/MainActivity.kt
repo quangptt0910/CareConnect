@@ -9,7 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -51,10 +51,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CareConnectApp(
-                getErrorMessage = { error ->
-                    when (error) {
-                        is ErrorMessage.StringError -> error.message
-                        is ErrorMessage.IdError ->  this@MainActivity.getString(error.message)
+                getMessage = { message ->
+                    when (message) {
+                        is SnackBarMessage.StringMessage -> message.message
+                        is SnackBarMessage.IdMessage ->  this@MainActivity.getString(message.message)
                     }
                 }
             )

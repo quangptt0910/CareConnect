@@ -45,7 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
@@ -55,7 +55,7 @@ import java.util.Locale
 fun ProfileInfoScreen(
     viewModel: ProfileInforViewModel = hiltViewModel(),
     openSplashScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ) {
 
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
@@ -67,7 +67,7 @@ fun ProfileInfoScreen(
 
     ProfileInfoScreenContent(
         linkAccount = viewModel::linkAccount,
-        showErrorSnackbar = showErrorSnackbar
+        showSnackBar = showSnackBar
     )
 }
 
@@ -76,8 +76,8 @@ fun ProfileInfoScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileInfoScreenContent(
-    linkAccount: (String, Double, Double, String, String, (ErrorMessage) -> Unit) -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    linkAccount: (String, Double, Double, String, String, (SnackBarMessage) -> Unit) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit
 ) {
     var weight by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
@@ -247,7 +247,7 @@ fun ProfileInfoScreenContent(
                             height.toDoubleOrNull() ?: 0.0,
                             dob,
                             address,
-                            showErrorSnackbar)
+                            showSnackBar)
                     },
                 shape = MaterialTheme.shapes.medium
             ) {
@@ -335,7 +335,7 @@ fun ProfileInfoPreview() {
     CareConnectTheme {
         ProfileInfoScreenContent(
             linkAccount = { _, _, _, _, _, _ -> },
-            showErrorSnackbar = {}
+            showSnackBar = {}
         )
     }
 }

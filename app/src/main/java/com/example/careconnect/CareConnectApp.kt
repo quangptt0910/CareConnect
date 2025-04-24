@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.admin.AdminApp
 import com.example.careconnect.screens.doctor.DoctorApp
 import com.example.careconnect.screens.login.LoginScreen
@@ -41,13 +41,13 @@ fun CareConnectApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     startDestination: String = SPLASH_ROUTE,
-    getErrorMessage: (ErrorMessage) -> String,
+    getMessage: (SnackBarMessage) -> String,
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val showErrorSnackbar: (ErrorMessage) -> Unit = { errorMessage ->
-        val message = getErrorMessage(errorMessage)
+    val showSnackbar: (SnackBarMessage) -> Unit = { message ->
+        val message = getMessage(message)
         scope.launch { snackbarHostState.showSnackbar(message) }
     }
 
@@ -65,7 +65,7 @@ fun CareConnectApp(
                     navController = navController,
                     startDestination = SPLASH_ROUTE,
                     snackbarHostState = snackbarHostState,
-                    showErrorSnackBar = showErrorSnackbar
+                    showSnackBar = showSnackbar
                 )
             }
         }
@@ -77,7 +77,7 @@ fun CareConnectNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     startDestination: String = SPLASH_ROUTE,
-    showErrorSnackBar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
     NavHost(
@@ -98,7 +98,7 @@ fun CareConnectNavHost(
                 openAdminScreen = {
                     navController.navigate(ADMIN_APP) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -110,7 +110,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -122,7 +122,7 @@ fun CareConnectNavHost(
                 openLoginScreen = {
                     navController.navigate(LOGIN_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -131,7 +131,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -140,7 +140,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -149,7 +149,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -158,7 +158,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
 
@@ -167,7 +167,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
-                showErrorSnackbar = showErrorSnackBar
+                showSnackBar = showSnackBar
             )
         }
     }

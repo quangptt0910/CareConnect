@@ -32,7 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.screens.patient.home.ErrorMessage
+import com.example.careconnect.screens.patient.home.SnackBarMessage
 import com.example.careconnect.screens.patient.home.LoadingIndicator
 import com.example.careconnect.screens.patient.home.SuggestionsList
 
@@ -102,7 +102,7 @@ fun SearchMenuResults(
     Column(Modifier.verticalScroll(rememberScrollState())) {
         when {
             uiState.isLoading -> LoadingIndicator()
-            uiState.errorMessage != null -> ErrorMessage(uiState.errorMessage)
+            uiState.SnackBarMessage != null -> SnackBarMessage(uiState.SnackBarMessage)
             else -> SuggestionsList(
                 suggestions = uiState.suggestions,
                 selectedDoctors = uiState.selectedDoctors,

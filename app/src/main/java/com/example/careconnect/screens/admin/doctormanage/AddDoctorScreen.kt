@@ -37,14 +37,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
 fun AddDoctorScreen(
     openDoctorScheduleScreen: (doctorId: String) -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: AddDoctorViewModel = hiltViewModel()
 ){
     val doctorId by viewModel.newDoctorId.collectAsStateWithLifecycle()
@@ -56,7 +56,7 @@ fun AddDoctorScreen(
     }
     AddDoctorScreenContent(
         createDoctorInfo = viewModel::createDoctorInfo,
-        showErrorSnackbar = showErrorSnackbar
+        showSnackBar = showSnackBar
     )
 }
 
@@ -64,8 +64,8 @@ fun AddDoctorScreen(
 
 @Composable
 fun AddDoctorScreenContent(
-    createDoctorInfo: (String, String, String, String, String, String, String, String, (ErrorMessage) -> Unit) -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit = {}
+    createDoctorInfo: (String, String, String, String, String, String, String, String, (SnackBarMessage) -> Unit) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit = {}
 ) {
 
     var name by remember { mutableStateOf("") }
@@ -129,7 +129,7 @@ fun AddDoctorScreenContent(
 
                 // Next Button
                 IconButton(
-                    onClick = { createDoctorInfo(name, surname, email, phone, address, specialization, experience, password, showErrorSnackbar) },
+                    onClick = { createDoctorInfo(name, surname, email, phone, address, specialization, experience, password, showSnackBar) },
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
@@ -197,7 +197,7 @@ fun AddDoctorScreenPreview() {
     CareConnectTheme {
         AddDoctorScreenContent(
             createDoctorInfo = { _, _, _, _, _, _, _, _, _->},
-            showErrorSnackbar = {}
+            showSnackBar = {}
         )
     }
 }

@@ -23,7 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.common.RegularCardEditor
 import com.example.careconnect.common.ext.card
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.admin.doctormanage.DialogCancelButton
 import com.example.careconnect.screens.admin.doctormanage.DialogConfirmButton
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -31,7 +31,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun SettingsScreen(
     openSplashScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val shouldRestart by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
@@ -41,7 +41,7 @@ fun SettingsScreen(
     } else {
         SettingsContent(
             signOut = viewModel::signOut,
-            showErrorSnackbar = showErrorSnackbar
+            showSnackBar = showSnackBar
         )
     }
 }
@@ -50,7 +50,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsContent(
     signOut: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -105,7 +105,7 @@ fun SettingsScreenPreview() {
     CareConnectTheme {
         SettingsContent(
             signOut = {},
-            showErrorSnackbar = {}
+            showSnackBar = {}
         )
     }
 }

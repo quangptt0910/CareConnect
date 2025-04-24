@@ -32,7 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.DoctorSchedule
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -40,7 +40,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun DoctorManageScreen(
     openAddDoctorScreen: () -> Unit,
     viewModel: DoctorManageViewModel = hiltViewModel(),
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ){
     val allDoctors by viewModel.allDoctors.collectAsStateWithLifecycle(emptyList())
     println("DEBUG:: DoctorManageScreen: doctorsList = $allDoctors")

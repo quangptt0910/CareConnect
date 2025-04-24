@@ -24,7 +24,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
-import com.example.careconnect.dataclass.ErrorMessage
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.delay
 
@@ -35,13 +35,13 @@ fun SplashScreen(
     openDoctorScreen: () -> Unit,
     openPatientScreen: () -> Unit,
     openLoginScreen: () -> Unit,
-    showErrorSnackbar: (ErrorMessage) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     println("Debug: SplashScreen")
     val navigateRoute by viewModel.navigationRoute.collectAsStateWithLifecycle()
 
-    SplashScreenContent(showErrorSnackbar = showErrorSnackbar)
+    SplashScreenContent(showSnackBar = showSnackBar)
 
     LaunchedEffect(navigateRoute) {
         delay(500L)
@@ -60,7 +60,7 @@ fun SplashScreen(
 
 @Composable
 private fun SplashScreenContent(
-    showErrorSnackbar: (ErrorMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit
 ) {
     ConstraintLayout {
         Column(
@@ -102,7 +102,7 @@ private fun SplashScreenContent(
 fun SplashScreenPreview() {
     CareConnectTheme {
         SplashScreenContent(
-            showErrorSnackbar = {}
+            showSnackBar = {}
         )
     }
 }
