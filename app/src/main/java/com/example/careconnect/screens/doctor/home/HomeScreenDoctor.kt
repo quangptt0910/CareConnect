@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.PersonOutline
@@ -44,9 +45,11 @@ import java.time.LocalDate
 
 @Composable
 fun HomeScreenDoctor(
-
+    openSettingsScreen: () -> Unit
 ) {
-    HomeScreenDoctorContent()
+    HomeScreenDoctorContent(
+        openSettingsScreen = openSettingsScreen
+    )
 }
 
 @Composable
@@ -284,6 +287,21 @@ fun HomeScreenDoctorContent(
                         style = MaterialTheme.typography.bodyLarge,)
 
 
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = { /* View/Start consultation */ }) {
+                        Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.padding(start = 20.dp))
+
+                    }
+                    Text(
+                        text = "Add Task",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier
+                            .fillMaxWidth().padding(start = 16.dp, top = 13.dp)
+                    )
                 }
             }
         }

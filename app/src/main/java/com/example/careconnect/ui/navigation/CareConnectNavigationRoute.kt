@@ -39,6 +39,14 @@ object Route {
     const val PATIENT_DOCTORS_OVERVIEW = "patient/doctors/overview/{specialty}"
     const val PATIENT_DOCTORS_PROFILE = "patient/doctors/profile/{doctorId}"
 
+    // Doctor-specific Routes
+    const val DOCTOR_APP = "doctor_app"
+    const val DOCTOR_PROFILE_ROUTE = "doctor/profile"
+    const val DOCTOR_CHAT_ROUTE = "doctor/chat"
+    const val DOCTOR_CHAT_MENU_ROUTE = "doctor/chat/menu"
+    const val DOCTOR_PATIENTS_ROUTE = "doctor/patients"
+
+
     // Route with parameter helper
     fun adminDoctorEditRoute(doctorId: String) =
         ADMIN_DOCTOR_EDIT_ROUTE.replace("{doctorId}", doctorId)
