@@ -51,7 +51,8 @@ fun AdminNavHost(
 
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){
             AddDoctorScreen(
-                openDoctorScheduleScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) },
+                openDoctorScheduleScreen = { doctorId ->
+                    navController.navigate(Route.adminDoctorScheduleRoute(doctorId)) },
                 showErrorSnackbar = showErrorSnackbar
             )
         }
@@ -61,11 +62,11 @@ fun AdminNavHost(
             arguments = listOf(navArgument("doctorId") { type = NavType.StringType } )
         ){ backStackEntry ->
             AddDoctorScheduleScreen(
-                doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
-                onNextStep = {},
+                openDoctorManageScreen = { navController.navigate(Route.ADMIN_DOCTOR_MANAGE_ROUTE) },
                 onBack = {}
             )
         }
+
         composable(Route.SETTINGS_ROUTE) {
             SettingsScreen(
                 openSplashScreen = openSplashScreen,

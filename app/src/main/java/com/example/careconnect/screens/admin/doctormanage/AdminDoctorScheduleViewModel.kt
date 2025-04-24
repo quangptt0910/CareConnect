@@ -1,5 +1,6 @@
 package com.example.careconnect.screens.admin.doctormanage
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.DoctorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,11 +23,13 @@ data class DoctorScheduleUiState(
 
 @HiltViewModel
 class AdminDoctorScheduleViewModel @Inject constructor(
-    private val doctorId: String,
-    private val doctorRepository: DoctorRepository
+    private val doctorRepository: DoctorRepository,
+    savedStateHandle: SavedStateHandle
 ): MainViewModel() {
     private val _uiState = MutableStateFlow(DoctorScheduleUiState())
     val uiState: StateFlow<DoctorScheduleUiState> = _uiState.asStateFlow()
+
+    private val doctorId: String = checkNotNull(savedStateHandle["doctorId"])
 
     init {
         loadWorkingDays()
@@ -40,7 +43,7 @@ class AdminDoctorScheduleViewModel @Inject constructor(
 
     ) {
         // Implement the logic to load working days
-        launchCatching {
+        launchCatching() {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
             try {
@@ -75,5 +78,4 @@ class AdminDoctorScheduleViewModel @Inject constructor(
             }
         }
     }
-
 }

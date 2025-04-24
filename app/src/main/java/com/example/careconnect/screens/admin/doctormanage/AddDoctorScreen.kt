@@ -47,22 +47,19 @@ fun AddDoctorScreen(
     showErrorSnackbar: (ErrorMessage) -> Unit,
     viewModel: AddDoctorViewModel = hiltViewModel()
 ){
-    val navigateToDoctorSchedule by viewModel.navigateToDoctorSchedule.collectAsStateWithLifecycle()
     val doctorId by viewModel.newDoctorId.collectAsStateWithLifecycle()
 
-    if (navigateToDoctorSchedule) {
-        LaunchedEffect(doctorId) {
-            doctorId?.let {
-                openDoctorScheduleScreen(it)
-            }
+    LaunchedEffect(doctorId) {
+        doctorId?.let {
+            openDoctorScheduleScreen(it)
         }
-    } else {
-        AddDoctorScreenContent(
-            createDoctorInfo = viewModel::createDoctorInfo,
-            showErrorSnackbar = showErrorSnackbar
-        )
     }
+    AddDoctorScreenContent(
+        createDoctorInfo = viewModel::createDoctorInfo,
+        showErrorSnackbar = showErrorSnackbar
+    )
 }
+
 
 
 @Composable

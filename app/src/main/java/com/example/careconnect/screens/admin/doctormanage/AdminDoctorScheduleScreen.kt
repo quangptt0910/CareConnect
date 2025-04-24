@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,9 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,8 +32,7 @@ import java.time.LocalDate
 
 @Composable
 fun AddDoctorScheduleScreen(
-    doctorId: String,
-    onNextStep: () -> Unit,
+    openDoctorManageScreen: () -> Unit,
     onBack: () -> Unit,
     viewModel: AdminDoctorScheduleViewModel = hiltViewModel()
 ) {
@@ -45,12 +40,12 @@ fun AddDoctorScheduleScreen(
 
     LaunchedEffect(uiState.navigateNext) {
         if (uiState.navigateNext) {
-            onNextStep()
+            openDoctorManageScreen()
         }
     }
 
     AddDoctorScheduleScreenContent(
-        uiState = DoctorScheduleUiState(),
+        uiState = uiState,
         onDateSelected = viewModel::toggleDate,
         onNextStep = viewModel::onSaveAndNext,
         onBack = onBack
@@ -64,8 +59,6 @@ fun AddDoctorScheduleScreenContent(
     onNextStep: () -> Unit,
     onBack: () -> Unit,
 ) {
-    var selectedDays by remember { mutableStateOf(setOf<LocalDate>()) }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -88,7 +81,7 @@ fun AddDoctorScheduleScreenContent(
             Spacer(modifier = Modifier.height(25.dp))
 
             MultiDatePicker(
-                selectedDates = selectedDays,
+                selectedDates = uiState.selectedDates,
                 onDateSelected = onDateSelected,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,13 +100,8 @@ fun AddDoctorScheduleScreenContent(
                 }
 
                 IconButton(
-                    onClick = { onNextStep() },
-                    enabled = !uiState.isSaving && !uiState.isLoading,
+                    onClick = { onNextStep() }
                 ) {
-                    if (uiState.isSaving) {
-                        CircularProgressIndicator()
-                    }
-                    Text(text = "Next")
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
                 }
             }

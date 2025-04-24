@@ -39,7 +39,7 @@ fun AdminApp(
     val currentRoute = navBackStackEntry?.destination?.route ?: Route.HOME_ADMIN_ROUTE
 
     // Define routes where the top bar and drawer should be hidden
-    val noTopBarRoutes = setOf(Route.ADMIN_DOCTOR_ADD_ROUTE)
+    val noTopBarRoutes = setOf(Route.ADMIN_DOCTOR_ADD_ROUTE, Route.ADMIN_DOCTOR_SCHEDULE_ROUTE)
 
     ModalNavigationDrawer(
         drawerContent = {
