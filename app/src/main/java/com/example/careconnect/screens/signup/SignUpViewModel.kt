@@ -45,7 +45,7 @@ class SignUpViewModel @Inject constructor(
             authRepository.signUp(name, surname, email, password)
             println("Debug: SignUp success")
             _navigateToProfile.value = true
-            //_shouldRestartApp.value = true
+
         }
     }
 }

@@ -20,7 +20,7 @@ class DoctorRemoteDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val functions: FirebaseFunctions
 ) {
-    suspend fun createDoctor(email: String, password: String, doctorData: Map<String, Any>): String {
+    suspend fun createDoctor(email: String, password: String, doctorData: Map<String, Any>): Pair<String, String> {
         val data = mapOf(
             "email" to email,
             "password" to password,
@@ -31,8 +31,13 @@ class DoctorRemoteDataSource @Inject constructor(
             .call(data)
             .await()
 
-        val success = result.data as Map<*, *>
-        return success["doctorId"] as String
+        @Suppress("UNCHECKED_CAST")
+        val success = result.data as Map<String, Any>
+
+        val message = success["message"] as String
+        val doctorId = success["doctorId"] as String
+
+        return message to doctorId
     }
 
     suspend fun updateDoctor(doctor: Doctor) {

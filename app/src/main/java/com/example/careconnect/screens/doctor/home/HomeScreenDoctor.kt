@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Add
@@ -218,7 +218,7 @@ fun HomeScreenDoctorContent(
                         startTime = "10:00 AM",
                         endTime = "11:00 AM",
                         address = "",
-                        appointmentStatus = AppointmentStatus.PENDING
+                        status = AppointmentStatus.PENDING
                     ),
                     Appointment(
                         id = "2",
@@ -228,7 +228,7 @@ fun HomeScreenDoctorContent(
                         startTime = "11:00 AM",
                         endTime = "12:00 PM",
                         address = "",
-                        appointmentStatus = AppointmentStatus.PENDING
+                        status = AppointmentStatus.PENDING
                     ),
                 )
             )
@@ -331,7 +331,7 @@ fun DailyAppointmentsSection(appointments: List<Appointment>) {
                         Text(text = "Name Surname", style = MaterialTheme.typography.titleMedium)
                     }
                     IconButton(onClick = { /* View/Start consultation */ }) {
-                        Icon(Icons.Default.ArrowForward, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
                     }
                 }
             }

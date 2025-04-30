@@ -5,8 +5,8 @@ import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.dataclass.DoctorSchedule
-import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Role
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toMap
 import com.example.careconnect.screens.signup.isValidEmail
@@ -94,7 +94,9 @@ class AddDoctorViewModel @Inject constructor(
                 "profilePhoto" to "",
                 "schedule" to scheduleMap
             )
-            _newDoctorId.value= doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
+            val (message, doctorId) = doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
+            _newDoctorId.value = doctorId
+            showSnackBar(SnackBarMessage.StringMessage(message))
             println("DEBUG:: PROFILE Doctor created successfully!!")
             println("DEBUG:: Doctor created successfully!!")
             _navigateToDoctorSchedule.value = true

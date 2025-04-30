@@ -6,12 +6,15 @@ data class Appointment(
     val id: String = "",  // Firestore document ID (optional)
     val patientId: String = "",  // Firebase UID of the patient
     val doctorId: String = "",  // Firebase UID of the doctor
-
+    val timeSlot: String = "",  // Time slot for the appointment (e.g., "09:00 AM - 09:15 AM")
+    val patientName: String = "",  // Name of the patient
+    val doctorName: String = "",  // Name of the doctor
+    val type: String = "",  // Type of the appointment (e.g., "Consultation", "Checkup")
     val appointmentDate: String = "",  // Date of the appointment (e.g., "2025-03-10")
     val startTime: String = "",  // Start time of the appointment (e.g., "09:00 AM")
     val endTime: String = "",    // End time of the appointment (e.g., "09:15 AM")
     val address: String = "",
-    val appointmentStatus: AppointmentStatus = AppointmentStatus.PENDING,  // Status of the appointment (e.g., PENDING, COMPLETED, CANCELED)
+    val status: AppointmentStatus = AppointmentStatus.PENDING,  // Status of the appointment (e.g., PENDING, COMPLETED, CANCELED)
 )
 
 enum class AppointmentStatus(val title: String, val color: Color, val value: Int) {

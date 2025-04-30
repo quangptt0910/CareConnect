@@ -113,7 +113,7 @@ fun AppointmentCardPreview() {
         appointmentDate = "2023-05-15",
         startTime = "10:00 AM",
         endTime = "11:00 AM",
-        appointmentStatus = AppointmentStatus.PENDING
+        status = AppointmentStatus.PENDING
     )
     AppointmentCard(appointment =appointment)
 }

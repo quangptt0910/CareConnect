@@ -1,6 +1,8 @@
 package com.example.careconnect.dataclass
 
 import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.ServerTimestamp
+import java.util.Date
 
 /*
 * Data class for user account
@@ -29,6 +31,7 @@ data class Doctor(
     val experience: Int = 2025, // Year start to work
     val schedule: DoctorSchedule = DoctorSchedule(),
     val profilePhoto: String = "",
+    @ServerTimestamp val createdAt: Date? = null
 )
 
 data class Patient(

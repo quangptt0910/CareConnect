@@ -34,7 +34,7 @@
     <string name="generic_error">Something went wrong. Please try again later.</string>
     <string name="incorrect_email_or_password">Incorrect email or password.</string>
     <string name="network_error">Network error. Please check your connection</string>
-
+    <string name="add_doctor_success">Doctor added successfully.</string>"
     <!-- LoginScreen -->
     <string name="login">Log In</string>
 
