@@ -1,8 +1,10 @@
 package com.example.careconnect.screens.doctor.patients
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
@@ -31,10 +33,33 @@ fun CreateMedicalReportScreenContent(
         color = MaterialTheme.colorScheme.background
     ) {
         LazyColumn(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
+                Text(
+                    text = "Create Medical Report",
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+
+                Text(
+                    text = "Name Surname:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(3.dp)
+                )
+                Text(
+                    text = "Date of Birth:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(3.dp)
+                )
+                Text(
+                    text = "Gender:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(3.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
                 TextFieldDoctor(
                     value = "",
                     onValueChange = {},
