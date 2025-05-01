@@ -44,8 +44,6 @@
     <string name="password_match_error">Passwords does not match.</string>
     <string name="all_fields_required">All fields are required.</string>
 
-
-
     <string name="signup">Create Account</string>
     <string name="password_level">Password Level: </string>
     <string name="password_requirement">Must be at least eight digits, contain at least one uppercase letter, one number and one special character</string>
@@ -74,7 +72,14 @@
     <string name="total_doctors">Total Doctors</string>
     <string name="total_appointments">Total Appointments</string>
     <string name="total_revenue">Total Revenue</string>
-    <string name="select_work_days">Select Work Days</string>"
+    <string name="select_work_days">Select Work Days</string>
+
+    <string name="time_asc">Time: Earliest</string>
+    <string name="time_desc">Time: Latest</string>
+    <string name="patient_name">Patient Name</string>
+    <string name="doctor_name">Doctor Name</string>
+    <string name="status">Status</string>
+
     <!-- Dialogs -->
     <string name="sign_out_title">Sign out?</string>
     <string name="sign_out_description">You will have to sign in again to see the data.</string>

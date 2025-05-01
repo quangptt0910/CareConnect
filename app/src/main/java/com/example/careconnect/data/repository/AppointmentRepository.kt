@@ -9,6 +9,13 @@ import javax.inject.Inject
 class AppointmentRepository @Inject constructor(
     private val appointmentDataSource: AppointmentDataSource
 ) {
+
+    suspend fun getAllAppointmentsByDate(date: String) =
+        appointmentDataSource.getAllAppointmentsByDate(date)
+
+    suspend fun getAllAppointmentsByMonth(date: String) =
+        appointmentDataSource.getAllAppointmentsByMonth(date)
+
     fun getAppointmentsByPatientId(patientId: Flow<String?>) =
         appointmentDataSource.getAppointmentsByPatientId(patientId)
 

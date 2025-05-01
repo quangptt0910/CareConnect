@@ -1,4 +1,130 @@
 package com.example.careconnect.screens.admin.appointment
 
-class AppointmentManageViewModel {
+import androidx.lifecycle.viewModelScope
+import com.example.careconnect.MainViewModel
+import com.example.careconnect.data.repository.AppointmentRepository
+import com.example.careconnect.dataclass.Appointment
+import com.example.careconnect.dataclass.AppointmentStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
+import java.util.Locale
+import javax.inject.Inject
+
+enum class TimeRange { Day, Week, Month }
+enum class SortOption(val label: String) {
+    TimeAsc("Time: Earliest"),
+    TimeDesc("Time: Latest"),
+    PatientName("Patient Name"),
+    DoctorName("Doctor Name"),
+    Status("Status")
+}
+
+data class AppointmentUiState(
+    val appointments: List<Appointment> = emptyList(),
+    val isLoading: Boolean = true,
+    val error: String? = null,
+
+    val selectedRange: TimeRange = TimeRange.Day,
+    val currentDate: LocalDate = LocalDate.now(),
+
+    val filterStatus: AppointmentStatus? = null,
+    val sortOption: SortOption = SortOption.TimeAsc
+)
+
+@HiltViewModel
+class AppointmentManageViewModel @Inject constructor(
+    private val repo: AppointmentRepository
+) : MainViewModel() {
+
+    private val isoFormatter = DateTimeFormatter.ISO_DATE
+    private val weekFields = WeekFields.of(Locale.getDefault())
+
+    // Controls
+    private val _selectedRange = MutableStateFlow(TimeRange.Day)
+    private val _currentDate   = MutableStateFlow(LocalDate.now())
+    private val _filterStatus  = MutableStateFlow<AppointmentStatus?>(null)
+    private val _sortOption    = MutableStateFlow(SortOption.TimeAsc)
+
+    // Combined UI state
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<AppointmentUiState> = combine(
+        _selectedRange,
+        _currentDate,
+        _filterStatus,
+        _sortOption
+    ) { range, date, status, sort ->
+        AppointmentUiState(
+            selectedRange = range,
+            currentDate   = date,
+            filterStatus  = status,
+            sortOption    = sort,
+            isLoading     = true
+        )
+    }
+        .flatMapLatest { state ->
+            // fetch raw list based on range
+            val rawFlow: Flow<List<Appointment>> = flow {
+                val list = when(state.selectedRange) {
+                    TimeRange.Day -> repo.getAllAppointmentsByDate(state.currentDate.format(isoFormatter))
+                    TimeRange.Week -> {
+                        val start = state.currentDate.with(weekFields.dayOfWeek(), 1)
+                        (0 until 7).flatMap { offset ->
+                            repo.getAllAppointmentsByDate(start.plusDays(offset.toLong()).format(isoFormatter))
+                        }
+                    }
+                    TimeRange.Month -> {
+                        val ym = YearMonth.from(state.currentDate)
+                        repo.getAllAppointmentsByMonth(ym.atDay(1).format(isoFormatter))
+                    }
+                }
+                emit(list)
+            }
+            // apply filter and sort
+            rawFlow.map { list ->
+                list.filter { state.filterStatus == null || it.status == state.filterStatus }
+                    .let { filtered ->
+                        when(state.sortOption) {
+                            SortOption.TimeAsc    -> filtered.sortedBy { it.startTime }
+                            SortOption.TimeDesc   -> filtered.sortedByDescending { it.startTime }
+                            SortOption.PatientName-> filtered.sortedBy { it.patientName }
+                            SortOption.DoctorName -> filtered.sortedBy { it.doctorName }
+                            SortOption.Status     -> filtered.sortedBy { it.status.value }
+                        }
+                    }
+            }
+                .map { sortedList ->
+                    AppointmentUiState(
+                        appointments = sortedList,
+                        isLoading    = false,
+                        selectedRange = state.selectedRange,
+                        currentDate   = state.currentDate,
+                        filterStatus  = state.filterStatus,
+                        sortOption    = state.sortOption
+                    )
+                }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, AppointmentUiState())
+
+    // UI event handlers
+    fun setRange(range: TimeRange)  { _selectedRange.value = range }
+    fun setDate(date: LocalDate)   { _currentDate.value   = date }
+    fun setFilter(status: AppointmentStatus?) { _filterStatus.value = status }
+    fun setSort(option: SortOption)  { _sortOption.value  = option }
+    fun resetAll() {
+        _filterStatus.value = null
+        _sortOption.value   = SortOption.TimeAsc
+    }
 }

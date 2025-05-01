@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.careconnect.dataclass.SnackBarMessage
+import com.example.careconnect.screens.admin.appointment.AppointmentManageScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScheduleScreen
 import com.example.careconnect.screens.admin.doctormanage.AddDoctorScreen
 import com.example.careconnect.screens.admin.doctormanage.DoctorManageScreen
@@ -46,7 +47,7 @@ fun AdminNavHost(
         }
 
         composable(Route.ADMIN_APPOINTMENTS_ROUTE) {
-            PatientManageScreen()
+            AppointmentManageScreen()
         }
 
         composable(Route.ADMIN_DOCTOR_ADD_ROUTE){

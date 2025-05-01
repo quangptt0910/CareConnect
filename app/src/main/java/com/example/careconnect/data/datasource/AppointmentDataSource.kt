@@ -2,6 +2,7 @@ package com.example.careconnect.data.datasource
 
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
+import com.example.careconnect.dataclass.toLocalDate
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,11 +11,34 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
+import java.time.YearMonth
 import javax.inject.Inject
 
 class AppointmentDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
 ){
+    suspend fun getAllAppointmentsByDate(date: String): List<Appointment> {
+        return firestore
+            .collection("appointments")
+            .whereEqualTo("appointmentDate", date)
+            .get()
+            .await().toObjects(Appointment::class.java)
+    }
+
+    suspend fun getAllAppointmentsByMonth(date: String): List<Appointment> {
+        val local = date.toLocalDate()
+        val ym = YearMonth.of(local.year, local.month)
+        val start = ym.atDay(1)
+        val end = ym.plusMonths(1).atDay(1)
+
+        return firestore
+            .collection("appointments")
+            .whereGreaterThanOrEqualTo("appointmentDate", start)
+            .whereLessThan("appointmentDate", end)
+            .get()
+            .await().toObjects(Appointment::class.java)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByPatientId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->

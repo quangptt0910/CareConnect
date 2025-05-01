@@ -18,10 +18,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
 import java.time.Instant
@@ -52,46 +54,45 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 
 
-enum class TimeRange { Day, Week, Month }
-enum class SortOption(val label: String) { TimeAsc("Time: Earliest"), DoctorName("Doctor Name"), Status("Status") }
-
-data class FilterState(
-    val status: AppointmentStatus? = null,
-    val doctor: String? = null
-)
+@Composable
+fun AppointmentManageScreen(
+    viewModel: AppointmentManageViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    AppointmentManageScreenContent(
+        uiState = uiState,
+        onRangeChange = viewModel::setRange,
+        onDateChange = viewModel::setDate,
+        onFilterChange = viewModel::setFilter,
+        onSortChange = viewModel::setSort,
+        onReset = viewModel::resetAll
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentManageScreenContent(
-    appointments: List<Appointment>,
-    doctors: List<String>,
-    onFilterChange: (FilterState) -> Unit,
+    uiState: AppointmentUiState,
+    onRangeChange: (TimeRange) -> Unit,
+    onDateChange: (LocalDate) -> Unit,
+    onFilterChange: (AppointmentStatus?) -> Unit,
     onSortChange: (SortOption) -> Unit,
     onReset: () -> Unit
 ) {
-    // State
-    var selectedRange by remember { mutableStateOf(TimeRange.Day) }
-    var currentDate by remember { mutableStateOf(LocalDate.now()) }
-    var filterState by remember { mutableStateOf(FilterState()) }
-    var sortOption by remember { mutableStateOf(SortOption.TimeAsc) }
-    var showFilterMenu by remember { mutableStateOf(false) }
-    var showSortMenu by remember { mutableStateOf(false) }
+
     var showDatePicker by remember { mutableStateOf(false) }
-
-    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val monthFormatter = DateTimeFormatter.ofPattern("MM/yyyy")
-    val weekFields = WeekFields.of(Locale.getDefault())
-    val weekStart: LocalDate = currentDate.with(weekFields.dayOfWeek(), 1)
-    val weekEnd: LocalDate = currentDate.with(weekFields.dayOfWeek(), 7)
-
-    // DatePickerState
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        initialSelectedDateMillis = uiState.currentDate
+            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+    val weekFields = WeekFields.of(Locale.getDefault())
+    val weekStart = uiState.currentDate.with(weekFields.dayOfWeek(), 1)
+    val weekEnd = weekStart.plusDays(6)
+
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Chips for Day/Week/Month
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -99,8 +100,8 @@ fun AppointmentManageScreenContent(
         ) {
             TimeRange.entries.forEach { range ->
                 FilterChip(
-                    selected = range == selectedRange,
-                    onClick = { selectedRange = range },
+                    selected = range == uiState.selectedRange,
+                    onClick = { onRangeChange(range) },
                     label = { Text(range.name) }
                 )
             }
@@ -114,32 +115,37 @@ fun AppointmentManageScreenContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
+            // Left arrow
             IconButton(onClick = {
-                currentDate = when (selectedRange) {
-                    TimeRange.Day -> currentDate.minusDays(1)
-                    TimeRange.Week -> currentDate.minusWeeks(1)
-                    TimeRange.Month -> currentDate.minusMonths(1)
+                val newDate = when (uiState.selectedRange) {
+                    TimeRange.Day -> uiState.currentDate.minusDays(1)
+                    TimeRange.Week -> uiState.currentDate.minusWeeks(1)
+                    TimeRange.Month -> uiState.currentDate.minusMonths(1)
                 }
+                onDateChange(newDate)
             }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous")
             }
 
+            // Date show
             Text(
-                text = when (selectedRange) {
-                    TimeRange.Day -> currentDate.format(dateFormatter)
+                text = when (uiState.selectedRange) {
+                    TimeRange.Day -> uiState.currentDate.format(dateFormatter)
                     TimeRange.Week -> "${weekStart.format(dateFormatter)} - ${weekEnd.format(dateFormatter)}"
-                    TimeRange.Month -> currentDate.format(DateTimeFormatter.ofPattern("MM/yyyy"))
+                    TimeRange.Month -> uiState.currentDate.format(monthFormatter)
                 },
-                modifier = Modifier.clickable { showDatePicker = true }
+                modifier = Modifier.padding(horizontal = 16.dp).clickable { showDatePicker = true }
 
             )
 
+            // Right arrow
             IconButton(onClick = {
-                currentDate = when (selectedRange) {
-                    TimeRange.Day -> currentDate.plusDays(1)
-                    TimeRange.Week -> currentDate.plusWeeks(1)
-                    TimeRange.Month -> currentDate.plusMonths(1)
+                val newDate = when (uiState.selectedRange) {
+                    TimeRange.Day   -> uiState.currentDate.plusDays(1)
+                    TimeRange.Week  -> uiState.currentDate.plusWeeks(1)
+                    TimeRange.Month -> uiState.currentDate.plusMonths(1)
                 }
+                onDateChange(newDate)
             }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
             }
@@ -155,11 +161,13 @@ fun AppointmentManageScreenContent(
                             val picked = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-                            currentDate = when (selectedRange) {
-                                TimeRange.Day -> picked
-                                TimeRange.Week -> picked
-                                TimeRange.Month -> picked.withDayOfMonth(1)
-                            }
+                            onDateChange(
+                                when (uiState.selectedRange) {
+                                    TimeRange.Day   -> picked
+                                    TimeRange.Week  -> picked.with(weekFields.dayOfWeek(), 1)
+                                    TimeRange.Month -> picked.withDayOfMonth(1)
+                                }
+                            )
                         }
                         showDatePicker = false
                     }) {
@@ -191,38 +199,31 @@ fun AppointmentManageScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Filter, Sort, Reset row
+        var showFilterMenu by remember { mutableStateOf(false) }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Filter button
+
             Box {
                 Button(onClick = { showFilterMenu = true }) { Text("Filter") }
                 DropdownMenu(
                     expanded = showFilterMenu,
                     onDismissRequest = { showFilterMenu = false }
                 ) {
-                    Text("Status:", modifier = Modifier.padding(8.dp))
-                    listOf("All") + AppointmentStatus.entries.map { it.title }.forEach { status ->
-                        DropdownMenuItem(
-                            text = { Text(status) },
-                            onClick = {
-                                filterState = filterState.copy(
-                                    status = if (status == "All") null else AppointmentStatus.entries.first { it.title == status }
-                                )
-                                onFilterChange(filterState)
+                    DropdownMenuItem(
+                        text = { Text("All") },
+                        onClick = {
+                                onFilterChange(null)
                                 showFilterMenu = false
                             }
                         )
-                    }
-                    Divider()
-                    Text("Doctor:", modifier = Modifier.padding(8.dp))
-                    doctors.forEach { doc ->
+                    AppointmentStatus.entries.forEach { status ->
                         DropdownMenuItem(
-                            text = { Text(doc) },
+                            text = { Text(status.title) },
                             onClick = {
-                                filterState = filterState.copy(doctor = doc)
-                                onFilterChange(filterState)
+                                onFilterChange(status)
                                 showFilterMenu = false
                             }
                         )
@@ -233,6 +234,7 @@ fun AppointmentManageScreenContent(
             Spacer(Modifier.width(8.dp))
 
             // Sort button
+            var showSortMenu by remember { mutableStateOf(false) }
             Box {
                 Button(onClick = { showSortMenu = true }) { Text("Sort") }
                 DropdownMenu(
@@ -243,7 +245,6 @@ fun AppointmentManageScreenContent(
                         DropdownMenuItem(
                             text = { Text(option.label) },
                             onClick = {
-                                sortOption = option
                                 onSortChange(option)
                                 showSortMenu = false
                             }
@@ -255,11 +256,7 @@ fun AppointmentManageScreenContent(
             Spacer(modifier = Modifier.weight(1f))
 
             // Reset button on far-right
-            TextButton(onClick = {
-                filterState = FilterState()
-                sortOption = SortOption.TimeAsc
-                onReset()
-            }) {
+            TextButton(onClick = onReset) {
                 Text("Reset")
             }
         }
@@ -267,35 +264,55 @@ fun AppointmentManageScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Appointment cards list
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(appointments) { appt ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "${appt.startTime} - ${appt.endTime}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = appt.status.title,
-                                color = appt.status.color,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Text(text = "Patient: ${appt.patientName}")
-                        Text(text = "Doctor: ${appt.doctorName}")
-                        Text(text = "Type: ${appt.type}")
-                        Text(text = "Address: ${appt.address}")
-                    }
+        if (uiState.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.error != null) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: ${uiState.error}")
+            }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(uiState.appointments) { appt ->
+                    AppointmentCard(appt = appt)
                 }
             }
         }
     }
 }
+
+@Composable
+fun AppointmentCard(appt: Appointment) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${appt.startTime} - ${appt.endTime}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = appt.status.title,
+                    color = appt.status.color,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(text = "Patient: ${appt.patientName}")
+            Text(text = "Doctor: ${appt.doctorName}")
+            Text(text = "Type: ${appt.type}")
+            Text(text = "Address: ${appt.address}")
+        }
+    }
+}
+
+
 
 // Sample Preview Data
 private val sampleAppointments = listOf(
@@ -305,8 +322,8 @@ private val sampleAppointments = listOf(
         doctorName = "Dr. Smith",
         type = "Consultation",
         appointmentDate = "2025-04-30",
-        startTime = "09:00 AM",
-        endTime = "09:30 AM",
+        startTime = "09:00",
+        endTime = "09:30",
         address = "123 Main St",
         status = AppointmentStatus.PENDING
     ),
@@ -316,21 +333,20 @@ private val sampleAppointments = listOf(
         doctorName = "Dr. Wong",
         type = "Checkup",
         appointmentDate = "2025-04-30",
-        startTime = "10:00 AM",
-        endTime = "10:30 AM",
+        startTime = "10:00",
+        endTime = "10:30",
         address = "456 Elm St",
         status = AppointmentStatus.COMPLETED
     )
 )
 
-private val sampleDoctors = listOf("Dr. Smith", "Dr. Wong", "Dr. Patel")
-
 @Preview(showBackground = true)
 @Composable
 fun AppointmentManageScreenPreview() {
     AppointmentManageScreenContent(
-        appointments = sampleAppointments,
-        doctors = sampleDoctors,
+        uiState = AppointmentUiState(appointments = sampleAppointments),
+        onRangeChange = {},
+        onDateChange = {},
         onFilterChange = {},
         onSortChange = {},
         onReset = {}
