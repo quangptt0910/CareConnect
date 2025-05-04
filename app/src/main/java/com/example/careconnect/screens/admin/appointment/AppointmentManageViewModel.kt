@@ -40,7 +40,7 @@ data class AppointmentUiState(
     val selectedRange: TimeRange = TimeRange.Day,
     val currentDate: LocalDate = LocalDate.now(),
 
-    val filterStatus: AppointmentStatus? = null,
+    val filterStatus: Set<AppointmentStatus?> = emptySet(),
     val sortOption: SortOption = SortOption.TimeAsc
 )
 
@@ -55,7 +55,7 @@ class AppointmentManageViewModel @Inject constructor(
     // Controls
     private val _selectedRange = MutableStateFlow(TimeRange.Day)
     private val _currentDate   = MutableStateFlow(LocalDate.now())
-    private val _filterStatus  = MutableStateFlow<AppointmentStatus?>(null)
+    private val _filterStatus  = MutableStateFlow<Set<AppointmentStatus?>>(emptySet())
     private val _sortOption    = MutableStateFlow(SortOption.TimeAsc)
 
     // Combined UI state
@@ -94,7 +94,7 @@ class AppointmentManageViewModel @Inject constructor(
             }
             // apply filter and sort
             rawFlow.map { list ->
-                list.filter { state.filterStatus == null || it.status == state.filterStatus }
+                list.filter { state.filterStatus.isEmpty() || it.status in state.filterStatus }
                     .let { filtered ->
                         when(state.sortOption) {
                             SortOption.TimeAsc    -> filtered.sortedBy { it.startTime }
@@ -121,10 +121,10 @@ class AppointmentManageViewModel @Inject constructor(
     // UI event handlers
     fun setRange(range: TimeRange)  { _selectedRange.value = range }
     fun setDate(date: LocalDate)   { _currentDate.value   = date }
-    fun setFilter(status: AppointmentStatus?) { _filterStatus.value = status }
+    fun setFilter(status: Set<AppointmentStatus?>) { _filterStatus.value = status }
     fun setSort(option: SortOption)  { _sortOption.value  = option }
     fun resetAll() {
-        _filterStatus.value = null
+        _filterStatus.value = emptySet()
         _sortOption.value   = SortOption.TimeAsc
     }
 }

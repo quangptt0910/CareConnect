@@ -32,15 +32,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.screens.patient.home.SnackBarMessage
 import com.example.careconnect.screens.patient.home.LoadingIndicator
+import com.example.careconnect.screens.patient.home.SnackBarMessage
 import com.example.careconnect.screens.patient.home.SuggestionsList
 
 /**
  * Composable function for displaying a search bar and search results.
  *
  * @param uiState UI state containing search information.
- * @param onProductSelected Callback for selecting products.
+ * @param onDoctorSelected Callback for selecting doctor.
  * @param onSearchQueryChange Callback for updating search queries.
  */
 @ExperimentalMaterial3Api

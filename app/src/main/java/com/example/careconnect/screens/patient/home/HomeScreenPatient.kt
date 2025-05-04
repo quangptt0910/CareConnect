@@ -149,7 +149,7 @@ fun HomeScreenPatientContent(
                     }
                 }
             },
-            sheetPeekHeight = 400.dp, // The visible height when collapsed
+            sheetPeekHeight = 200.dp, // The visible height when collapsed
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         ) { paddingValues ->
             Column(modifier = Modifier.padding(16.dp)) {

@@ -65,7 +65,7 @@ class ChatViewModel @Inject constructor(
     }
 
     fun getMessages(chatId: String){
-        viewModelScope.launch {
+        launchCatching {
             messages = chatMessagesRepository.getMessages(chatId)
         }
 
@@ -94,7 +94,7 @@ class ChatViewModel @Inject constructor(
             _messages.add(newMessage)
 
             // Send message to Firebase
-            viewModelScope.launch {
+            launchCatching {
                 chatRemoteDataSource.sendMessage(chatId, newMessage)
             }
         }
