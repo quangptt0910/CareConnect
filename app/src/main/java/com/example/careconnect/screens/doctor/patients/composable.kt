@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -170,7 +177,7 @@ fun MedicalCategoryCard(iconResId: Int, title: String, onClick: () -> Unit) {
             .clickable { onClick() }
     ) {
         Column(
-            modifier = Modifier.padding(10.dp).height(90.dp).width(100.dp),
+            modifier = Modifier.padding(10.dp).height(90.dp).width(95.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -204,3 +211,139 @@ fun CategoryRow(items: List<Pair<Int, String>>) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun SymptomsSection(
+    symptomsList: MutableList<String>,
+    symptoms: String,
+    onSymptomChange: (String) -> Unit,
+    onAddSymptom: (String) -> Unit,
+    onRemoveSymptom: (String) -> Unit
+) {
+    val allSymptoms = listOf(
+        "Headache", "Dizziness", "Numbness", "Tingling", "Seizures",
+        "Confusion", "Cough", "Shortness of breath", "Chest tightness", "Wheezing",
+        "Sore throat", "Chest pain", "Palpitations", "Fainting", "Swelling in legs",
+        "Nausea", "Vomiting", "Diarrhea", "Constipation", "Abdominal pain",
+        "Heartburn", "Fatigue", "Fever", "Rash", "Itching", "Anxiety", "Depression"
+    )
+
+    var expanded by remember { mutableStateOf(false) }
+    val filteredSuggestions = allSymptoms.filter {
+        it.contains(symptoms, ignoreCase = true) && it !in symptomsList
+    }
+
+    Column(modifier = Modifier
+        .width(300.dp)
+        .padding(0.dp)) {
+
+        Text(
+            text = "Symptoms",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = symptoms,
+                onValueChange = {
+                    onSymptomChange(it)
+                    expanded = true
+                },
+                label = { Text("Type or select symptom") },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded && filteredSuggestions.isNotEmpty(),
+                onDismissRequest = { expanded = false }
+            ) {
+                filteredSuggestions.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            onAddSymptom(suggestion)
+                            onSymptomChange("")
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        if (symptoms.isNotBlank() && symptoms !in symptomsList) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = {
+                onAddSymptom(symptoms)
+                onSymptomChange("")
+                expanded = false
+            }) {
+                Text("Add Custom Symptom")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        FlowRow( // Layout that wraps chips
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            symptomsList.forEach { tag ->
+                AssistChip(
+                    onClick = { onRemoveSymptom(tag) },
+                    label = { Text(tag) },
+                    modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun TagInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onAdd: (String) -> Unit,
+    tags: List<String>,
+    onRemove: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text("Enter symptom and press 'Add'") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+            tags.forEach { tag ->
+                Card(
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .clickable { onRemove(tag) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                ) {
+                    Text(
+                        text = tag,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = { onAdd(value) }, enabled = value.isNotBlank()) {
+            Text("Add Symptom")
+        }
+    }
+}

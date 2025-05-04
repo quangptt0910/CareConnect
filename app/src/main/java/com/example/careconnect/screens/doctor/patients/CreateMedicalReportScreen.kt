@@ -12,6 +12,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +34,9 @@ fun CreateMedicalReportScreen(
 @Composable
 fun CreateMedicalReportScreenContent(
 ){
+    var symptoms by rememberSaveable { mutableStateOf("") }
+    val symptomsList = remember { mutableStateListOf<String>() }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -59,53 +68,62 @@ fun CreateMedicalReportScreenContent(
                     modifier = Modifier.padding(3.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-
-                TextFieldDoctor(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Symptoms"
-                )
-                TextFieldDoctor(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Diagnosis"
-                )
-                TextFieldDoctor(
-                    "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Prognosis"
-                )
-                TextFieldDoctor(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Treatment"
-                )
-                TextFieldDoctor(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Recommendations"
-                )
-                TextFieldDoctor(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier,
-                    label = "Plan of Care"
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { /* Handle button click */ },
-                    modifier = Modifier.width(200.dp).height(40.dp)
-                ) {
-                    Text("Submit medical report")
-                }
             }
+
+            item {
+                SymptomsSection(
+                    symptomsList = symptomsList,
+                    symptoms = symptoms,
+                    onSymptomChange = { symptoms = it },
+                    onAddSymptom = {
+                        symptomsList.add(it)
+                    },
+                    onRemoveSymptom = {
+                        symptomsList.remove(it)
+                    }
+                )
+            }
+        item {
+            TextFieldDoctor(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier,
+                label = "Diagnosis"
+            )
+            TextFieldDoctor(
+                "",
+                onValueChange = {},
+                modifier = Modifier,
+                label = "Prognosis"
+            )
+            TextFieldDoctor(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier,
+                label = "Treatment"
+            )
+            TextFieldDoctor(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier,
+                label = "Recommendations"
+            )
+            TextFieldDoctor(
+                value = "",
+                onValueChange = {},
+                modifier = Modifier,
+                label = "Plan of Care"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { /* Handle button click */ },
+                modifier = Modifier.width(200.dp).height(40.dp)
+            ) {
+                Text("Submit medical report")
+            }
+        }
         }
     }
 }

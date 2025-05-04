@@ -44,12 +44,13 @@ fun PatientsProfileScreenContent(
         SmallTopAppBarExample3()
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize().padding(top = 85.dp),
             horizontalAlignment = CenterHorizontally
         ) {
+
             item {
                 ElevatedCard(
-                    modifier = Modifier.padding(top = 85.dp, start = 16.dp, end = 16.dp)
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
                         .fillMaxWidth()
                 ) {
                     Text(
