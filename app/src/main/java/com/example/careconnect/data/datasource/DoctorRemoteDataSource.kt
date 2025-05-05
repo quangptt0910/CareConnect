@@ -176,6 +176,54 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
+        val dateKey = date.toDateString()
+        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(doctorRef)
+            val doctor = snapshot.toObject(Doctor::class.java)
+            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
+
+            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
+
+            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
+            updatedSchedule[dateKey] = currentSlots
+
+            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
+        }.await()
+    }
+
+    suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
+        val dateKey = date.toDateString()
+        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(doctorRef)
+            val doctor = snapshot.toObject(Doctor::class.java)
+            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
+
+            // Remove if already exists (same start + end)
+            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
+            currentSlots.add(slot)
+
+            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
+            updatedSchedule[dateKey] = currentSlots
+
+            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
+        }.await()
+    }
+
+
+    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
+        val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
+        val doctor = snapshot.toObject(Doctor::class.java)
+        val dateKey = date.toDateString()
+        return doctor?.schedule?.workingDays?.get(dateKey) ?: emptyList()
+    }
+
+
+
     companion object {
         private const val DOCTORS_COLLECTION = "doctors"
         private const val PATIENTS_LIST_COLLECTION = "patients_list"
