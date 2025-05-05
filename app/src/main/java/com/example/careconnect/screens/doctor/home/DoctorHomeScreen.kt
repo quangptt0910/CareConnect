@@ -31,40 +31,46 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
-import com.example.careconnect.ui.theme.CareConnectTheme
+import com.example.careconnect.dataclass.Patient
 import java.time.LocalDate
 
 @Composable
-fun HomeScreenDoctor(
-    openSettingsScreen: () -> Unit
+fun DoctorHomeScreen(
+    openSettingsScreen: () -> Unit,
+    viewModel: DoctorHomeViewModel = hiltViewModel()
 ) {
-    HomeScreenDoctorContent(
-        openSettingsScreen = openSettingsScreen
+    val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
+    DoctorHomeScreenContent(
+        openSettingsScreen = openSettingsScreen,
+        patientList = patientList
     )
 }
 
 @Composable
-fun HomeScreenDoctorContent(
-    openSettingsScreen: () -> Unit = {}
-){
+fun DoctorHomeScreenContent(
+    openSettingsScreen: () -> Unit = {},
+    patientList: List<Patient> = emptyList()
+) {
     val date = LocalDate.now()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
-    ){
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(15.dp)
-        ){
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -80,9 +86,9 @@ fun HomeScreenDoctorContent(
 
                 // Go to notifications screen
                 IconButton(
-                    onClick = {  },
+                    onClick = { },
                     modifier = Modifier.align(Alignment.CenterVertically)
-                ){
+                ) {
                     Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
                 }
 
@@ -109,13 +115,13 @@ fun HomeScreenDoctorContent(
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
-            ){
+            ) {
                 Card(
                     modifier = Modifier.weight(1f).padding(3.dp),
                     elevation = CardDefaults.cardElevation(4.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
 
-                ){
+                ) {
                     Text(
                         text = "Appointment",
                         style = MaterialTheme.typography.bodyLarge,
@@ -124,7 +130,7 @@ fun HomeScreenDoctorContent(
                     )
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                    ){
+                    ) {
                         Text(
                             text = "5",
                             style = MaterialTheme.typography.bodyLarge,
@@ -144,16 +150,14 @@ fun HomeScreenDoctorContent(
                     elevation = CardDefaults.cardElevation(4.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
 
-                ){
+                ) {
                     Text(
                         text = "Patients",
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier
                             .fillMaxWidth().padding(5.dp)
                     )
-                    Row(
-
-                    ){
+                    Row {
                         Text(
                             text = "5",
                             style = MaterialTheme.typography.bodyLarge,
@@ -172,7 +176,7 @@ fun HomeScreenDoctorContent(
                     elevation = CardDefaults.cardElevation(4.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
 
-                ){
+                ) {
                     Text(
                         text = "Tasks",
                         style = MaterialTheme.typography.bodyLarge,
@@ -181,7 +185,7 @@ fun HomeScreenDoctorContent(
                     )
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                    ){
+                    ) {
                         Text(
                             text = "5",
                             style = MaterialTheme.typography.bodyLarge,
@@ -245,68 +249,81 @@ fun HomeScreenDoctorContent(
             Card(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 elevation = CardDefaults.cardElevation(4.dp)
-            ){
-                ListItem(
-                    headlineContent = { Text(text = "Name Surname") },
-                    colors = ListItemDefaults.colors(Color.LightGray)
-                )
-                ListItem(
-                    headlineContent = { Text(text = "Name Surname") },
-                    colors = ListItemDefaults.colors(Color.LightGray)
-                )
+            ) {
+                if (patientList.isEmpty()) {
+                    ListItem(
+                        headlineContent = { Text(text = "No patients found") },
+                        colors = ListItemDefaults.colors(Color.LightGray)
+                    )
+                } else {
+                    patientList.forEach { patient ->
+                        ListItem(
+                            headlineContent = { Text(text = "${patient.name} ${patient.surname}") },
+                            colors = ListItemDefaults.colors(Color.LightGray)
+                        )
+                    }
+                }
             }
 
+                Text(
+                    text = "Tasks",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(15.dp)
+                )
 
-            Text(
-                text = "Tasks",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(15.dp)
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ){
-                val (checkedState, onStateChange) = remember { mutableStateOf(true) }
-                Row(     Modifier. fillMaxWidth()
-                    .height(56.dp)
-                    .toggleable(value = checkedState,
-                        onValueChange = { onStateChange(!checkedState) },
-                        role = androidx.compose.ui.semantics.Role.Checkbox)
-                    .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment. CenterVertically
-                ){
-                    Checkbox(
-                        checked = checkedState,
-                        onCheckedChange = {}
-                    )
-                    Text(text = "Check me out",
-                        style = MaterialTheme.typography.bodyLarge,)
-
-
-                }
-                Row(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    elevation = CardDefaults.cardElevation(4.dp)
                 ) {
-                    IconButton(onClick = { /* View/Start consultation */ }) {
-                        Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.padding(start = 20.dp))
+                    val (checkedState, onStateChange) = remember { mutableStateOf(true) }
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .height(56.dp)
+                            .toggleable(
+                                value = checkedState,
+                                onValueChange = { onStateChange(!checkedState) },
+                                role = androidx.compose.ui.semantics.Role.Checkbox
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = checkedState,
+                            onCheckedChange = {}
+                        )
+                        Text(
+                            text = "Check me out",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+
 
                     }
-                    Text(
-                        text = "Add Task",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier
-                            .fillMaxWidth().padding(start = 16.dp, top = 13.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        IconButton(onClick = { /* View/Start consultation */ }) {
+                            Icon(
+                                Icons.Outlined.Add,
+                                contentDescription = null,
+                                modifier = Modifier.padding(start = 20.dp)
+                            )
+
+                        }
+                        Text(
+                            text = "Add Task",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .fillMaxWidth().padding(start = 16.dp, top = 13.dp)
+                        )
+                    }
                 }
             }
         }
     }
-}
 
 @Composable
 fun DailyAppointmentsSection(appointments: List<Appointment>) {
@@ -340,10 +357,11 @@ fun DailyAppointmentsSection(appointments: List<Appointment>) {
 }
 
 
-@Preview
-@Composable
-fun HomeScreenDoctorPreview() {
-    CareConnectTheme {
-        HomeScreenDoctorContent()
-    }
-}
+
+//@Preview
+//@Composable
+//fun HomeScreenDoctorPreview() {
+//    CareConnectTheme {
+//        DoctorHomeScreenContent()
+//    }
+//}

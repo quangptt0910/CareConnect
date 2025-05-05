@@ -2,16 +2,23 @@ package com.example.careconnect.data.datasource
 
 import android.util.Log
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.PatientRef
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toDateString
 import com.example.careconnect.dataclass.toLocalDate
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.dataObjects
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import javax.inject.Inject
@@ -112,53 +119,66 @@ class DoctorRemoteDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
-    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
-        val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
-        val doctor = snapshot.toObject(Doctor::class.java)
-        val dateKey = date.toDateString()
-        return doctor?.schedule?.workingDays?.get(dateKey) ?: emptyList()
+    fun addPatient(doctorId: String, patientId: String) {
+        Log.d("DoctorRemoteDataSource", "Adding patient with ID $patientId to doctor with ID $doctorId")
+        val patientRef = mapOf("addedAt" to FieldValue.serverTimestamp())
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(PATIENTS_LIST_COLLECTION).document(patientId).set(patientRef)
     }
 
-    suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
-        val dateKey = date.toDateString()
-        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+    // Get full patient details for a doctor
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getPatientsList(doctorId: Flow<String?>): Flow<List<Patient>> {
+        Log.d("DoctorRemoteDataSource", "Getting patients list for doctor with ID $doctorId")
+        println("DEBUG: Getting patients list for doctor with ID $doctorId")
+        return doctorId
+            .filterNotNull()
+            .flatMapLatest { ownerId ->
+                println("DEBUG: Fetching patients list for doctor with ID $ownerId")
+                firestore.collection(DOCTORS_COLLECTION)
+                    .document(ownerId)
+                    .collection(PATIENTS_LIST_COLLECTION)
+                    .orderBy("addedAt", Query.Direction.DESCENDING)
+                    .dataObjects<PatientRef>()
+                    .map { patientRefs ->
+                        println("DEBUG: 🔵 Found ${patientRefs.size} patient references")
+                        patientRefs.forEach { ref ->
+                            println("DEBUG:📋 Patient reference: patientId=${ref.id}")
+                        }
+                        patientRefs.mapNotNull { patientRef ->
+                            val patientDocument = firestore.collection(PATIENTS_COLLECTION)
+                                .document(patientRef.id)
+                                .get()
+                                .await()
 
-        firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java)
-            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
+                            if (!patientDocument.exists()) {
+                                println("DEBUG: ❌ Patient document does not exist for ID: ${patientRef.id}")
+                                return@mapNotNull null
+                            }
 
-            // Remove if already exists (same start + end)
-            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
-            currentSlots.add(slot)
-
-            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
-            updatedSchedule[dateKey] = currentSlots
-
-            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
-        }.await()
+                            val patients = patientDocument.toObject(Patient::class.java)
+                            println("DEBUG: 🟢 Found patient: $patients")
+                            patients
+                        }
+                    }
+        }
     }
 
-    suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
-        val dateKey = date.toDateString()
-        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
-
-        firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java)
-            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
-
-            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
-
-            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
-            updatedSchedule[dateKey] = currentSlots
-
-            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
-        }.await()
+    // Get a single patient by ID
+    private suspend fun getPatientById(patientId: String): Patient? {
+        return try {
+            firestore.collection(PATIENTS_COLLECTION)
+                .document(patientId)
+                .get()
+                .await()
+                .toObject(Patient::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
-
 
     companion object {
         private const val DOCTORS_COLLECTION = "doctors"
+        private const val PATIENTS_LIST_COLLECTION = "patients_list"
+        private const val PATIENTS_COLLECTION = "patients"
     }
 }

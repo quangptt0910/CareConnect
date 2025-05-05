@@ -59,5 +59,9 @@ enum class Gender {
     MALE, FEMALE, OTHER
 }
 
-
+// Data class to hold the reference to a patient
+data class PatientRef(
+    @DocumentId val id: String = "",
+    @ServerTimestamp val addedAt: Date? = null
+)
 

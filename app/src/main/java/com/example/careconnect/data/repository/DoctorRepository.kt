@@ -2,7 +2,7 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.DoctorRemoteDataSource
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.dataclass.TimeSlot
+import com.example.careconnect.dataclass.Patient
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
@@ -38,18 +38,13 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getWorkingDays(doctorId)
     }
 
-    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
-        return doctorRemoteDataSource.getScheduleForDate(doctorId, date)
+    fun getPatientsList(doctorId: Flow<String?>): Flow<List<Patient>> {
+        return doctorRemoteDataSource.getPatientsList(doctorId)
     }
 
-    suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
-        doctorRemoteDataSource.saveSlot(doctorId, date, slot)
+    fun addPatient(doctorId: String, patientId: String) {
+        doctorRemoteDataSource.addPatient(doctorId, patientId)
     }
-
-    suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
-        doctorRemoteDataSource.deleteSlot(doctorId, date, slot)
-    }
-
 
 
 }

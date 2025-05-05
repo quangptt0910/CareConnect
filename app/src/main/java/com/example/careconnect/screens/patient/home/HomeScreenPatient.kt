@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Specialization
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -89,15 +90,7 @@ fun HomeScreenPatientContent(
         skipHiddenState = true // Prevents dismissal
     )
     val scope = rememberCoroutineScope()
-
-    // List of doctor specialties
-    val specialties = listOf(
-        "Cardiologist", "Dermatologist", "Neurologist", "Pediatrician",
-        "Orthopedic Surgeon", "Gynecologist", "Ophthalmologist", "Dentist"
-    )
     val date = LocalDate.now()
-
-
 
     val items =
         listOf(
@@ -131,25 +124,24 @@ fun HomeScreenPatientContent(
                     LazyColumn(
                         modifier = Modifier.fillMaxHeight(0.5f) // Expandable up to 50% screen height
                     ) {
-                        items(specialties) { specialty ->
+                        items(Specialization.all()) { specialty ->
+                            val displayName = specialty.displayName().toString()
                             Text(
-                                text = specialty,
+                                text = displayName,
                                 fontSize = 16.sp,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
-                                    .clickable(
-                                        onClick = {
-                                            openDoctorsOverviewScreen(specialty)
-                                        }
-                                    )
+                                    .clickable{
+                                        openDoctorsOverviewScreen(displayName)
+                                    }
                             )
                             HorizontalDivider()
                         }
                     }
                 }
             },
-            sheetPeekHeight = 200.dp, // The visible height when collapsed
+            sheetPeekHeight = 150.dp, // The visible height when collapsed
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         ) { paddingValues ->
             Column(modifier = Modifier.padding(16.dp)) {

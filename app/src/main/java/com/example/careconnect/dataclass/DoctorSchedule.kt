@@ -34,6 +34,8 @@ data class TimeSlot(
 
 }
 
+
+
 // Extension functions to help with date conversions
 fun LocalDate.toDateString(): String = this.toString() // Returns in ISO format (YYYY-MM-DD)
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this) // Parses from ISO format (YYYY-MM-DD)

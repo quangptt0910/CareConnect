@@ -14,14 +14,11 @@ class ChatMessagesRemoteDataSource @Inject constructor(
 ) {
     suspend fun sendMessage(chatId: String, message: Message) {
         currentCollection(chatId).add(message).await()
-
         addChatRoomDataSource.updateChatRoom(chatId, message.text, message.timestamp)
     }
 
     suspend fun getMessages(chatId: String): List<Message> {
-        val chatSnapshot = firestore.collection("chatrooms")
-            .document(chatId)
-            .collection("messages")
+        val chatSnapshot = currentCollection(chatId)
             .orderBy("timestamp")
             .get()
             .await()
