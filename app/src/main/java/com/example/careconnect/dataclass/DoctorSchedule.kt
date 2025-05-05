@@ -12,12 +12,14 @@ import java.time.LocalDate
 data class DoctorSchedule(
     val workingDays: Map<String, List<TimeSlot>> = emptyMap(),  // Map of day names to a list of available time slots>
     val defaultWorkingHours: List<TimeSlot> = listOf(
-        TimeSlot("09:00", "12:00"),
-        TimeSlot("14:00", "18:00")
+        TimeSlot("09:00", "12:00", appointmentMinutes = 20),
+        TimeSlot("14:00", "18:00", appointmentMinutes = 30)
     )
 ) {
 
 }
+
+enum class SlotType { CONSULT, SURGERY}
 
 /**
  * Represents a time slot for a doctor's schedule.
@@ -25,6 +27,8 @@ data class DoctorSchedule(
 data class TimeSlot(
     val startTime: String = "",  // Start time HH:MM (e.g., "09:00")
     val endTime: String = "",    // End time HH:MM (e.g., "09:15")
+    val appointmentMinutes: Int = 15,
+    val slotType: SlotType = SlotType.CONSULT,
     val isAvailable: Boolean = true  // Whether the time slot is available for booking
 ) {
 
