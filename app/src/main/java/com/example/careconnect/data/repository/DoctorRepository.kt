@@ -2,6 +2,7 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.DoctorRemoteDataSource
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
@@ -37,6 +38,13 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getWorkingDays(doctorId)
     }
 
+    fun getPatientsList(doctorId: Flow<String?>): Flow<List<Patient>> {
+        return doctorRemoteDataSource.getPatientsList(doctorId)
+    }
+
+    fun addPatient(doctorId: String, patientId: String) {
+        doctorRemoteDataSource.addPatient(doctorId, patientId)
+    }
 
 
 }

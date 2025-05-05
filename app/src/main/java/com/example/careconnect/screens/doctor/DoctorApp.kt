@@ -8,12 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.SnackBarMessage
-import com.example.careconnect.screens.doctor.home.HomeScreenDoctor
+import com.example.careconnect.screens.doctor.home.DoctorHomeScreen
 import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.settings.SettingsScreen
-import com.example.careconnect.ui.navigation.Route.HOME_DOCTOR_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 
@@ -39,7 +38,7 @@ fun DoctorApp(
             modifier = Modifier.padding(it)
         ) {
             composable(BarRoutesDoctor.FEED.route) {
-                HomeScreenDoctor(
+                DoctorHomeScreen(
                     openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
                 )
             }
@@ -50,6 +49,11 @@ fun DoctorApp(
                     }
                 )
             }
+
+            composable(BarRoutesDoctor.PATIENTS.route) {
+
+            }
+
             composable(BarRoutesDoctor.PROFILE.route) {
 
             }
@@ -61,11 +65,11 @@ fun DoctorApp(
                 )
             }
 
-            composable(HOME_DOCTOR_ROUTE) {
-                HomeScreenDoctor(
-                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
-                )
-            }
+//            composable(HOME_DOCTOR_ROUTE) {
+//                DoctorHomeScreen(
+//                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
+//                )
+//            }
         }
     }
 }
