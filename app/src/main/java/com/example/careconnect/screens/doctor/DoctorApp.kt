@@ -11,6 +11,7 @@ import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.doctor.home.DoctorHomeScreen
 import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
+import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
@@ -55,7 +56,10 @@ fun DoctorApp(
             }
 
             composable(BarRoutesDoctor.PROFILE.route) {
-
+                ScheduleScreen(
+                    //openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
+                    showSnackBar = showSnackBar
+                )
             }
 
             composable(SETTINGS_ROUTE) {

@@ -177,52 +177,131 @@ class DoctorRemoteDataSource @Inject constructor(
     }
 
     suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
+        if (doctorId.isEmpty()) return
+
         val dateKey = date.toDateString()
         val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
 
         firestore.runTransaction { transaction ->
             val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java)
-            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
+            val doctor = snapshot.toObject(Doctor::class.java) ?: throw IllegalStateException("Doctor not found")
 
-            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
+            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: return@runTransaction
 
-            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
-            updatedSchedule[dateKey] = currentSlots
+            // Find and remove the specific slot
+            val removedIndex = currentSlots.indexOfFirst {
+                it.startTime == slot.startTime && it.endTime == slot.endTime
+            }
 
-            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
+            if (removedIndex >= 0) {
+                currentSlots.removeAt(removedIndex)
+
+                // Update Firestore with the new list
+                transaction.update(doctorRef, "schedule.workingDays.$dateKey", currentSlots)
+
+                // Update cache
+                cachedSchedules[doctorId]?.let { doctorCache ->
+                    val cachedSlots = doctorCache[dateKey]?.toMutableList()
+                    cachedSlots?.let {
+                        it.removeAll { cachedSlot ->
+                            cachedSlot.startTime == slot.startTime && cachedSlot.endTime == slot.endTime
+                        }
+                        doctorCache[dateKey] = it
+                    }
+                }
+            }
         }.await()
     }
 
     suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
+        if (doctorId.isEmpty()) return
+
         val dateKey = date.toDateString()
         val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
 
         firestore.runTransaction { transaction ->
             val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java)
-            val currentSlots = doctor?.schedule?.workingDays?.get(dateKey)?.toMutableList() ?: mutableListOf()
+            val doctor = snapshot.toObject(Doctor::class.java) ?: throw IllegalStateException("Doctor not found")
 
-            // Remove if already exists (same start + end)
-            currentSlots.removeAll { it.startTime == slot.startTime && it.endTime == slot.endTime }
-            currentSlots.add(slot)
+            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: mutableListOf()
 
-            val updatedSchedule = doctor?.schedule?.workingDays?.toMutableMap() ?: mutableMapOf()
+            // Find existing slot with same time (more efficient than removeAll)
+            val existingIndex = currentSlots.indexOfFirst {
+                it.startTime == slot.startTime && it.endTime == slot.endTime
+            }
+
+            if (existingIndex >= 0) {
+                currentSlots[existingIndex] = slot // Replace existing
+            } else {
+                currentSlots.add(slot) // Add new
+            }
+
+            // Sort slots by start time for better UI experience
+            currentSlots.sortBy { it.startTime }
+
+            // Update Firestore
+            val updatedSchedule = doctor.schedule.workingDays.toMutableMap()
             updatedSchedule[dateKey] = currentSlots
 
-            transaction.update(doctorRef, "schedule.workingDays", updatedSchedule)
+            transaction.update(doctorRef, "schedule.workingDays.$dateKey", currentSlots)
         }.await()
+
+        // Update cache
+        val doctorCache = cachedSchedules.getOrPut(doctorId) { mutableMapOf() }
+        val currentCachedSlots = doctorCache[dateKey]?.toMutableList() ?: mutableListOf()
+
+        val existingIndex = currentCachedSlots.indexOfFirst {
+            it.startTime == slot.startTime && it.endTime == slot.endTime
+        }
+
+        if (existingIndex >= 0) {
+            currentCachedSlots[existingIndex] = slot
+        } else {
+            currentCachedSlots.add(slot)
+        }
+
+        currentCachedSlots.sortBy { it.startTime }
+        doctorCache[dateKey] = currentCachedSlots
     }
 
 
     suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
-        val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
-        val doctor = snapshot.toObject(Doctor::class.java)
+        if (doctorId.isEmpty()) return emptyList()
         val dateKey = date.toDateString()
-        return doctor?.schedule?.workingDays?.get(dateKey) ?: emptyList()
+
+        // Use cache if available
+        cachedSchedules[doctorId]?.let { doctorCache ->
+            doctorCache[dateKey]?.let { slots ->
+                return slots
+            }
+        }
+
+        return try {
+            val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
+            val doctor = snapshot.toObject(Doctor::class.java)
+            val slots = doctor?.schedule?.workingDays?.get(dateKey) ?: emptyList()
+
+            // Update cache
+            val doctorCache = cachedSchedules.getOrPut(doctorId) { mutableMapOf() }
+            doctorCache[dateKey] = slots
+
+            slots
+        } catch (e: Exception) {
+            Log.e("DoctorRemoteDataSource", "Error getting doctor", e)
+            emptyList()
+        }
     }
 
+    private val cachedSchedules = mutableMapOf<String, MutableMap<String, List<TimeSlot>>>()
 
+    // Add clearing cache function
+    fun clearCache(doctorId: String? = null) {
+        if (doctorId != null) {
+            cachedSchedules.remove(doctorId)
+        } else {
+            cachedSchedules.clear()
+        }
+    }
 
     companion object {
         private const val DOCTORS_COLLECTION = "doctors"

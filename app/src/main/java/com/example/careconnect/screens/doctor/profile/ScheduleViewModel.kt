@@ -1,74 +1,141 @@
 package com.example.careconnect.screens.doctor.profile
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
+import com.example.careconnect.R
+import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.TimeSlot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
+
+
+data class ScheduleUiState(
+    val selectedDate: LocalDate = LocalDate.now(),
+    val slots: List<TimeSlot> = emptyList(),
+    val isLoading: Boolean = false,
+    val dialogState: DialogState = DialogState(),
+)
+
+data class DialogState(
+    val isOpen: Boolean = false,
+    val editingSlot: TimeSlot? = null
+)
 
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
-    private val repo: DoctorRepository
+    private val repo: DoctorRepository,
+    authRepository: AuthRepository
 ): MainViewModel() {
+
     private val _selectedDate = MutableStateFlow(LocalDate.now())
-    val selectedDate: StateFlow<LocalDate> = _selectedDate
-
     private val _slots = MutableStateFlow<List<TimeSlot>>(emptyList())
-    val slots: StateFlow<List<TimeSlot>> = _slots
+    private val _isLoading = MutableStateFlow(false)
+    private val _dialogState = MutableStateFlow(DialogState())
 
-    private var currentUserId =  "123"
+    private var currentUserId =  authRepository.currentUserIdFlow.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+   // val doctorId = currentUserId.value.toString()
 
-    var dialogState by mutableStateOf(DialogState(isOpen = false, editingSlot = null))
-        private set
+    // Expose a single UI state combining all flows
+    val uiState: StateFlow<ScheduleUiState> = combine(
+        _selectedDate,
+        _slots,
+        _isLoading,
+        _dialogState,
+        currentUserId
+    ) { date, slots, isLoading, dialogState, userId ->
+        ScheduleUiState(
+            selectedDate = date,
+            slots = slots,
+            isLoading = isLoading,
+            dialogState = dialogState,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ScheduleUiState()
+    )
+
 
     init {
-        loadSlotsFor(_selectedDate.value)
+        launchCatching {
+            // Load only when doctor id is valid
+            currentUserId.collect { userId ->
+                if (userId!!.isNotEmpty()) {
+                    loadSlotsFor(_selectedDate.value, userId)
+                }
+            }
+        }
     }
 
-    fun selectDate(date: LocalDate) {
+    fun selectDate(date: LocalDate, showSnackBar: (SnackBarMessage) -> Unit) {
         _selectedDate.value = date
-        loadSlotsFor(date)
+        val doctorId = currentUserId.value.toString()
+        launchCatching(showSnackBar) {
+            if (doctorId.isNotEmpty()) {
+                loadSlotsFor(date, doctorId)
+            }
+        }
     }
 
-    private fun loadSlotsFor(date: LocalDate) {
-        viewModelScope.launch {
-            val schedule = repo.getScheduleForDate(currentUserId, date)
+    private suspend fun loadSlotsFor(date: LocalDate, doctorId: String) {
+        _isLoading.value = true
+        try {
+            val schedule = repo.getScheduleForDate(doctorId, date)
             _slots.value = schedule
+        } catch (e: Exception) {
+            // Handle error - could emit to a UI error channel
+            throw e
+        } finally {
+            _isLoading.value = false
         }
     }
 
     fun showSlotDialog(slot: TimeSlot?) {
-        dialogState = DialogState(isOpen = true, editingSlot = slot)
+        _dialogState.value = DialogState(isOpen = true, editingSlot = slot)
     }
 
     fun closeDialog() {
-        dialogState = DialogState(isOpen = false, editingSlot = null)
+        _dialogState.value = DialogState(isOpen = false, editingSlot = null)
     }
 
-    fun addOrUpdateSlot(date: LocalDate, slot: TimeSlot) {
-        viewModelScope.launch {
-            repo.saveSlot(currentUserId, date, slot)
-            loadSlotsFor(date)
+    fun addOrUpdateSlot(slot: TimeSlot, showSnackBar: (SnackBarMessage) -> Unit) {
+        val doctorId = currentUserId.value.toString()
+        launchCatching(showSnackBar) {
+            if (doctorId.isNotEmpty()) {
+                repo.saveSlot(doctorId, _selectedDate.value, slot)
+                loadSlotsFor(_selectedDate.value, doctorId)
+                closeDialog()
+                showSnackBar(SnackBarMessage.IdMessage(R.string.slot_saved))
+            } else {
+                // Handle error - could emit to a UI error channel
+                showSnackBar(SnackBarMessage.IdMessage(R.string.generic_error))
+                throw Exception("Doctor ID is empty")
+            }
+
         }
     }
 
-    fun removeSlot(date: LocalDate, slot: TimeSlot) {
-        viewModelScope.launch {
-            repo.deleteSlot(currentUserId, date, slot)
-            loadSlotsFor(date)
+    fun removeSlot(slot: TimeSlot, showSnackBar: (SnackBarMessage) -> Unit) {
+        val doctorId = currentUserId.value.toString()
+        launchCatching(showSnackBar) {
+            if (doctorId.isNotEmpty()) {
+                repo.deleteSlot(doctorId, _selectedDate.value, slot)
+                loadSlotsFor(_selectedDate.value, doctorId)
+                closeDialog()
+                showSnackBar(SnackBarMessage.IdMessage(R.string.slot_deleted))
+            } else {
+                showSnackBar(SnackBarMessage.IdMessage(R.string.generic_error))
+                throw Exception("Doctor ID is empty")
+            }
         }
     }
 }
 
-data class DialogState(
-    val isOpen: Boolean,
-    val editingSlot: TimeSlot?
-)

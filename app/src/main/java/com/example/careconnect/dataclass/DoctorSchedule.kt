@@ -19,7 +19,7 @@ data class DoctorSchedule(
 
 }
 
-enum class SlotType { CONSULT, SURGERY}
+enum class SlotType { CONSULT, SURGERY }
 
 /**
  * Represents a time slot for a doctor's schedule.
