@@ -2,6 +2,7 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.datasource.AuthRemoteDataSource.UserData
+import com.example.careconnect.dataclass.Patient
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -36,5 +37,9 @@ class AuthRepository @Inject constructor(
 
     suspend fun deleteAccount() {
         authRemoteDataSource.deleteAccount()
+    }
+
+    suspend fun getPatientById(patientId: String): Patient? {
+        return authRemoteDataSource.getPatientById(patientId)
     }
 }

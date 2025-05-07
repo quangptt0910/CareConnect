@@ -45,6 +45,7 @@ object Route {
     const val DOCTOR_CHAT_ROUTE = "doctor/chat"
     const val DOCTOR_CHAT_MENU_ROUTE = "doctor/chat/menu"
     const val DOCTOR_PATIENTS_ROUTE = "doctor/patients"
+    const val DOCTOR_PATIENTS_PROFILE_ROUTE = "doctor/patients/profile/{patientId}"
 
 
     // Route with parameter helper
@@ -63,6 +64,8 @@ object Route {
     fun getPatientDoctorsProfileRoute(doctorId: String) =
         "patient/doctors/profile/$doctorId"
 
+    fun getDoctorPatientsProfileRoute(patientId: String) =
+        "doctor/patients/profile/$patientId"
 }
 
 @Stable

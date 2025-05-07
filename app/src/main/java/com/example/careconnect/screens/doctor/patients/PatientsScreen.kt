@@ -12,28 +12,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
-import com.example.careconnect.dataclass.Gender
-import com.example.careconnect.dataclass.MedicalHistory
 import com.example.careconnect.dataclass.Patient
-import com.example.careconnect.dataclass.Role
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun PatientsScreen(
-
+    viewModel: PatientsViewModel = hiltViewModel(),
+    openPatientsProfile: (patientId: String) -> Unit = {}
 ){
-    PatientsScreenContent()
+    val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
+    PatientsScreenContent(
+        patientList = patientList,
+        openPatientsProfile = openPatientsProfile
+    )
 }
 
 @Composable
 fun PatientsScreenContent(
-
+    patientList: List<Patient> = emptyList(),
+    openPatientsProfile: (patientId: String) -> Unit = {}
 ){
    Surface(
        modifier = Modifier.fillMaxSize(),
@@ -55,26 +61,11 @@ fun PatientsScreenContent(
 
            Spacer(modifier = Modifier.height(20.dp))
 
-           val patients = listOf(
-               Patient(
-                   id = "patient456",
-                   name = "Jane",
-                   surname = "Smith",
-                   email = "jane.smith@example.com",
-                   role = Role.PATIENT,
-                   phone = "987-654-3210",
-                   address = "456 Wellness Ave, Care Town",
-                   dateOfBirth = "1990-05-15",
-                   gender = Gender.FEMALE,
-                   height = 165.0, // Height in cm
-                   weight = 50.0,  // Weight in kg
-                   medicalHistory = MedicalHistory() // Assuming MedicalHistory has a default constructor
-               )
-           )
 
            FilledCardPatientsView(
                title = "Patients",
-               patients = patients,
+               patients = patientList,
+               onEditClick = { patientId -> openPatientsProfile(patientId) },
                onDeleteProduct = { /* Handle product deletion */ }
            )
        }

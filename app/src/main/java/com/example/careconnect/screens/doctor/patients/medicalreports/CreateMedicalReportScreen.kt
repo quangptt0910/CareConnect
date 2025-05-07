@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.doctor.patients
+package com.example.careconnect.screens.doctor.patients.medicalreports
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.careconnect.screens.doctor.patients.SymptomsSection
+import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable

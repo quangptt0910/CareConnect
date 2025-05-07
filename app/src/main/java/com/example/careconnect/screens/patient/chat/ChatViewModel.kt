@@ -1,6 +1,7 @@
 package com.example.careconnect.screens.patient.chat
 
 import android.net.Uri
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,11 +28,11 @@ class ChatViewModel @Inject constructor(
 ): MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
 //    val messages: List<Message> get() = _messages  // Publicly exposed list
+    private val _currentUser = mutableStateOf<Author?>(null)
+    private val currentUser: MutableState<Author?> = _currentUser
 
-    val me = Author(
-        id = Firebase.auth.currentUser?.uid ?: "",
-        name = Firebase.auth.currentUser?.displayName ?: "Me"
-    )
+    val me : Author
+        get() = currentUser.value ?: Author()
 
     private val chatRemoteDataSource = ChatMessagesRemoteDataSource(
         auth = Firebase.auth,
@@ -43,7 +44,7 @@ class ChatViewModel @Inject constructor(
     )
 
     // Simulated user IDs (in a real app, get from authentication)
-    val currentUser = Firebase.auth.currentUser?.uid ?: ""
+
     //private val otherUser = Author(id = "user_1", name = "Alice")
     //private val me = Author(id = MY_ID, name = "Me")
 
@@ -62,6 +63,10 @@ class ChatViewModel @Inject constructor(
 //                Message("1","I'm good, thanks! You?", otherUser, System.currentTimeMillis())
 //            )
 //        )
+    }
+
+    fun setCurrentUser(id: String, name: String){
+        _currentUser.value = Author(id = id, name = name)
     }
 
     fun getMessages(chatId: String){

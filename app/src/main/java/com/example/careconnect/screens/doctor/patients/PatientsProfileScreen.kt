@@ -20,22 +20,39 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
+import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun PatientsProfileScreen(
-
+    patientId: String,
+    viewModel: PatientsProfileViewModel = hiltViewModel()
 ){
-    PatientsProfileScreenContent()
+    LaunchedEffect(patientId) {
+        viewModel.loadPatient(patientId)
+    }
+
+    val patient by viewModel.patient.collectAsStateWithLifecycle()
+
+    PatientsProfileScreenContent(
+        patientId = patientId,
+        patient = patient
+    )
 }
 
 @Composable
 fun PatientsProfileScreenContent(
+    patientId: String,
+    patient: Patient? = null
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -44,7 +61,7 @@ fun PatientsProfileScreenContent(
         SmallTopAppBarExample3()
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize().padding(top = 85.dp),
+                .fillMaxSize().padding(top = 90.dp),
             horizontalAlignment = CenterHorizontally
         ) {
 
@@ -53,58 +70,61 @@ fun PatientsProfileScreenContent(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(
-                        text = "Name Surname",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = "Email",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = "Phone",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = "Address",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                }
+                    if (patient != null) {
+                        Text(
+                            text = patient.name + " " + patient.surname,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
 
-                Text(
-                    text = "Medical Information",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 20.dp)
-                )
+                        Text(
+                            text = "Email: ${patient.email}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            text = "Phone number: ${patient.phone}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            text = "Address: ${patient.address}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
 
-                ElevatedCard(
-                    modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp)
-                        .fillMaxWidth()
-                ) {
                     Text(
-                        text = "Gender",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
+                        text = "Medical Information",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 20.dp, start = 16.dp)
                     )
-                    Text(
-                        text = "Height",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = "Weight",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = "Date of Birth",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(10.dp)
-                    )
+
+                    ElevatedCard(
+                        modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Gender: ${patient?.gender}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            text = "Height: ${patient?.height}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            text = "Weight: ${patient?.weight}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                        Text(
+                            text = "Date of Birth: ${patient?.dateOfBirth}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
                 }
             }
 
@@ -205,7 +225,9 @@ fun SmallTopAppBarExample3() {
 @Composable
 fun PatientsProfileScreenPreview(){
     CareConnectTheme {
-        PatientsProfileScreenContent()
+        PatientsProfileScreenContent(
+            patientId = "1"
+        )
     }
 }
 

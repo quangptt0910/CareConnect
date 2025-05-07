@@ -58,8 +58,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-const val MY_ID = "user_me"
-
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
@@ -87,13 +85,20 @@ fun ChatScreenContent(
         color = MaterialTheme.colorScheme.background
     ) {
 
+        val currentUserId = model.me.id
         val chatName = model.chatRoom?.let {
-            if (it.doctor.id == MY_ID) it.patient.name else it.doctor.name
-        } ?: "Chat"
+            if (it.doctorId == currentUserId) {
+                it.patient.name
+            } else {
+                it.doctor.name
+            }
+        }
 
-        SmallTopAppBarExample(
-            name = chatName
-        )
+        if (chatName != null) {
+            SmallTopAppBarExample(
+                name = chatName
+            )
+        }
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (messages, chatBox) = createRefs()

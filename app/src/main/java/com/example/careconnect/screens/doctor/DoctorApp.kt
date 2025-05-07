@@ -11,10 +11,14 @@ import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.doctor.home.DoctorHomeScreen
 import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
+import com.example.careconnect.screens.doctor.patients.PatientsProfileScreen
+import com.example.careconnect.screens.doctor.patients.PatientsScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
+import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 
 @Composable
@@ -52,13 +56,22 @@ fun DoctorApp(
             }
 
             composable(BarRoutesDoctor.PATIENTS.route) {
-
+                PatientsScreen(
+                    openPatientsProfile = { patientId ->
+                        navController.navigate(getDoctorPatientsProfileRoute(patientId)) }
+                )
             }
 
             composable(BarRoutesDoctor.PROFILE.route) {
                 ScheduleScreen(
                     //openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
                     showSnackBar = showSnackBar
+                )
+            }
+
+            composable(DOCTOR_PATIENTS_PROFILE_ROUTE) { backStackEntry ->
+                PatientsProfileScreen(
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: ""
                 )
             }
 

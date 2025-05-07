@@ -55,6 +55,7 @@ fun FilledCardPatientsView(
     title : String,
     modifier: Modifier = Modifier,
     patients: List<Patient>,
+    onEditClick: (String) -> Unit,
     onDeleteProduct: (Patient) -> Unit,
 ) {
 
@@ -89,7 +90,7 @@ fun FilledCardPatientsView(
                             ) {
                                 IconButton(
                                     onClick = {
-
+                                        onEditClick(patients.id)
                                     }
                                 ) {
                                     Icon(
@@ -232,6 +233,7 @@ fun SymptomsSection(
     val filteredSuggestions = allSymptoms.filter {
         it.contains(symptoms, ignoreCase = true) && it !in symptomsList
     }
+    val uiColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary
 
     Column(modifier = Modifier
         .width(300.dp)
@@ -256,7 +258,31 @@ fun SymptomsSection(
                 label = { Text("Type or select symptom") },
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+            colors = TextFieldDefaults.colors(
+                // Text colors
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                disabledTextColor = Color.Gray,
+
+                // Container colors
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
+
+                // Border/Indicator colors
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+
+                // Label colors
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = uiColor.copy(alpha = 0.8f),
+
+                // Cursor color
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            shape = RoundedCornerShape(10.dp),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
             )
 
             ExposedDropdownMenu(
