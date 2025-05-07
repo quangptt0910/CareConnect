@@ -113,6 +113,8 @@ fun PatientApp(
                 )
             }
 
+
+
             composable(PATIENT_APPOINTMENTS_ROUTE){
                 BookAppointmentScreen(
 

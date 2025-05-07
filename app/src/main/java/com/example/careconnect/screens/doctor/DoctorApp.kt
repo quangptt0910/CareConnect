@@ -13,11 +13,17 @@ import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
 import com.example.careconnect.screens.doctor.patients.PatientsProfileScreen
 import com.example.careconnect.screens.doctor.patients.PatientsScreen
+import com.example.careconnect.screens.doctor.patients.medicalreports.CreateMedicalReportScreen
+import com.example.careconnect.screens.doctor.patients.medicalreports.MedicalReportsScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE
+import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
+import com.example.careconnect.ui.navigation.Route.getDoctorPatientsCreateMedicalReportRoute
+import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalReportRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 
@@ -71,6 +77,24 @@ fun DoctorApp(
 
             composable(DOCTOR_PATIENTS_PROFILE_ROUTE) { backStackEntry ->
                 PatientsProfileScreen(
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    openMedicalReportsScreen = { patientId ->
+                        navController.navigate(getDoctorPatientsMedicalReportRoute(patientId))
+                    }
+                )
+            }
+
+            composable(DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE) { backStackEntry ->
+                MedicalReportsScreen(
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    openCreateMedicalReportScreen = { patientId ->
+                        navController.navigate(getDoctorPatientsCreateMedicalReportRoute(patientId))
+                    }
+                )
+            }
+
+            composable(DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE) { backStackEntry ->
+                CreateMedicalReportScreen(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: ""
                 )
             }

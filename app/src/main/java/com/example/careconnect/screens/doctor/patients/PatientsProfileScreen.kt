@@ -35,7 +35,8 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun PatientsProfileScreen(
     patientId: String,
-    viewModel: PatientsProfileViewModel = hiltViewModel()
+    viewModel: PatientsProfileViewModel = hiltViewModel(),
+    openMedicalReportsScreen: (patientId: String) -> Unit = {}
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -45,14 +46,16 @@ fun PatientsProfileScreen(
 
     PatientsProfileScreenContent(
         patientId = patientId,
-        patient = patient
+        patient = patient,
+        openMedicalReportsScreen = openMedicalReportsScreen
     )
 }
 
 @Composable
 fun PatientsProfileScreenContent(
     patientId: String,
-    patient: Patient? = null
+    patient: Patient? = null,
+    openMedicalReportsScreen: (patientId: String) -> Unit = {}
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -159,7 +162,7 @@ fun PatientsProfileScreenContent(
                         // Navigate to Immunizations Screen
                     }
                     MedicalCategoryCard(R.drawable.medical_report, "Medical Reports") {
-                        // Navigate to Medical History Screen
+                        openMedicalReportsScreen(patientId)
                     }
 
                 }

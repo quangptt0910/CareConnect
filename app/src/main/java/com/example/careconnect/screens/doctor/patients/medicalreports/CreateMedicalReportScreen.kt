@@ -28,13 +28,16 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun CreateMedicalReportScreen(
-
+    patientId: String,
 ){
-    CreateMedicalReportScreenContent()
+    CreateMedicalReportScreenContent(
+        patientId = patientId
+    )
 }
 
 @Composable
 fun CreateMedicalReportScreenContent(
+    patientId: String,
 ){
     var symptoms by rememberSaveable { mutableStateOf("") }
     val symptomsList = remember { mutableStateListOf<String>() }
@@ -134,6 +137,8 @@ fun CreateMedicalReportScreenContent(
 @Composable
 fun CreateMedicalReportScreenPreview(){
     CareConnectTheme {
-        CreateMedicalReportScreenContent()
+        CreateMedicalReportScreenContent(
+            patientId = "123"
+        )
     }
 }
