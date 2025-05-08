@@ -11,6 +11,9 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.datasource.AddChatRoomDataSource
 import com.example.careconnect.data.datasource.ChatMessagesRemoteDataSource
 import com.example.careconnect.data.repository.ChatMessagesRepository
+import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.chat.Author
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
@@ -24,7 +27,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val chatMessagesRepository: ChatMessagesRepository
+    private val chatMessagesRepository: ChatMessagesRepository,
+    private val doctorRepository: DoctorRepository
 ): MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
 //    val messages: List<Message> get() = _messages  // Publicly exposed list
@@ -54,19 +58,16 @@ class ChatViewModel @Inject constructor(
     var chatRoom by mutableStateOf<ChatRoom?>(null)
         private set
 
-    init {
-        // Add some dummy messages for testing
-//        _messages.addAll(
-//            listOf(
-//                Message("1","Hello!", otherUser, System.currentTimeMillis()),
-//                Message("1","Hey! How are you?", me, System.currentTimeMillis()),
-//                Message("1","I'm good, thanks! You?", otherUser, System.currentTimeMillis())
-//            )
-//        )
-    }
-
     fun setCurrentUser(id: String, name: String){
         _currentUser.value = Author(id = id, name = name)
+    }
+
+    suspend fun getDoctor(doctorId: String): Doctor? {
+        return doctorRepository.getDoctorById(doctorId)
+    }
+
+    suspend fun getPatient(patientId: String): Patient? {
+        return doctorRepository.getPatientById(patientId)
     }
 
     fun getMessages(chatId: String){

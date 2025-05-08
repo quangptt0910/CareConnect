@@ -44,20 +44,21 @@ import kotlinx.coroutines.launch
 fun DoctorsProfileViewScreen(
     doctorId: String,
     viewModel: DoctorsProfileViewModel = hiltViewModel(),
-    openChatScreen: (chatId: String, doctorId: String) -> Unit = {_, _ ->}
+    openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _ , _->}
 ){
     LaunchedEffect(doctorId) {
         viewModel.setDoctorId(doctorId)
     }
 
     val doctor by viewModel.doctor.collectAsState()
+    val patientId by viewModel.patientId.collectAsState()
 
     doctor?.let {
         DoctorsProfileViewScreenContent(
         doctor = it,
         doctorId = doctorId,
             openChatScreen = { chatId -> // <-- accept chatId from the inner layer
-                openChatScreen(chatId, doctorId)
+                patientId?.let { it1 -> openChatScreen(chatId, it1, doctorId) }
             },
             getChatId = {
                 viewModel.getCurrentPatient().let { patient ->

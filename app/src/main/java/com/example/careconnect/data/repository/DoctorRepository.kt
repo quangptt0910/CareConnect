@@ -31,6 +31,10 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getDoctorById(doctorId)
     }
 
+    suspend fun getPatientById(patientId: String): Patient? {
+        return doctorRemoteDataSource.getPatientById(patientId)
+    }
+
     suspend fun saveWorkingDays(doctorId: String, selectedDate: Set<LocalDate>) {
         doctorRemoteDataSource.saveWorkingDays(doctorId, selectedDate)
     }

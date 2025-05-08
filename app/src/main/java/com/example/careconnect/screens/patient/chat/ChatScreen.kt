@@ -51,6 +51,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.careconnect.common.LoadingIndicator
+import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -62,23 +66,39 @@ import java.util.Locale
 fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
     chatId: String,
+    patientId: String,
     doctorId: String,
 ){
-    ChatScreenContent(
-        chatId = chatId,
-        doctorId = doctorId
-    )
+    var doctor by remember { mutableStateOf<Doctor?>(null) }
+    var patient by remember { mutableStateOf<Patient?>(null) }
+    var chatRoom by remember { mutableStateOf<ChatRoom?>(null) }
+
+    LaunchedEffect(patientId, doctorId, chatId) {
+        doctor = viewModel.getDoctor(doctorId)
+        patient = viewModel.getPatient(patientId)
+        viewModel.loadChat(chatId)
+        chatRoom = viewModel.chatRoom
+    }
+
+    // Pass only the necessary data to ChatScreenContent
+    if (doctor != null && patient != null && chatRoom != null) {
+        ChatScreenContent(
+            chatRoom = chatRoom!!,
+            patient = patient!!,
+            doctor = doctor!!
+        )
+    } else {
+        LoadingIndicator()
+    }
 }
 
 @Composable
 fun ChatScreenContent(
     model: ChatViewModel = hiltViewModel(),
-    chatId: String,
-    doctorId: String
+    chatRoom: ChatRoom,
+    doctor: Doctor,
+    patient: Patient,
 ) {
-    LaunchedEffect(chatId) {
-        model.loadChat(chatId)
-    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -88,9 +108,9 @@ fun ChatScreenContent(
         val currentUserId = model.me.id
         val chatName = model.chatRoom?.let {
             if (it.doctorId == currentUserId) {
-                it.patient.name
+                patient.name
             } else {
-                it.doctor.name
+                doctor.name
             }
         }
 
@@ -134,7 +154,7 @@ fun ChatScreenContent(
                 onSend = { text ->
                     model.sendMessage(
                         message = Message(text = text, author = (model.me)),
-                        chatId = chatId
+                        chatId = chatRoom.chatId
                     )
                 }
             )
@@ -175,7 +195,7 @@ fun ChatItem(message: Message) {
                 .padding(12.dp)
         ) {
             // Display text if it's not null or empty
-            message.text?.let {
+            message.text.let {
                 Text(
                     text = it,
                     color = if (message.isFromMe) Color.White else Color.Black
@@ -356,8 +376,9 @@ fun ChatScreenPreview() {
         val uiState = HomeUiState()
         ChatScreenContent(
             model = viewModel(),
-            chatId = "1",
-            doctorId = "1"
+            chatRoom = ChatRoom(),
+            doctor = Doctor(),
+            patient = Patient()
         )
     }
 }

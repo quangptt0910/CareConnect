@@ -55,8 +55,8 @@ fun DoctorApp(
             }
             composable(BarRoutesDoctor.CHAT.route) {
                 ChatMenuScreen(
-                    openChatScreen = { chatId, doctorId ->
-                        navController.navigate(getPatientChatRoute(doctorId, chatId))
+                    openChatScreen = { chatId, patientId, doctorId ->
+                        navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
                     }
                 )
             }

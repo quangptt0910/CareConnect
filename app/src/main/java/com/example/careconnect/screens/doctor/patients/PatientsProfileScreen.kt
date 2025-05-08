@@ -36,7 +36,8 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun PatientsProfileScreen(
     patientId: String,
     viewModel: PatientsProfileViewModel = hiltViewModel(),
-    openMedicalReportsScreen: (patientId: String) -> Unit = {}
+    openMedicalReportsScreen: (patientId: String) -> Unit = {},
+    openChatScreen: () -> Unit = {}
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -47,7 +48,8 @@ fun PatientsProfileScreen(
     PatientsProfileScreenContent(
         patientId = patientId,
         patient = patient,
-        openMedicalReportsScreen = openMedicalReportsScreen
+        openMedicalReportsScreen = openMedicalReportsScreen,
+        openChatScreen = openChatScreen
     )
 }
 
@@ -55,7 +57,8 @@ fun PatientsProfileScreen(
 fun PatientsProfileScreenContent(
     patientId: String,
     patient: Patient? = null,
-    openMedicalReportsScreen: (patientId: String) -> Unit = {}
+    openMedicalReportsScreen: (patientId: String) -> Unit = {},
+    openChatScreen: () -> Unit = {}
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -182,7 +185,7 @@ fun PatientsProfileScreenContent(
                         // Navigate to Medical History Screen
                     }
                     MedicalCategoryCard(R.drawable.chat, "Chat") {
-                        // Navigate to Medical History Screen
+                        openChatScreen()
                     }
                 }
             }

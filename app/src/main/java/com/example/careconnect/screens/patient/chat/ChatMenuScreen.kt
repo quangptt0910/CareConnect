@@ -31,13 +31,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
 fun ChatMenuScreen(
-    openChatScreen : (doctorId: String, chatId: String) -> Unit,
+    openChatScreen : (doctorId: String, patientId: String, chatId: String) -> Unit,
     viewModel: ChatMenuViewModel = hiltViewModel()
 ){
     val doctor by viewModel.doctor.collectAsState()
@@ -47,10 +49,12 @@ fun ChatMenuScreen(
     val patientId = patient?.id ?: ""
 
     LaunchedEffect(doctorId, patientId) {
-        viewModel.getChatRooms(doctorId, patientId)
+        viewModel.loadChatRooms()
     }
 
+    val userRole by viewModel.currentUserRole.collectAsState()
     val chatRooms by viewModel.chatRooms.collectAsState()
+    val chatPartners by viewModel.chatPartners.collectAsState()
 
 
     ChatMenuScreenContent(
@@ -58,6 +62,8 @@ fun ChatMenuScreen(
         onDoctorSelected = { _, _ -> },
         openChatScreen = openChatScreen,
         chatRoom = chatRooms,
+        chatPartners = chatPartners,
+        userRole = userRole
     )
 }
 
@@ -67,8 +73,10 @@ fun ChatMenuScreen(
 fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
     chatRoom: List<ChatRoom>,
+    chatPartners: Map<String, Any>,
+    userRole: Role,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
-    openChatScreen: (doctorId: String, chatId: String) -> Unit,
+    openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit,
 
     ) {
     Surface(
@@ -100,17 +108,49 @@ fun ChatMenuScreenContent(
             LazyColumn {
                 items(chatRoom.size) { index ->
                     val chat = chatRoom[index]
-                    ChatListItem(
-                        name = "Dr " + chat.doctor.name + " " + chat.doctor.surname,
-                        message = chat.lastMessage,
-                        time = formatTimestamp(chat.lastUpdated),
-                        imageRes = chat.doctor.profilePhoto,
-                        onChatClicked = { openChatScreen(
-                            chat.doctor.id, chat.chatId
-                        )}
-                    )
 
-                    HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
+                    // Display based on user role
+                    val chatPartner = when (userRole) {
+                        Role.PATIENT -> {
+                            // Get doctor info for this chat
+                            chatPartners[chat.doctorId] as? Doctor
+                        }
+
+                        Role.DOCTOR -> {
+                            // Get patient info for this chat
+                            chatPartners[chat.patientId] as? Patient
+                        }
+
+                        else -> null
+                    }
+
+                    chatPartner?.let {
+                        val displayName = when (userRole) {
+                            Role.PATIENT -> "Dr. ${(it as Doctor).name} ${it.surname}"
+                            Role.DOCTOR -> "${(it as Patient).name} ${it.surname}"
+                            else -> ""
+                        }
+
+                        val profilePhoto = when (userRole) {
+                            Role.PATIENT -> (it as Doctor).profilePhoto
+                            Role.DOCTOR -> ""  // Patient may not have profile photo in your data model
+                            else -> ""
+                        }
+
+                        ChatListItem(
+                            name = displayName,
+                            message = chat.lastMessage,
+                            time = formatTimestamp(chat.lastUpdated),
+                            imageRes = R.drawable.carousel_image_1.toString(),
+                            onChatClicked = {
+                                openChatScreen(
+                                    chat.doctorId, chat.patientId, chat.chatId
+                                )
+                            }
+                        )
+
+                        HorizontalDivider(modifier = Modifier.padding(start = 90.dp))
+                    }
                 }
             }
         }
@@ -130,7 +170,7 @@ fun SmallTopAppBarExample1() {
                 ),
                 title = {
                     Text(
-                        "Chat Now\nWith Doctor",
+                        "Chat Now",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -172,33 +212,17 @@ fun ChatMenuScreenPreview() {
         val sampleChatRooms = listOf(
             ChatRoom(
                 chatId = "chat_001",
-                doctor = Doctor(
-                    id = "doc_001",
-                    name = "Dr. Emma Thompson",
-                    profilePhoto = R.drawable.carousel_image_1.toString()
-                ),
+                doctorId = "doc_001",
+                patientId = "pat_001",
                 lastMessage = "Please remember to take your meds.",
                 lastUpdated = System.currentTimeMillis() - 600_000 // 10 min ago
             ),
             ChatRoom(
                 chatId = "chat_002",
-                doctor = Doctor(
-                    id = "doc_002",
-                    name = "Dr. John Miller",
-                    profilePhoto = "https://via.placeholder.com/150"
-                ),
+                doctorId = "doc_002",
+                patientId = "pat_002",
                 lastMessage = "Your blood test came back normal.",
                 lastUpdated = System.currentTimeMillis() - 3_600_000 // 1 hour ago
-            ),
-            ChatRoom(
-                chatId = "chat_003",
-                doctor = Doctor(
-                    id = "doc_003",
-                    name = "Dr. Sarah Patel",
-                    profilePhoto = "https://via.placeholder.com/150"
-                ),
-                lastMessage = "Let's schedule your next checkup.",
-                lastUpdated = System.currentTimeMillis() - 86_400_000 // 1 day ago
             )
         )
 
@@ -206,8 +230,15 @@ fun ChatMenuScreenPreview() {
             uiState = uiState,
             chatRoom = sampleChatRooms,
             onDoctorSelected = { _, _ -> },
+            chatPartners = mapOf(
+                "doc_001" to Doctor(id = "doc_001", name = "Dr. John", surname = "Doe"),
+                "pat_001" to Patient(id = "pat_001", name = "Jane", surname = ""),
+                "doc_002" to Doctor(id = "doc_002", name = "Dr. Alice", surname = "Smith"),
+                "pat_002" to Patient(id = "pat_002", name = "Bob", surname = "")
+            ),
+            userRole = Role.PATIENT,
             openChatScreen = {
-                doctorId, chatId ->
+                doctorId, patientId, chatId ->
                 println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
             }
         )

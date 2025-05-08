@@ -18,8 +18,16 @@ class AddChatRoomRepository @Inject constructor(
         addChatRoomRemoteDataSource.updateChatRoom(chatId, lastMessage, lastUpdated)
     }
 
-    suspend fun getChatRooms(doctorId: String, patientId: String): List<ChatRoom> {
-        return addChatRoomRemoteDataSource.getChatRooms(doctorId, patientId)
+    suspend fun loadChatRooms(){
+        addChatRoomRemoteDataSource.loadChatRooms()
+    }
+
+    suspend fun getChatRoomsByDoctorId(doctorId: String): List<ChatRoom> {
+        return addChatRoomRemoteDataSource.getChatRoomsByDoctorId(doctorId)
+    }
+
+    suspend fun getChatRoomsByPatientId(patientId: String): List<ChatRoom> {
+        return addChatRoomRemoteDataSource.getChatRoomsByPatientId(patientId)
     }
 
     suspend fun getOrCreateChatRoomId(patient: Patient, doctor: Doctor): String {

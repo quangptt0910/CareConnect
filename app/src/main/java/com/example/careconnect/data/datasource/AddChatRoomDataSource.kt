@@ -24,6 +24,37 @@ class AddChatRoomDataSource @Inject constructor(
         ).await()
     }
 
+    suspend fun loadChatRooms() {
+        val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+        firestore.collection(CHATROOMS_COLLECTION)
+            .whereArrayContains("participants", currentUserId)
+            .orderBy("lastUpdated")
+            .get()
+            .await()
+            .toObjects(ChatRoom::class.java)
+
+    }
+
+    suspend fun getChatRoomsByDoctorId(doctorId: String): List<ChatRoom> {
+        val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+        return firestore.collection(CHATROOMS_COLLECTION)
+            .whereArrayContains("participants", currentUserId)
+            .whereEqualTo("doctorId", doctorId)
+            .get()
+            .await()
+            .toObjects(ChatRoom::class.java)
+    }
+
+    suspend fun getChatRoomsByPatientId(patientId: String): List<ChatRoom> {
+        val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
+        return firestore.collection(CHATROOMS_COLLECTION)
+            .whereArrayContains("participants", currentUserId)
+            .whereEqualTo("patientId", patientId)
+            .get()
+            .await()
+            .toObjects(ChatRoom::class.java)
+    }
+
     suspend fun getChatRooms(doctorId: String, patientId: String): List<ChatRoom> {
         val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
         return firestore.collection(CHATROOMS_COLLECTION)
@@ -54,8 +85,6 @@ class AddChatRoomDataSource @Inject constructor(
                 val newChatRoom = ChatRoom(
                     doctorId = doctor.id,
                     patientId = patient.id,
-                    doctor = doctor,
-                    patient = patient,
                     participants = listOf(patient.id, doctor.id),
                     messages = emptyList(),
                     lastMessage = "",

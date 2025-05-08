@@ -164,7 +164,7 @@ class DoctorRemoteDataSource @Inject constructor(
     }
 
     // Get a single patient by ID
-    private suspend fun getPatientById(patientId: String): Patient? {
+    suspend fun getPatientById(patientId: String): Patient? {
         return try {
             firestore.collection(PATIENTS_COLLECTION)
                 .document(patientId)
