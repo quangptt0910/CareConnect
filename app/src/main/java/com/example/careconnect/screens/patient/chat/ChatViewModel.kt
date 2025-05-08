@@ -47,6 +47,16 @@ class ChatViewModel @Inject constructor(
         )
     )
 
+    fun initializeCurrentUser(patient: Patient?, doctor: Doctor?, patientId: String) {
+        Firebase.auth.currentUser?.let { user ->
+            val name = if (user.uid == patientId) patient?.name else doctor?.name
+            if (name != null) {
+                setCurrentUser(user.uid, name)
+            }
+        }
+    }
+
+
     // Simulated user IDs (in a real app, get from authentication)
 
     //private val otherUser = Author(id = "user_1", name = "Alice")
@@ -88,8 +98,12 @@ class ChatViewModel @Inject constructor(
 
 
     // Function to send a new message
-    fun sendMessage(message: Message, chatId: String) {
-        val newMessage = message.copy(timestamp = System.currentTimeMillis())
+    fun sendMessage(text: String, chatId: String) {
+        val newMessage = Message(
+            text = text,
+            author = me,
+            timestamp = System.currentTimeMillis()
+        )
         _messages.add(newMessage)
 
         viewModelScope.launch {

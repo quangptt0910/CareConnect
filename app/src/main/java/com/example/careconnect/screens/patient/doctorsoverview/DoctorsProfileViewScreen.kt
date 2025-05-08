@@ -50,22 +50,30 @@ fun DoctorsProfileViewScreen(
         viewModel.setDoctorId(doctorId)
     }
 
+    val coroutineScope = rememberCoroutineScope()
     val doctor by viewModel.doctor.collectAsState()
-    val patientId by viewModel.patientId.collectAsState()
+    //val patientId by viewModel.patientId.collectAsState()
+    println("DoctorsProfileViewScreen: doctorId=$doctorId, doctor=$doctor")
 
     doctor?.let {
         DoctorsProfileViewScreenContent(
-        doctor = it,
-        doctorId = doctorId,
-            openChatScreen = { chatId -> // <-- accept chatId from the inner layer
-                patientId?.let { it1 -> openChatScreen(chatId, it1, doctorId) }
-            },
+            doctor = it,
+            doctorId = doctorId,
             getChatId = {
                 viewModel.getCurrentPatient().let { patient ->
                     viewModel.getOrCreateChatRoomId(patient, it)
                 }
+            },
+
+            openChatScreen = { chatId ->
+                coroutineScope.launch {
+                    viewModel.getCurrentPatient().let { patient ->
+                        openChatScreen(chatId, patient.id, doctorId)
+                    }
+                }
             }
-    )
+
+        )
     }
 }
 

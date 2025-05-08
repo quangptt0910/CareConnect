@@ -79,6 +79,7 @@ fun ChatScreen(
         patient = viewModel.getPatient(patientId)
         println("ChatScreen: patient=$patient")
         viewModel.loadChat(chatId)
+        viewModel.initializeCurrentUser(patient, doctor, patientId)
     }
 
     val chatRoom = viewModel.chatRoom
@@ -154,12 +155,7 @@ fun ChatScreenContent(
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
-                onSend = { text ->
-                    model.sendMessage(
-                        message = Message(text = text, author = (model.me)),
-                        chatId = chatRoom.chatId
-                    )
-                }
+                onSend = { text -> model.sendMessage(text, chatRoom.chatId) }
             )
         }
     }

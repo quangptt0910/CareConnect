@@ -38,10 +38,19 @@ class ChatMenuViewModel @Inject constructor(
     private val _chatPartners = MutableStateFlow<Map<String, Any>>(emptyMap())
     val chatPartners: StateFlow<Map<String, Any>> = _chatPartners
 
+    fun setCurrentUser(userId: String, role: Role) {
+        println("Setting current user with ID: $userId and role: $role")
+        _currentUserId.value = userId
+        _currentUserRole.value = role
+    }
+
+
     fun loadChatRooms() {
         launchCatching {
             val userId = _currentUserId.value
             val userRole = _currentUserRole.value
+
+            println("Loading chat rooms for user ID: $userId and role: $userRole")
 
             // Load chat rooms based on user role
             _chatRooms.value = when (userRole) {
@@ -49,6 +58,7 @@ class ChatMenuViewModel @Inject constructor(
                 Role.DOCTOR -> addChatRoomRepository.getChatRoomsByDoctorId(userId)
                 else -> emptyList()
             }
+            println("Loaded chat rooms: ${_chatRooms.value.size}")
 
             // Load chat partners' details
             loadChatPartners()
@@ -60,6 +70,7 @@ class ChatMenuViewModel @Inject constructor(
         val userRole = _currentUserRole.value
 
         for (chatRoom in _chatRooms.value) {
+            println("Fetching partner for chatRoom: ${chatRoom.chatId}")
             when (userRole) {
                 Role.PATIENT -> {
                     // For patients, load doctor details
@@ -87,6 +98,7 @@ class ChatMenuViewModel @Inject constructor(
                         }
                     }
                 }
+
                 else -> { /* Handle other roles if needed */ }
             }
         }

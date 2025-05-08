@@ -44,17 +44,28 @@ fun ChatMenuScreen(
 ){
     val doctor by viewModel.doctor.collectAsState()
     val patient by viewModel.currentPatient.collectAsState()
+    val userRole by viewModel.currentUserRole.collectAsState()
+
 
     val doctorId = doctor?.id ?: ""
     val patientId = patient?.id ?: ""
 
+    LaunchedEffect(doctor, patient) {
+        if (userRole == Role.DOCTOR && doctor != null) {
+            viewModel.setCurrentUser(doctor!!.id, doctor!!.role)
+        } else if (userRole == Role.PATIENT && patient != null) {
+            viewModel.setCurrentUser(patient!!.id, patient!!.role)
+        }
+    }
+
     LaunchedEffect(doctorId, patientId) {
+        println("LaunchedEffect triggered: doctorId=$doctorId, patientId=$patientId")
         viewModel.loadChatRooms()
     }
 
-    val userRole by viewModel.currentUserRole.collectAsState()
     val chatRooms by viewModel.chatRooms.collectAsState()
     val chatPartners by viewModel.chatPartners.collectAsState()
+
 
 
     ChatMenuScreenContent(
