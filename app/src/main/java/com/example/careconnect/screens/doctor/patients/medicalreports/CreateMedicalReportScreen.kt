@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.doctor.patients.SymptomsSection
 import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
@@ -48,14 +49,16 @@ fun CreateMedicalReportScreen(
 
     CreateMedicalReportScreenContent(
         patientId = patientId,
-        patient = patient
+        patient = patient,
+        onCreateMedicalReport = viewModel::createMedicalReport
     )
 }
 
 @Composable
 fun CreateMedicalReportScreenContent(
     patientId: String,
-    patient: Patient? = null
+    patient: Patient? = null,
+    onCreateMedicalReport: (String, MedicalReport) -> Unit
 ){
     var symptoms by rememberSaveable { mutableStateOf("") }
     val symptomsList = remember { mutableStateListOf<String>() }
@@ -150,27 +153,43 @@ fun CreateMedicalReportScreenContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick =  { showDialog = true },
-                modifier = Modifier.width(200.dp).height(40.dp).padding(16.dp)
-            ) {
-                Text("Submit medical report")
-            }
-
-            if (showDialog) {
-                AlertDialogExample(
-                    onDismissRequest = { showDialog = false },
-                    onConfirmation = {
-                        showDialog = false
-                        // TODO: Handle submit action here
-                    },
-                    dialogTitle = "Submit medical report",
-                    dialogText = "Are you sure you want to submit this medical report?",
-                    icon = androidx.compose.material.icons.Icons.Default.Check
-                )
-            }
         }
+            item {
+                Button(
+                    onClick = { showDialog = true },
+                    modifier = Modifier.width(200.dp).height(40.dp).padding(16.dp)
+                ) {
+                    Text("Submit medical report")
+                }
+
+
+                if (showDialog) {
+                    AlertDialogExample(
+                        onDismissRequest = { showDialog = false },
+                        onConfirmation = {
+                            showDialog = false
+
+                            val medicalReport = MedicalReport(
+                                patientId = patientId,
+                                symptoms = symptomsList,
+                                diagnosis = diagnosis,
+                                prognosis = prognosis,
+                                treatment = treatment,
+                                recommendations = recommendations,
+                                plan = planOfCare,
+                                reportDate = com.google.firebase.Timestamp.now(),
+                                reportPdfUrl = null
+                            )
+
+                            onCreateMedicalReport(patientId, medicalReport)
+                        },
+                        dialogTitle = "Submit medical report",
+                        dialogText = "Are you sure you want to submit this medical report?",
+                        icon = androidx.compose.material.icons.Icons.Default.Check
+                    )
+                }
+            }
+
         }
     }
 }
@@ -223,7 +242,8 @@ fun AlertDialogExample(
 fun CreateMedicalReportScreenPreview(){
     CareConnectTheme {
         CreateMedicalReportScreenContent(
-            patientId = "123"
+            patientId = "123",
+            onCreateMedicalReport = { _, _ -> }
         )
     }
 }

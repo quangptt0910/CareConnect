@@ -1,5 +1,7 @@
 package com.example.careconnect.data.datasource
 
+import android.util.Log
+import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,6 +21,19 @@ class PatientRemoteDataSource @Inject constructor(
             snapshot.toObject(Patient::class.java)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
+        try {
+            firestore.collection("patients")
+                .document(patientId)
+                .collection("medicalReports")
+                .add(medicalReport)
+                .await()
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to create medical report", e)
+            throw e // or handle accordingly
         }
     }
 }
