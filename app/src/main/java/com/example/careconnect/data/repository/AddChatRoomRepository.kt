@@ -38,5 +38,9 @@ class AddChatRoomRepository @Inject constructor(
         return addChatRoomRemoteDataSource.getCurrentPatient()
     }
 
+    suspend fun getCurrentDoctor(): Doctor {
+        return addChatRoomRemoteDataSource.getCurrentDoctor()
+    }
+
 
 }

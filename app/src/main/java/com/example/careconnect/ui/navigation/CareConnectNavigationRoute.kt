@@ -42,7 +42,7 @@ object Route {
     // Doctor-specific Routes
     const val DOCTOR_APP = "doctor_app"
     const val DOCTOR_PROFILE_ROUTE = "doctor/profile"
-    const val DOCTOR_CHAT_ROUTE = "doctor/chat"
+    const val DOCTOR_CHAT_ROUTE = "doctor/chat/{chatId}/{patientId}/{doctorId}"
     const val DOCTOR_CHAT_MENU_ROUTE = "doctor/chat/menu"
     const val DOCTOR_PATIENTS_ROUTE = "doctor/patients"
     const val DOCTOR_PATIENTS_PROFILE_ROUTE = "doctor/patients/profile/{patientId}"
@@ -74,6 +74,9 @@ object Route {
 
     fun getDoctorPatientsCreateMedicalReportRoute(patientId: String) =
         "doctor/patients/create_medical_report/$patientId"
+
+    fun getDoctorChatRoute(chatId: String, patientId:String, doctorId: String) =
+        "doctor/chat/$chatId/$patientId/$doctorId"
 }
 
 @Stable

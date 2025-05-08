@@ -17,15 +17,17 @@ import com.example.careconnect.screens.doctor.patients.medicalreports.CreateMedi
 import com.example.careconnect.screens.doctor.patients.medicalreports.MedicalReportsScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
+import com.example.careconnect.screens.patient.chat.ChatScreen
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.DOCTOR_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
+import com.example.careconnect.ui.navigation.Route.getDoctorChatRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsCreateMedicalReportRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalReportRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
-import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 
 @Composable
 fun DoctorApp(
@@ -56,7 +58,7 @@ fun DoctorApp(
             composable(BarRoutesDoctor.CHAT.route) {
                 ChatMenuScreen(
                     openChatScreen = { chatId, patientId, doctorId ->
-                        navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
+                        navController.navigate(getDoctorChatRoute(doctorId, patientId, chatId))
                     }
                 )
             }
@@ -80,7 +82,18 @@ fun DoctorApp(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: "",
                     openMedicalReportsScreen = { patientId ->
                         navController.navigate(getDoctorPatientsMedicalReportRoute(patientId))
+                    },
+                    openChatScreen = { chatId, patientId, doctorId ->
+                        navController.navigate(getDoctorChatRoute(chatId, patientId, doctorId))
                     }
+                )
+            }
+
+            composable(DOCTOR_CHAT_ROUTE) { backStackEntry ->
+                ChatScreen(
+                    chatId = backStackEntry.arguments?.getString("chatId") ?: "",
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
                 )
             }
 
@@ -89,7 +102,7 @@ fun DoctorApp(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: "",
                     openCreateMedicalReportScreen = { patientId ->
                         navController.navigate(getDoctorPatientsCreateMedicalReportRoute(patientId))
-                    }
+                    },
                 )
             }
 

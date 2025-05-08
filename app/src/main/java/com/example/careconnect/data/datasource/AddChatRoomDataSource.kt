@@ -105,6 +105,11 @@ class AddChatRoomDataSource @Inject constructor(
         return firestore.collection("patients").document(userId).get().await().toObject(Patient::class.java) ?: Patient()
     }
 
+    suspend fun getCurrentDoctor(): Doctor {
+        val userId = auth.currentUser?.uid ?: return Doctor()
+        return firestore.collection("doctors").document(userId).get().await().toObject(Doctor::class.java) ?: Doctor()
+    }
+
     companion object {
         private const val CHATROOMS_COLLECTION = "chatrooms"
 

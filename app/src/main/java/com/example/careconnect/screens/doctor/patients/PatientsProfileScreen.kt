@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,25 +32,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun PatientsProfileScreen(
     patientId: String,
     viewModel: PatientsProfileViewModel = hiltViewModel(),
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
-    openChatScreen: () -> Unit = {}
+    openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->}
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
     }
 
     val patient by viewModel.patient.collectAsStateWithLifecycle()
+    val doctorId by viewModel.doctorId.collectAsStateWithLifecycle()
 
     PatientsProfileScreenContent(
+
         patientId = patientId,
         patient = patient,
         openMedicalReportsScreen = openMedicalReportsScreen,
-        openChatScreen = openChatScreen
+        openChatScreen = { chatId ->
+            doctorId?.let { openChatScreen(chatId, patientId, it) }
+        },
+        getChatId = {
+            val doctor = viewModel.getCurrentDoctor()
+            patient?.let { viewModel.getOrCreateChatRoomId(it, doctor) } ?: ""
+        }
     )
 }
 
@@ -58,8 +68,11 @@ fun PatientsProfileScreenContent(
     patientId: String,
     patient: Patient? = null,
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
-    openChatScreen: () -> Unit = {}
+    getChatId: suspend () -> String = {""},
+    openChatScreen: (chatId: String) -> Unit = {}
 ){
+    val coroutineScope = rememberCoroutineScope()
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -185,7 +198,12 @@ fun PatientsProfileScreenContent(
                         // Navigate to Medical History Screen
                     }
                     MedicalCategoryCard(R.drawable.chat, "Chat") {
-                        openChatScreen()
+                        coroutineScope.launch {
+                            println("Chat button clicked")
+                            val chatId = getChatId()
+                            println("Obtained chatId: $chatId")
+                            openChatScreen(chatId)
+                        }
                     }
                 }
             }
