@@ -63,6 +63,13 @@ class DoctorRepository @Inject constructor(
         doctorRemoteDataSource.deleteSlot(doctorId, date, slot)
     }
 
+    suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {
+        return doctorRemoteDataSource.getAvailableSlots(doctorId, date)
+    }
 
+    fun clearCache(doctorId: String? = null) {
+        doctorRemoteDataSource.clearCache(doctorId)
+
+    }
 
 }

@@ -27,7 +27,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun DoctorsOverviewScreen(
     specialty: String,
-    openBookingScreen: () -> Unit = {},
+    openBookingScreen: (doctorId: String) -> Unit = {},
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     viewModel: DoctorsOverviewViewModel = hiltViewModel()
 ){
@@ -50,7 +50,7 @@ fun DoctorsOverviewScreen(
 fun DoctorsOverviewScreenContent(
     doctors: List<Doctor> = emptyList(),
     specialty: String,
-    openBookingScreen: () -> Unit = {},
+    openBookingScreen: (doctorId: String) -> Unit = {},
     openDoctorProfileScreen: (doctorId: String) -> Unit = {}
 ) {
 
@@ -86,7 +86,7 @@ fun DoctorsOverviewScreenContent(
                         address = doctor.address,
                         doctorId = doctor.id,
                         imageRes = R.drawable.carousel_image_1,
-                        openBookingScreen = openBookingScreen,
+                        openBookingScreen = { openBookingScreen(doctor.id) },
                         openDoctorProfileScreen = { openDoctorProfileScreen(doctor.id) }
                     )
 

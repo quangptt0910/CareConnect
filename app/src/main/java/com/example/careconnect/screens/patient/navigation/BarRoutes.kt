@@ -20,7 +20,7 @@ enum class BarRoutes(
 ) {
     FEED(R.string.feed, Icons.Filled.Home, HOME_PATIENT_ROUTE),
     CHAT(R.string.chat, Icons.AutoMirrored.Filled.Chat, PATIENT_CHAT_MENU_ROUTE),
-    BOOKING(R.string.booking, Icons.Filled.CalendarMonth, PATIENT_APPOINTMENTS_ROUTE),
+    APPOINTMENTS(R.string.appointments, Icons.Filled.CalendarMonth, PATIENT_APPOINTMENTS_ROUTE),
     PROFILE(R.string.profile, Icons.Filled.Person, PATIENT_PROFILE_ROUTE)
 
 }

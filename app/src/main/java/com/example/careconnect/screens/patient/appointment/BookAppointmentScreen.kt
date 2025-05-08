@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,20 +40,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
 fun BookAppointmentScreen(
-
+    doctorId: String,
+    viewModel: BookAppointmentViewModel = hiltViewModel(),
+    showSnackBar: (SnackBarMessage) -> Unit
 ){
-    BookAppointmentScreenContent()
+
+    LaunchedEffect(doctorId) {
+        viewModel.setDoctorId(doctorId)
+    }
+
+    val doctor by viewModel.doctor.collectAsStateWithLifecycle()
+    BookAppointmentScreenContent(
+        doctor = doctor
+    )
 }
 
 
 @Composable
 fun BookAppointmentScreenContent(
+    doctor: Doctor? = Doctor(),
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),

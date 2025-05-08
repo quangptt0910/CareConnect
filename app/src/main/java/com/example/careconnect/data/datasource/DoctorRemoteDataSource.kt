@@ -279,7 +279,8 @@ class DoctorRemoteDataSource @Inject constructor(
         return try {
             val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
             val doctor = snapshot.toObject(Doctor::class.java)
-            val slots = doctor?.schedule?.workingDays?.get(dateKey) ?: emptyList()
+            val slots = doctor?.schedule?.workingDays?.get(dateKey)?.sortedBy { it.startTime }
+                    ?: emptyList()
 
             // Update cache
             val doctorCache = cachedSchedules.getOrPut(doctorId) { mutableMapOf() }
@@ -301,6 +302,12 @@ class DoctorRemoteDataSource @Inject constructor(
         } else {
             cachedSchedules.clear()
         }
+    }
+
+    suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {
+        return getScheduleForDate(doctorId, date)
+            .filter { it.isAvailable }
+            .sortedBy { it.startTime }
     }
 
     companion object {

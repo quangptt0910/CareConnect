@@ -38,7 +38,8 @@
     <string name="slot_saved">Slot saved successfully.</string>
     <string name="slot_deleted">Slot deleted successfully.</string>
     <string name="doctor_deleted">Doctor deleted successfully.</string>
-
+    <string name="appointment_booked_success">Appointment booked successfully!!</string>
+    <string name="please_select_time">Please select a time.</string>
     <!-- LoginScreen -->
     <string name="login">Log In</string>
 
