@@ -51,7 +51,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.careconnect.common.LoadingIndicator
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.chat.ChatRoom
@@ -71,24 +70,28 @@ fun ChatScreen(
 ){
     var doctor by remember { mutableStateOf<Doctor?>(null) }
     var patient by remember { mutableStateOf<Patient?>(null) }
-    var chatRoom by remember { mutableStateOf<ChatRoom?>(null) }
+
+    println("ChatScreen: chatId=$chatId, patientId=$patientId, doctorId=$doctorId")
 
     LaunchedEffect(patientId, doctorId, chatId) {
         doctor = viewModel.getDoctor(doctorId)
+        println("ChatScreen: doctor=$doctor")
         patient = viewModel.getPatient(patientId)
+        println("ChatScreen: patient=$patient")
         viewModel.loadChat(chatId)
-        chatRoom = viewModel.chatRoom
     }
+
+    val chatRoom = viewModel.chatRoom
 
     // Pass only the necessary data to ChatScreenContent
     if (doctor != null && patient != null && chatRoom != null) {
         ChatScreenContent(
-            chatRoom = chatRoom!!,
+            chatRoom = chatRoom,
             patient = patient!!,
             doctor = doctor!!
         )
     } else {
-        LoadingIndicator()
+        println("ChatScreen: doctor=$doctor, patient=$patient, chatRoom=$chatRoom")
     }
 }
 

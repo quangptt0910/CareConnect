@@ -27,10 +27,14 @@ class PatientsProfileViewModel @Inject constructor(
     private val _doctorId = MutableStateFlow<String?>(null)
     val doctorId: StateFlow<String?> = _doctorId
 
-    fun setDoctorId(doctorId: String) {
-        launchCatching {
-            _doctorId.value = authRepository.currentUser?.uid
+    fun loadDoctorId() : String? {
+        viewModelScope.launch {
+            val doctorId = authRepository.getCurrentUserId()
+            _doctorId.value = doctorId
+            println("Loaded doctorId: $doctorId")
+
         }
+        return _doctorId.value
     }
 
 

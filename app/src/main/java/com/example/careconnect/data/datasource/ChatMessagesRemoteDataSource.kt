@@ -1,5 +1,6 @@
 package com.example.careconnect.data.datasource
 
+import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
@@ -25,6 +26,12 @@ class ChatMessagesRemoteDataSource @Inject constructor(
 
         return chatSnapshot.toObjects(Message::class.java)
     }
+
+    suspend fun getChatRoomById(chatId: String): ChatRoom? {
+        val snapshot = firestore.collection("chatrooms").document(chatId).get().await()
+        return snapshot.toObject(ChatRoom::class.java)
+    }
+
 
     private fun currentCollection(chatId: String): CollectionReference =
         firestore.collection("chatrooms").document(chatId).collection("messages")

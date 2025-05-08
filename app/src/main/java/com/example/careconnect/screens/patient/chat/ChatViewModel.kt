@@ -78,8 +78,14 @@ class ChatViewModel @Inject constructor(
     }
 
     fun loadChat(chatId: String) {
-        getMessages(chatId)
+        println("ChatViewModel: Loading chat with ID: $chatId")
+        launchCatching {
+            chatRoom = chatMessagesRepository.getChatRoomById(chatId) // <-- This sets the chatRoom
+            messages = chatMessagesRepository.getMessages(chatId)
+            println("ChatViewModel: chatRoom=$chatRoom, messages=$messages")
+        }
     }
+
 
     // Function to send a new message
     fun sendMessage(message: Message, chatId: String) {

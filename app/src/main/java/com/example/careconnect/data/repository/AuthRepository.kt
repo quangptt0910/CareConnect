@@ -38,5 +38,9 @@ class AuthRepository @Inject constructor(
         authRemoteDataSource.deleteAccount()
     }
 
+    suspend fun getCurrentUserId(): String? {
+        return authRemoteDataSource.getCurrentUserId()
+    }
+
 
 }

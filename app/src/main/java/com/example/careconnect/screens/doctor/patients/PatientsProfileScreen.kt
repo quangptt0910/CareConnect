@@ -46,7 +46,7 @@ fun PatientsProfileScreen(
     }
 
     val patient by viewModel.patient.collectAsStateWithLifecycle()
-    val doctorId by viewModel.doctorId.collectAsStateWithLifecycle()
+    val doctorId = viewModel.loadDoctorId()
 
     PatientsProfileScreenContent(
 
