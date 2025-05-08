@@ -154,17 +154,7 @@ class AuthRemoteDataSource @Inject constructor(
         auth.signInWithCredential(credential).await()
     }
 
-    suspend fun getPatientById(patientId: String): Patient? {
-        return try {
-            val snapshot = firestore.collection("patients")
-                .document(patientId)
-                .get()
-                .await()
-            snapshot.toObject(Patient::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
+
 
     sealed class UserData {
         data class AdminData(val admin: Admin) : UserData()

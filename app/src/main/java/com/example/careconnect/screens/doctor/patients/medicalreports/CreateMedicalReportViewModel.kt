@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.doctor.patients
+package com.example.careconnect.screens.doctor.patients.medicalreports
 
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class PatientsProfileViewModel @Inject constructor(
+class CreateMedicalReportViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
 ): MainViewModel() {
     private val _patient = MutableStateFlow<Patient?>(null)
