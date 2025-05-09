@@ -2,6 +2,7 @@ package com.example.careconnect.data.repository
 
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.datasource.AuthRemoteDataSource.UserData
+import com.example.careconnect.dataclass.Role
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -28,6 +29,10 @@ class AuthRepository @Inject constructor(
 
     suspend fun linkAccount(userId: String, gender: String, weight: Double, height: Double, dob: String, address: String) {
         authRemoteDataSource.linkAccount(userId, gender, weight, height, dob, address)
+    }
+
+    suspend fun getCurrentUserRole(): Role {
+        return authRemoteDataSource.getCurrentUserRole()
     }
 
     fun signOut() {

@@ -40,17 +40,27 @@ class ChatMenuViewModel @Inject constructor(
     private val _chatPartners = MutableStateFlow<Map<String, Any>>(emptyMap())
     val chatPartners: StateFlow<Map<String, Any>> = _chatPartners
 
-    fun setCurrentUser(userId: String, role: Role) {
-        println("Setting current user with ID: $userId and role: $role")
-        _currentUserId.value = userId
-        _currentUserRole.value = role
+    suspend fun setCurrentUser() {
+        _currentUserId.value = authRepository.getCurrentUserId().toString()
+        _currentUserRole.value = authRepository.getCurrentUserRole()
+
+        if (_currentUserRole.value == Role.PATIENT) {
+            _currentPatient.value = patientRepository.getPatientById(_currentUserId.value)
+        } else if (_currentUserRole.value == Role.DOCTOR) {
+            _doctor.value = doctorRepository.getDoctorById(_currentUserId.value)
+        }
+    }
+
+    suspend fun getCurrentUserRole(): Role {
+        setCurrentUser()
+        return _currentUserRole.value
     }
 
 
     fun loadChatRooms() {
         launchCatching {
             val userId = authRepository.getCurrentUserId()
-            val userRole = _currentUserRole.value
+            val userRole = authRepository.getCurrentUserRole()
 
             println("Loading chat rooms for user ID: $userId and role: $userRole")
 

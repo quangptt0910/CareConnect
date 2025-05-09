@@ -119,7 +119,8 @@ fun PatientApp(
 
             composable(PATIENT_BOOKING_APPOINTMENTS_ROUTE){backStackEntry ->
                 BookAppointmentScreen(
-                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
+                    showSnackBar = showSnackBar
                 )
             }
         }
