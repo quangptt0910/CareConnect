@@ -1,5 +1,8 @@
 package com.example.careconnect.screens.doctor.patients.prescriptions
 
+import android.app.DatePickerDialog
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,34 +10,48 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
-import com.example.careconnect.screens.doctor.patients.SymptomsSection
+import com.example.careconnect.dataclass.Prescription
 import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
 import com.example.careconnect.ui.theme.CareConnectTheme
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
 
 @Composable
 fun CreatePrescriptionsScreen(
@@ -50,149 +67,184 @@ fun CreatePrescriptionsScreen(
     CreatePrescriptionsScreenContent(
         patientId = patientId,
         patient = patient,
-        onCreateMedicalReport = viewModel::createMedicalReport
+        onCreatePrescription = viewModel::createPrescription
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePrescriptionsScreenContent(
     patientId: String,
     patient: Patient? = null,
-    onCreateMedicalReport: (String, MedicalReport) -> Unit
-){
-    var symptoms by rememberSaveable { mutableStateOf("") }
-    val symptomsList = remember { mutableStateListOf<String>() }
+    onCreatePrescription: (String, Prescription) -> Unit
+) {
+    val context = LocalContext.current
+    val datePicker = rememberDatePickerState()
+    val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
-    var diagnosis by remember { mutableStateOf("") }
-    var prognosis by remember { mutableStateOf("") }
-    var treatment by remember { mutableStateOf("") }
-    var recommendations by remember { mutableStateOf("") }
-    var planOfCare by remember { mutableStateOf("") }
-
+    var medicationName by remember { mutableStateOf("") }
+    var dosageExpanded by remember { mutableStateOf(false) }
+    var selectedDosage by remember { mutableStateOf("") }
+    var refills by remember { mutableStateOf(0) }
+    var instructions by remember { mutableStateOf("") }
+    var validUntil by remember { mutableStateOf<Timestamp?>(null) }
     var showDialog by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    val dosageOptions = listOf(
+        "1 tablet once a day",
+        "1 tablet twice a day",
+        "1 tablet 3 times a day",
+        "2 tablets once a day"
+    )
+
+    Surface(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
-                Text(
-                    text = "Create Medical Report",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Text("Create Prescription", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(16.dp))
 
-                if (patient != null) {
-                    Text(
-                        text = "${patient.name} ${patient.surname}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(3.dp)
-                    )
-
-                    Text(
-                        text = "Date of Birth: ${patient.dateOfBirth}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(3.dp)
-                    )
-                    Text(
-                        text = "Gender: ${patient.gender}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(3.dp)
-                    )
+                patient?.let {
+                    Text("${it.name} ${it.surname}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Date of Birth: ${it.dateOfBirth}", style = MaterialTheme.typography.bodyMedium)
+                    Text("Gender: ${it.gender}", style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
             item {
-                SymptomsSection(
-                    symptomsList = symptomsList,
-                    symptoms = symptoms,
-                    onSymptomChange = { symptoms = it },
-                    onAddSymptom = {
-                        symptomsList.add(it)
-                    },
-                    onRemoveSymptom = {
-                        symptomsList.remove(it)
+                TextFieldDoctor(
+                    value = medicationName,
+                    onValueChange = { medicationName = it },
+                    label = "Medication Name"
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Dosage Selector
+                ExposedDropdownMenuBox(
+                    expanded = dosageExpanded,
+                    onExpandedChange = { dosageExpanded = !dosageExpanded }
+                ) {
+                    TextField(
+                        value = selectedDosage,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Select Dosage") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dosageExpanded) },
+                        modifier = Modifier.menuAnchor().width(300.dp)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = dosageExpanded,
+                        onDismissRequest = { dosageExpanded = false }
+                    ) {
+                        dosageOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    selectedDosage = option
+                                    dosageExpanded = false
+                                }
+                            )
+                        }
                     }
-                )
-            }
-            item {
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Refills Number Picker with Up/Down Arrows
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextField(
+                        value = refills.toString(),
+                        onValueChange = {},
+                        label = { Text("Refills Allowed") },
+                        readOnly = true,
+                        trailingIcon = {
+                            Column {
+                                IconButton(onClick = { refills += 1 }) {
+                                    Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Increase")
+                                }
+                                IconButton(onClick = {
+                                    if (refills > 0) refills -= 1
+                                }) {
+                                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Decrease")
+                                }
+                            }
+                        },
+                        modifier = Modifier.width(300.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 TextFieldDoctor(
-                    value = diagnosis,
-                    onValueChange = { diagnosis = it },
-                    modifier = Modifier,
-                    label = "Diagnosis"
+                    value = instructions,
+                    onValueChange = { instructions = it },
+                    label = "Additional Instructions"
                 )
-                TextFieldDoctor(
-                    value = prognosis,
-                    onValueChange = { prognosis = it },
-                    modifier = Modifier,
-                    label = "Prognosis"
-                )
-                TextFieldDoctor(
-                    value = treatment,
-                    onValueChange = { treatment = it },
-                    modifier = Modifier,
-                    label = "Treatment"
-                )
-                TextFieldDoctor(
-                    value = recommendations,
-                    onValueChange = { recommendations = it },
-                    modifier = Modifier,
-                    label = "Recommendations"
-                )
-                TextFieldDoctor(
-                    value = planOfCare,
-                    onValueChange = { planOfCare = it },
-                    modifier = Modifier,
-                    label = "Plan of Care"
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Valid Until Date Picker
+                TextField(
+                    value = validUntil?.let { dateFormatter.format(it.toDate()) } ?: "",
+                    onValueChange = {},
+                    label = { Text("Valid Until") },
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            val datePickerDialog = DatePickerDialog(context)
+                            datePickerDialog.setOnDateSetListener { _, year, month, day ->
+                                val cal = Calendar.getInstance()
+                                cal.set(year, month, day)
+                                validUntil = Timestamp(cal.time)
+                            }
+                            datePickerDialog.show()
+                        }) {
+                            Icon(Icons.Default.CalendarToday, contentDescription = "Pick Date")
+                        }
+                    },
+                    modifier = Modifier.width(300.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
             item {
                 Button(
                     onClick = { showDialog = true },
-                    modifier = Modifier.width(200.dp).height(40.dp).padding(16.dp)
+                    modifier = Modifier.width(200.dp).height(100.dp).padding(16.dp)
                 ) {
-                    Text("Submit medical report")
+                    Text("Submit Prescription")
                 }
-
 
                 if (showDialog) {
                     AlertDialogExample(
                         onDismissRequest = { showDialog = false },
                         onConfirmation = {
                             showDialog = false
-
-                            val medicalReport = MedicalReport(
+                            val prescription = Prescription(
                                 patientId = patientId,
-                                symptoms = symptomsList,
-                                diagnosis = diagnosis,
-                                prognosis = prognosis,
-                                treatment = treatment,
-                                recommendations = recommendations,
-                                plan = planOfCare,
-                                reportDate = com.google.firebase.Timestamp.now(),
-                                reportPdfUrl = null
+                                medicationName = medicationName,
+                                dosage = selectedDosage,
+                                refills = refills,
+                                instructions = instructions,
+                                issueDate = Timestamp.now(),
+                                validUntil = validUntil
                             )
-
-                            onCreateMedicalReport(patientId, medicalReport)
+                            onCreatePrescription(patientId, prescription)
                         },
-                        dialogTitle = "Submit medical report",
-                        dialogText = "Are you sure you want to submit this medical report?",
-                        icon = androidx.compose.material.icons.Icons.Default.Check
+                        dialogTitle = "Submit Prescription",
+                        dialogText = "Are you sure you want to submit this prescription?",
+                        icon = Icons.Default.Check
                     )
                 }
             }
-
         }
     }
 }
+
 
 @Composable
 fun AlertDialogExample(
@@ -243,7 +295,8 @@ fun CreatePrescriptionsScreenPreview(){
     CareConnectTheme {
         CreatePrescriptionsScreenContent(
             patientId = "123",
-            onCreateMedicalReport = { _, _ -> }
+            onCreatePrescription = { _, _ -> }
+
         )
     }
 }

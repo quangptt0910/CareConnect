@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.PatientRepository
-import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Prescription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,20 +44,18 @@ class CreatePrescriptionsViewModel @Inject constructor(
         }
     }
 
-    fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
+    fun createPrescription(patientId: String, prescription: Prescription) {
         viewModelScope.launch {
             val doctorId = _currentDoctorId.value
-            val medicalReportRef = doctorId?.let {
-                medicalReport.copy(
-                    doctorId = it,
-                )
+            val prescriptionWithDoctor = doctorId?.let {
+                prescription.copy(doctorId = it)
             }
 
-            Log.d("MedicalReportViewModel", "Doctor ID: $doctorId")
-            Log.d("MedicalReportViewModel", "Medical Report: $medicalReportRef")
+            Log.d("CreatePrescriptionVM", "Doctor ID: $doctorId")
+            Log.d("CreatePrescriptionVM", "Prescription: $prescriptionWithDoctor")
 
-            if (medicalReportRef != null) {
-                patientRepository.createMedicalReport(patientId, medicalReportRef)
+            if (prescriptionWithDoctor != null) {
+                patientRepository.createPrescription(patientId, prescriptionWithDoctor)
             }
         }
     }

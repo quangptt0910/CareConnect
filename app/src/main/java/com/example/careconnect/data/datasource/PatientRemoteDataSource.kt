@@ -3,6 +3,7 @@ package com.example.careconnect.data.datasource
 import android.util.Log
 import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Prescription
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
@@ -33,6 +34,19 @@ class PatientRemoteDataSource @Inject constructor(
                 .await()
         } catch (e: Exception) {
             Log.e("Firestore", "Failed to create medical report", e)
+            throw e // or handle accordingly
+        }
+    }
+
+    suspend fun createPrescription(patientId: String, prescription: Prescription) {
+        try {
+            firestore.collection("patients")
+                .document(patientId)
+                .collection("prescriptions")
+                .add(prescription)
+                .await()
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to create prescription", e)
             throw e // or handle accordingly
         }
     }
