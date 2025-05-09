@@ -19,10 +19,11 @@ import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.HOME_PATIENT_ROUTE
-import com.example.careconnect.ui.navigation.Route.PATIENT_APPOINTMENTS_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
+import com.example.careconnect.ui.navigation.Route.getPatientBookingAppointmentsBookRoute
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 import com.example.careconnect.ui.navigation.Route.getPatientDoctorsOverviewRoute
 import com.example.careconnect.ui.navigation.Route.getPatientDoctorsProfileRoute
@@ -63,9 +64,9 @@ fun PatientApp(
             composable(BarRoutes.PROFILE.route) {
 
             }
-            composable(BarRoutes.BOOKING.route) {
-                BookAppointmentScreen(
-                )
+            composable(BarRoutes.APPOINTMENTS.route) {
+//                BookAppointmentScreen(
+//                )
             }
 
             composable(HOME_PATIENT_ROUTE){
@@ -100,7 +101,7 @@ fun PatientApp(
 
             composable("patient/doctors/overview/{specialty}"){ backStackEntry ->
                 DoctorsOverviewScreen(
-                    openBookingScreen = { navController.navigate(PATIENT_APPOINTMENTS_ROUTE) },
+                    openBookingScreen = { doctorId -> navController.navigate(getPatientBookingAppointmentsBookRoute(doctorId)) },
                     openDoctorProfileScreen = { doctorId -> navController.navigate(getPatientDoctorsProfileRoute(doctorId)) },
                     specialty = backStackEntry.arguments?.getString("specialty") ?: ""
                 )
@@ -116,9 +117,9 @@ fun PatientApp(
 
 
 
-            composable(PATIENT_APPOINTMENTS_ROUTE){
+            composable(PATIENT_BOOKING_APPOINTMENTS_ROUTE){backStackEntry ->
                 BookAppointmentScreen(
-
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
                 )
             }
         }
