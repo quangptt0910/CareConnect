@@ -10,11 +10,17 @@ class AppointmentRepository @Inject constructor(
     private val appointmentDataSource: AppointmentDataSource
 ) {
 
+    suspend fun getAllAppointments() =
+        appointmentDataSource.getAllAppointments()
+
     suspend fun getAllAppointmentsByDate(date: String) =
         appointmentDataSource.getAllAppointmentsByDate(date)
 
     suspend fun getAllAppointmentsByMonth(date: String) =
         appointmentDataSource.getAllAppointmentsByMonth(date)
+
+    suspend fun getAllPatientAppointments(patientId: String) =
+        appointmentDataSource.getAllPatientAppointments(patientId)
 
     fun getAppointmentsByPatientId(patientId: Flow<String?>) =
         appointmentDataSource.getAppointmentsByPatientId(patientId)
@@ -30,6 +36,9 @@ class AppointmentRepository @Inject constructor(
 
     suspend fun getPatientAppointmentsByDate(patientId: String?, date: String) =
         appointmentDataSource.getPatientAppointmentsByDate(patientId, date)
+
+    suspend fun getPatientAppointmentsByMonth(doctorId: String?, date: String) =
+        appointmentDataSource.getPatientAppointmentsByMonth(doctorId, date)
 
     suspend fun getAppointmentsByStatus(status: AppointmentStatus) =
         appointmentDataSource.getAppointmentsByStatus(status)

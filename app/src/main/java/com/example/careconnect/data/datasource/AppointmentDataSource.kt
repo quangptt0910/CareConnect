@@ -17,6 +17,15 @@ import javax.inject.Inject
 class AppointmentDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
 ){
+
+    suspend fun getAllAppointments(): List<Appointment> {
+        return firestore
+            .collection("appointments")
+            .get()
+            .await()
+            .toObjects(Appointment::class.java)
+    }
+
     suspend fun getAllAppointmentsByDate(date: String): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -39,6 +48,13 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    suspend fun getAllPatientAppointments(patientId: String): List<Appointment> {
+        return firestore
+            .collection("appointments")
+            .whereEqualTo("patientId", patientId)
+            .get()
+            .await().toObjects(Appointment::class.java)
+    }
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByPatientId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->
@@ -108,6 +124,20 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
+    suspend fun getPatientAppointmentsByMonth(patientId: String?, date: String): List<Appointment> {
+        val local = date.toLocalDate()
+        val ym = YearMonth.of(local.year, local.month)
+        val start = ym.atDay(1)
+        val end = ym.plusMonths(1).atDay(1)
+
+        return firestore
+            .collection("appointments")
+            .whereEqualTo("patientId", patientId)
+            .whereGreaterThanOrEqualTo("appointmentDate", start)
+            .whereLessThan("appointmentDate", end)
+            .get()
+            .await().toObjects(Appointment::class.java)
+    }
     // Get appointments by status
     suspend fun getAppointmentsByStatus(status: AppointmentStatus): List<Appointment> {
         return firestore

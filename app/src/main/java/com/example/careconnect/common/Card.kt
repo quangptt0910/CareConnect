@@ -1,10 +1,14 @@
 package com.example.careconnect.common
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -118,6 +122,32 @@ fun AppointmentCardPreview() {
     AppointmentCard(appointment =appointment)
 }
 
+@Composable
+fun AppointmentCard(appt: Appointment) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${appt.startTime} - ${appt.endTime}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = appt.status.title,
+                    color = appt.status.color,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(text = "Patient: ${appt.patientName}")
+            Text(text = "Doctor: ${appt.doctorName}")
+            Text(text = "Type: ${appt.type}")
+            Text(text = "Address: ${appt.address}")
+        }
+    }
+}
 
 //@Preview(showBackground = true)
 //@Composable

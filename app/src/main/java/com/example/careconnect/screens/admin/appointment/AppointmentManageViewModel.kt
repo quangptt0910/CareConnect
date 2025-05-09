@@ -23,7 +23,7 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
 
-enum class TimeRange { Day, Week, Month }
+enum class TimeRange { Day, Week, Month, All }
 enum class SortOption(val label: String) {
     TimeAsc("Time: Earliest"),
     TimeDesc("Time: Latest"),
@@ -89,6 +89,9 @@ class AppointmentManageViewModel @Inject constructor(
                         val ym = YearMonth.from(state.currentDate)
                         repo.getAllAppointmentsByMonth(ym.atDay(1).format(isoFormatter))
                     }
+                    TimeRange.All -> {
+                        repo.getAllAppointments()
+                    }
                 }
                 emit(list)
             }
@@ -124,6 +127,8 @@ class AppointmentManageViewModel @Inject constructor(
     fun setFilter(status: Set<AppointmentStatus?>) { _filterStatus.value = status }
     fun setSort(option: SortOption)  { _sortOption.value  = option }
     fun resetAll() {
+        _selectedRange.value = TimeRange.All
+        _currentDate.value   = LocalDate.now()
         _filterStatus.value = emptySet()
         _sortOption.value   = SortOption.TimeAsc
     }

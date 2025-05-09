@@ -30,7 +30,7 @@ class AuthRemoteDataSource @Inject constructor(
 
     val currentUser: FirebaseUser? get() = auth.currentUser
 
-    suspend fun getCurrentUserId(): String? {
+    fun getCurrentUserId(): String? {
         return auth.currentUser?.uid
     }
 

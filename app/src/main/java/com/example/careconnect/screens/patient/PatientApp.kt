@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.patient.appointment.BookAppointmentScreen
+import com.example.careconnect.screens.patient.appointment.PatientAppointmentScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
 import com.example.careconnect.screens.patient.doctorsoverview.DoctorsOverviewScreen
@@ -65,8 +66,7 @@ fun PatientApp(
 
             }
             composable(BarRoutes.APPOINTMENTS.route) {
-//                BookAppointmentScreen(
-//                )
+                PatientAppointmentScreen()
             }
 
             composable(HOME_PATIENT_ROUTE){
