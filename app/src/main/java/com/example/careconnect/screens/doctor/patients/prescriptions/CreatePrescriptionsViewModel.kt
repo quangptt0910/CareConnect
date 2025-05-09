@@ -1,11 +1,9 @@
-package com.example.careconnect.screens.doctor.patients.medicalreports
+package com.example.careconnect.screens.doctor.patients.prescriptions
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.AuthRepository
-import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.data.repository.PatientRepository
 import com.example.careconnect.dataclass.MedicalReport
 import com.example.careconnect.dataclass.Patient
@@ -17,10 +15,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class CreateMedicalReportViewModel @Inject constructor(
+class CreatePrescriptionsViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
-    private val authRepository: AuthRepository,
-    private val doctorRepository: DoctorRepository
+    private val authRepository: AuthRepository
 ): MainViewModel() {
     private val _patient = MutableStateFlow<Patient?>(null)
     val patient: StateFlow<Patient?> = _patient
@@ -47,27 +44,21 @@ class CreateMedicalReportViewModel @Inject constructor(
         }
     }
 
-    fun createMedicalReport(patientId: String, medicalReport: MedicalReport, context: Context) {
+    fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
         viewModelScope.launch {
-            val doctorId = _currentDoctorId.value ?: return@launch
-            val patient = _patient.value ?: return@launch
-            val doctor = doctorRepository.getDoctorById(doctorId) // Implement this
-
-            val completeReport = medicalReport.copy(doctorId = doctorId)
-
-            // Generate PDF
-            val pdfFile = doctor?.let {
-                CreateMedicalReportPdf(context, patient,
-                    it, completeReport)
-            }
-            if (pdfFile != null) {
-                Log.d("PDF", "PDF generated at: ${pdfFile.absolutePath}")
+            val doctorId = _currentDoctorId.value
+            val medicalReportRef = doctorId?.let {
+                medicalReport.copy(
+                    doctorId = it,
+                )
             }
 
-            // Optionally: Upload the PDF file and get URL, then update reportPdfUrl
+            Log.d("MedicalReportViewModel", "Doctor ID: $doctorId")
+            Log.d("MedicalReportViewModel", "Medical Report: $medicalReportRef")
 
-            patientRepository.createMedicalReport(patientId, completeReport)
+            if (medicalReportRef != null) {
+                patientRepository.createMedicalReport(patientId, medicalReportRef)
+            }
         }
     }
-
 }

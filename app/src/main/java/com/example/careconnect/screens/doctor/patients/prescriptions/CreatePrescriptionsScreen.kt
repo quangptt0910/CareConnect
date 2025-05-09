@@ -1,6 +1,5 @@
-package com.example.careconnect.screens.doctor.patients.medicalreports
+package com.example.careconnect.screens.doctor.patients.prescriptions
 
-import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,9 +37,9 @@ import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
-fun CreateMedicalReportScreen(
+fun CreatePrescriptionsScreen(
     patientId: String,
-    viewModel: CreateMedicalReportViewModel = hiltViewModel()
+    viewModel: CreatePrescriptionsViewModel = hiltViewModel()
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -49,7 +47,7 @@ fun CreateMedicalReportScreen(
 
     val patient by viewModel.patient.collectAsStateWithLifecycle()
 
-    CreateMedicalReportScreenContent(
+    CreatePrescriptionsScreenContent(
         patientId = patientId,
         patient = patient,
         onCreateMedicalReport = viewModel::createMedicalReport
@@ -57,10 +55,10 @@ fun CreateMedicalReportScreen(
 }
 
 @Composable
-fun CreateMedicalReportScreenContent(
+fun CreatePrescriptionsScreenContent(
     patientId: String,
     patient: Patient? = null,
-    onCreateMedicalReport: (String, MedicalReport, Context) -> Unit
+    onCreateMedicalReport: (String, MedicalReport) -> Unit
 ){
     var symptoms by rememberSaveable { mutableStateOf("") }
     val symptomsList = remember { mutableStateListOf<String>() }
@@ -72,7 +70,6 @@ fun CreateMedicalReportScreenContent(
     var planOfCare by remember { mutableStateOf("") }
 
     var showDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -123,40 +120,40 @@ fun CreateMedicalReportScreenContent(
                     }
                 )
             }
-        item {
-            TextFieldDoctor(
-                value = diagnosis,
-                onValueChange = { diagnosis = it },
-                modifier = Modifier,
-                label = "Diagnosis"
-            )
-            TextFieldDoctor(
-                value = prognosis,
-                onValueChange = { prognosis = it },
-                modifier = Modifier,
-                label = "Prognosis"
-            )
-            TextFieldDoctor(
-                value = treatment,
-                onValueChange = { treatment = it },
-                modifier = Modifier,
-                label = "Treatment"
-            )
-            TextFieldDoctor(
-                value = recommendations,
-                onValueChange = { recommendations = it },
-                modifier = Modifier,
-                label = "Recommendations"
-            )
-            TextFieldDoctor(
-                value = planOfCare,
-                onValueChange = { planOfCare = it },
-                modifier = Modifier,
-                label = "Plan of Care"
-            )
+            item {
+                TextFieldDoctor(
+                    value = diagnosis,
+                    onValueChange = { diagnosis = it },
+                    modifier = Modifier,
+                    label = "Diagnosis"
+                )
+                TextFieldDoctor(
+                    value = prognosis,
+                    onValueChange = { prognosis = it },
+                    modifier = Modifier,
+                    label = "Prognosis"
+                )
+                TextFieldDoctor(
+                    value = treatment,
+                    onValueChange = { treatment = it },
+                    modifier = Modifier,
+                    label = "Treatment"
+                )
+                TextFieldDoctor(
+                    value = recommendations,
+                    onValueChange = { recommendations = it },
+                    modifier = Modifier,
+                    label = "Recommendations"
+                )
+                TextFieldDoctor(
+                    value = planOfCare,
+                    onValueChange = { planOfCare = it },
+                    modifier = Modifier,
+                    label = "Plan of Care"
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             item {
                 Button(
                     onClick = { showDialog = true },
@@ -184,7 +181,7 @@ fun CreateMedicalReportScreenContent(
                                 reportPdfUrl = null
                             )
 
-                            onCreateMedicalReport(patientId, medicalReport, context)
+                            onCreateMedicalReport(patientId, medicalReport)
                         },
                         dialogTitle = "Submit medical report",
                         dialogText = "Are you sure you want to submit this medical report?",
@@ -242,11 +239,11 @@ fun AlertDialogExample(
 
 @Preview
 @Composable
-fun CreateMedicalReportScreenPreview(){
+fun CreatePrescriptionsScreenPreview(){
     CareConnectTheme {
-        CreateMedicalReportScreenContent(
+        CreatePrescriptionsScreenContent(
             patientId = "123",
-            onCreateMedicalReport = { _, _ , _-> }
+            onCreateMedicalReport = { _, _ -> }
         )
     }
 }
