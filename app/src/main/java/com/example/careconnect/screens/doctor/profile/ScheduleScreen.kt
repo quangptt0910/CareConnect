@@ -194,7 +194,7 @@ fun SlotEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (initialSlot == null) "Add Slot" else "Edit Slot") },
+        title = { Text(if (initialSlot == null) "Add Time Block" else "Edit Time Block") },
         text = {
             Column {
                 TimeTextField(label = "Start Time", value = start) { start = it }
@@ -255,7 +255,7 @@ fun SlotEditDialog(
                 onSave(TimeSlot(start, end, length.toInt(), type))
             },
                 enabled = start.isNotEmpty() && end.isNotEmpty()
-            ) { Text("Save") }
+            ) { Text("Generate Slots") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }
@@ -271,22 +271,20 @@ fun TimeTextField(
     value: String,
     onValueChange: (String) -> Unit
 ) {
-//    val timeHasError by derivedStateOf {
-//        if (value.isNotEmpty()) {
-//            try {
-//                val time = value.split(":")
-//                time[0].toInt() in 0..23 && time[1].toInt() in 0..59
-//            } catch (e: Exception) {
-//                true
-//        }
-//    }
 
     OutlinedTextField(
         label = { Text(label) },
         value = value,
         onValueChange = { newInput ->
-            // I
-            if (!newInput.contains(":") && value.length == 2) {
+            //
+            // If the user typed just a single digit
+            if (newInput.length == 1 && newInput[0].isDigit()) {
+                // Don't modify single digits - let the user continue typing
+                onValueChange(newInput)
+                return@OutlinedTextField
+            }
+
+            if (!newInput.contains(":") && newInput.length == 2 && value.length < 2) {
                 newInput.toIntOrNull()?.let { hours ->
                     if (hours in 0..23) {
                         onValueChange("$hours:")
@@ -308,7 +306,7 @@ fun TimeTextField(
                     if (hours.isNotEmpty()) {
                         val hoursInt = hours.toIntOrNull() ?: 0
                         if (hoursInt in 0..23) {
-                            onValueChange(if (hours.length == 2) "$hours:00" else hours)
+                            onValueChange(hours)
                         }
                     } else {
                         onValueChange("")
@@ -318,6 +316,10 @@ fun TimeTextField(
                 2 -> {
                     val hours = parts[0].take(2)
                     val minutes = parts[1].take(2)
+                    if (hours.isEmpty()) {
+                        onValueChange("0:$minutes")
+                        return@OutlinedTextField
+                    }
                     val hoursInt = hours.toIntOrNull() ?: 0
                     val minutesInt = minutes.toIntOrNull() ?: 0
                     if (hoursInt in 0..23 && minutesInt in 0..59) {

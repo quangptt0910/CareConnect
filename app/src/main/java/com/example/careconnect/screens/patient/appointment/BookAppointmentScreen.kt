@@ -44,8 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.SnackBarMessage
-import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
+import java.time.LocalDate
 
 
 @Composable
@@ -60,8 +60,20 @@ fun BookAppointmentScreen(
     }
 
     val doctor by viewModel.doctor.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     BookAppointmentScreenContent(
-        doctor = doctor
+        doctor = doctor,
+        uiState = uiState,
+        onDateSelected = { date ->
+            viewModel.onDateSelected(date, showSnackBar)
+        },
+        onTimeSelected = { time ->
+            viewModel.onTimeSelected(time)
+        },
+        onBookAppointment = {
+            viewModel.bookAppointment(showSnackBar)
+        },
     )
 }
 
@@ -69,6 +81,10 @@ fun BookAppointmentScreen(
 @Composable
 fun BookAppointmentScreenContent(
     doctor: Doctor? = Doctor(),
+    uiState: BookAppointmentUiState,
+    onDateSelected: (LocalDate) -> Unit,
+    onTimeSelected: (String) -> Unit,
+    onBookAppointment: () -> Unit,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -77,33 +93,43 @@ fun BookAppointmentScreenContent(
 
         SmallTopAppBarExample()
 
-
         Column(
             modifier = Modifier.padding(top = 80.dp).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-
         ) {
-            Text(
-                text = "Dr Theresa Mullins",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(start = 20.dp)
-            )
+            doctor?.let {
+                Text(
+                    text = "Dr. ${it.name} ${it.surname}",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 20.dp)
+                )
 
-            InlineDatePicker {  }
+                Text(
+                    text = it.specialization,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 20.dp, bottom = 16.dp)
+                )
 
-            val times = listOf("09:00 AM", "10:30 AM", "12:00 PM", "02:00 PM", "03:30 PM","04:00 PM", "05:30 PM", "07:00 PM", "08:30 PM")
-            TimeSelectionChips(availableTimes = times) { selectedTime ->
-                println("User selected: $selectedTime")
+                InlineDatePicker {  }
+
+                val times = listOf("09:00 AM", "10:30 AM", "12:00 PM", "02:00 PM", "03:30 PM","04:00 PM", "05:30 PM", "07:00 PM", "08:30 PM")
+                TimeSelectionChips(availableTimes = times) { selectedTime ->
+                    println("User selected: $selectedTime")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = {}) {
+                    Text("Book an Appointment",
+                        style = MaterialTheme.typography.titleLarge)
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = {}) {
-                Text("Book an Appointment",
-                    style = MaterialTheme.typography.titleLarge)
-            }
         }
 
 
@@ -192,8 +218,18 @@ fun TimeSelectionChips(availableTimes: List<String>, onTimeSelected: (String) ->
 @Composable
 fun BookAppointmentScreenPreview() {
     CareConnectTheme {
-        val uiState = HomeUiState()
+        val uiState = BookAppointmentUiState()
         BookAppointmentScreenContent(
+            doctor = Doctor(
+                name = "John",
+                surname = "Doe",
+                address = "123 Main St",
+                specialization = "Family Medicine"
+            ),
+            uiState = uiState,
+            onDateSelected = {},
+            onTimeSelected = {},
+            onBookAppointment = {}
         )
     }
 }

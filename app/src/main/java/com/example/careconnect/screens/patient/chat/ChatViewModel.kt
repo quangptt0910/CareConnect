@@ -12,6 +12,7 @@ import com.example.careconnect.data.datasource.AddChatRoomDataSource
 import com.example.careconnect.data.datasource.ChatMessagesRemoteDataSource
 import com.example.careconnect.data.repository.ChatMessagesRepository
 import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.data.repository.PatientRepository
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.chat.Author
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val chatMessagesRepository: ChatMessagesRepository,
-    private val doctorRepository: DoctorRepository
+    private val doctorRepository: DoctorRepository,
+    private val patientRepository: PatientRepository
 ): MainViewModel() {
     private val _messages = mutableStateListOf<Message>()  // Backing field
 //    val messages: List<Message> get() = _messages  // Publicly exposed list
@@ -77,7 +79,7 @@ class ChatViewModel @Inject constructor(
     }
 
     suspend fun getPatient(patientId: String): Patient? {
-        return doctorRepository.getPatientById(patientId)
+        return patientRepository.getPatientById(patientId)
     }
 
     fun getMessages(chatId: String){

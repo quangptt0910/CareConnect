@@ -17,7 +17,7 @@ data class DoctorScheduleUiState(
     val selectedDates: Set<LocalDate> = emptySet(),
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
-    val SnackBarMessage: String? = null,
+    val snackBarMessage: String? = null,
     val navigateNext: Boolean = false
 )
 
@@ -39,11 +39,9 @@ class AdminDoctorScheduleViewModel @Inject constructor(
         doctorRepository.saveWorkingDays(doctorId, selectedDate)
     }
 
-    private fun loadWorkingDays(
-
-    ) {
+    private fun loadWorkingDays() {
         // Implement the logic to load working days
-        launchCatching() {
+        launchCatching {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
             try {
@@ -51,7 +49,7 @@ class AdminDoctorScheduleViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(selectedDates = workingDays)
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(SnackBarMessage = e.message)
+                _uiState.value = _uiState.value.copy(snackBarMessage = e.message)
             }
         }
     }
@@ -74,7 +72,7 @@ class AdminDoctorScheduleViewModel @Inject constructor(
                 doctorRepository.saveWorkingDays(doctorId, _uiState.value.selectedDates)
                 _uiState.value = _uiState.value.copy(isSaving = false, navigateNext = true)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isSaving = false, SnackBarMessage = e.message)
+                _uiState.value = _uiState.value.copy(isSaving = false, snackBarMessage = e.message)
             }
         }
     }

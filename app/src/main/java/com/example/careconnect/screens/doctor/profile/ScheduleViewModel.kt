@@ -5,6 +5,7 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
+import com.example.careconnect.dataclass.SlotType
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.TimeSlot
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 
 data class ScheduleUiState(
@@ -41,7 +44,6 @@ class ScheduleViewModel @Inject constructor(
     private val _dialogState = MutableStateFlow(DialogState())
 
     private var currentUserId =  authRepository.currentUserIdFlow.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-   // val doctorId = currentUserId.value.toString()
 
     // Expose a single UI state combining all flows
     val uiState: StateFlow<ScheduleUiState> = combine(
@@ -110,7 +112,17 @@ class ScheduleViewModel @Inject constructor(
         val doctorId = currentUserId.value.toString()
         launchCatching(showSnackBar) {
             if (doctorId.isNotEmpty()) {
-                repo.saveSlot(doctorId, _selectedDate.value, slot)
+
+                val generatedSlots = generateTimeSlot(slot.startTime, slot.endTime, slot.appointmentMinutes, slot.slotType)
+                //Delete exist slots in range
+                repo.deleteSlotInRange(doctorId, _selectedDate.value, slot.startTime, slot.endTime)
+
+                // Save all new slots
+                generatedSlots.forEach { generatedSlot ->
+                    repo.saveSlot(doctorId, _selectedDate.value, generatedSlot)
+                }
+
+                // Reload
                 loadSlotsFor(_selectedDate.value, doctorId)
                 closeDialog()
                 showSnackBar(SnackBarMessage.IdMessage(R.string.slot_saved))
@@ -136,6 +148,28 @@ class ScheduleViewModel @Inject constructor(
                 throw Exception("Doctor ID is empty")
             }
         }
+    }
+
+    fun generateTimeSlot(startTime: String, endTime: String, appointmentMinutes: Int, slotType: SlotType = SlotType.CONSULT): List<TimeSlot> {
+        val slots = mutableListOf<TimeSlot>()
+        val formatter = DateTimeFormatter.ofPattern("H:mm")
+
+        val start = LocalTime.parse(startTime, formatter)
+        val end = LocalTime.parse(endTime, formatter)
+
+        if (start.isAfter(end) || start == end) { return slots }
+
+        var currentStart = start
+        while (currentStart.isBefore(end)) {
+            val currentEnd = currentStart.plusMinutes(appointmentMinutes.toLong())
+            if (currentEnd.isAfter(end)) {
+                break
+            }
+            slots.add(TimeSlot(formatter.format(currentStart), formatter.format(currentEnd), appointmentMinutes,slotType))
+            currentStart = currentEnd
+        }
+        return slots
+
     }
 }
 

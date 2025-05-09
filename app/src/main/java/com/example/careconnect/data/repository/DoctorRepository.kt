@@ -31,10 +31,6 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getDoctorById(doctorId)
     }
 
-    suspend fun getPatientById(patientId: String): Patient? {
-        return doctorRemoteDataSource.getPatientById(patientId)
-    }
-
     suspend fun saveWorkingDays(doctorId: String, selectedDate: Set<LocalDate>) {
         doctorRemoteDataSource.saveWorkingDays(doctorId, selectedDate)
     }
@@ -61,6 +57,10 @@ class DoctorRepository @Inject constructor(
 
     suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         doctorRemoteDataSource.deleteSlot(doctorId, date, slot)
+    }
+
+    suspend fun deleteSlotInRange(doctorId: String, date: LocalDate, startTime: String, endTime: String) {
+        doctorRemoteDataSource.deleteSlotInRange(doctorId, date, startTime, endTime)
     }
 
     suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {

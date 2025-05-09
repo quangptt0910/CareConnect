@@ -298,6 +298,7 @@ fun MultiDatePicker(
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val monthFormatter = remember { DateTimeFormatter.ofPattern("MMMM yyyy") }
 
+    val firstDayOfWeek = remember { DayOfWeek.MONDAY }
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -329,7 +330,8 @@ fun MultiDatePicker(
 
             // Day of week headers
             Row(modifier = Modifier.fillMaxWidth()) {
-                for (dayOfWeek in DayOfWeek.entries) {
+                var day = firstDayOfWeek
+                repeat(7) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -337,11 +339,12 @@ fun MultiDatePicker(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
+                            text = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
+                    day = if (day == DayOfWeek.SUNDAY) DayOfWeek.MONDAY else day.plus(1)
                 }
             }
 
@@ -349,8 +352,9 @@ fun MultiDatePicker(
 
             // Calendar grid
             val firstDayOfMonth = currentMonth.atDay(1)
-            val firstCalendarDate = firstDayOfMonth.minusDays(firstDayOfMonth.dayOfWeek.value % 7L)
-            val lastDayOfMonth = currentMonth.atEndOfMonth()
+
+            val daysFromStart = (firstDayOfMonth.dayOfWeek.value - firstDayOfWeek.value+ 7) %7
+            val firstCalendarDate = firstDayOfMonth.minusDays(daysFromStart.toLong())
 
             Column {
                 var currentDate = firstCalendarDate
@@ -399,7 +403,7 @@ private fun RowScope.DayCell(
     isCurrentMonth: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
-    val today = LocalDate.now()
+    val today = remember { LocalDate.now() }
     val isToday = date == today
 
     Box(

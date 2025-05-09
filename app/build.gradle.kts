@@ -73,7 +73,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.navigation:navigation-compose:2.9.0-alpha07")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
@@ -84,7 +84,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
 
     implementation("com.google.firebase:firebase-auth")
 
@@ -93,7 +93,7 @@ dependencies {
     implementation("com.google.firebase:firebase-perf:21.0.5")
     implementation("com.google.firebase:firebase-firestore")
     implementation("androidx.credentials:credentials:1.5.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("com.google.firebase:firebase-functions:21.1.1")
     // Cloud messaging

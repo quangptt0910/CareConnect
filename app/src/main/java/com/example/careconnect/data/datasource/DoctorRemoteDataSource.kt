@@ -163,19 +163,6 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
-    // Get a single patient by ID
-    suspend fun getPatientById(patientId: String): Patient? {
-        return try {
-            firestore.collection(PATIENTS_COLLECTION)
-                .document(patientId)
-                .get()
-                .await()
-                .toObject(Patient::class.java)
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         if (doctorId.isEmpty()) return
 
@@ -209,6 +196,32 @@ class DoctorRemoteDataSource @Inject constructor(
                         doctorCache[dateKey] = it
                     }
                 }
+            }
+        }.await()
+    }
+
+    suspend fun deleteSlotInRange(doctorId: String, date: LocalDate, startTime: String, endTime: String) {
+        if (doctorId.isEmpty()) return
+
+        val dateKey = date.toDateString()
+        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(doctorRef)
+            val doctor = snapshot.toObject(Doctor::class.java) ?: return@runTransaction
+
+            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: return@runTransaction
+
+            // Remove slots in the target range
+            val filteredSlots = currentSlots.filterNot { slot ->
+                slot.startTime >= startTime && slot.endTime <= endTime
+            }
+
+            transaction.update(doctorRef, "schedule.workingDays.$dateKey", filteredSlots)
+
+            // Update cache
+            cachedSchedules[doctorId]?.let { doctorCache ->
+                doctorCache[dateKey] = filteredSlots
             }
         }.await()
     }
