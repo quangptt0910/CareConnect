@@ -8,6 +8,7 @@ import com.example.careconnect.dataclass.Admin
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Gender
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +32,24 @@ class AuthRemoteDataSource @Inject constructor(
 
     suspend fun getCurrentUserId(): String? {
         return auth.currentUser?.uid
+    }
+
+    suspend fun getCurrentUserRole(): Role {
+        val userId = getCurrentUserId()
+        val db = FirebaseFirestore.getInstance()
+        val patientDoc = db.collection("patients").document(userId!!).get().await()
+        val doctorDoc = db.collection("doctors").document(userId).get().await()
+        val adminDoc = db.collection("admins").document(userId).get().await()
+
+        if (patientDoc.exists()) {
+            return Role.PATIENT
+        } else if (doctorDoc.exists()) {
+            return Role.DOCTOR
+        } else if (adminDoc.exists()) {
+            return Role.ADMIN
+        } else {
+            throw Exception("User not found")
+        }
     }
 
     val currentUserIdFlow: Flow<String?>

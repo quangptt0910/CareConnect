@@ -36,18 +36,20 @@ class AddChatRoomDataSource @Inject constructor(
     }
 
     suspend fun getChatRoomsByDoctorId(doctorId: String): List<ChatRoom> {
+        println("Fetching chat rooms for doctor ID: $doctorId")
         val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
         return firestore.collection(CHATROOMS_COLLECTION)
-            .whereEqualTo("doctorId", doctorId)
+            .whereArrayContains("participants", doctorId)
             .get()
             .await()
             .toObjects(ChatRoom::class.java)
     }
 
     suspend fun getChatRoomsByPatientId(patientId: String): List<ChatRoom> {
+        println("Fetching chat rooms for patient ID: $patientId")
         val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
         return firestore.collection(CHATROOMS_COLLECTION)
-            .whereEqualTo("patientId", patientId)
+            .whereArrayContains("participants", patientId)
             .get()
             .await()
             .toObjects(ChatRoom::class.java)

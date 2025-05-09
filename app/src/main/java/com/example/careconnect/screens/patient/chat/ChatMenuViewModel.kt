@@ -2,6 +2,7 @@ package com.example.careconnect.screens.patient.chat
 
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.AddChatRoomRepository
+import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.data.repository.PatientRepository
 import com.example.careconnect.dataclass.Doctor
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class ChatMenuViewModel @Inject constructor(
     private val addChatRoomRepository: AddChatRoomRepository,
     private val doctorRepository: DoctorRepository,
-    private val patientRepository: PatientRepository
+    private val patientRepository: PatientRepository,
+    private val authRepository: AuthRepository
 ): MainViewModel() {
 
     private val _chatRooms = MutableStateFlow<List<ChatRoom>>(emptyList())
@@ -38,24 +40,34 @@ class ChatMenuViewModel @Inject constructor(
     private val _chatPartners = MutableStateFlow<Map<String, Any>>(emptyMap())
     val chatPartners: StateFlow<Map<String, Any>> = _chatPartners
 
-    fun setCurrentUser(userId: String, role: Role) {
-        println("Setting current user with ID: $userId and role: $role")
-        _currentUserId.value = userId
-        _currentUserRole.value = role
+    suspend fun setCurrentUser() {
+        _currentUserId.value = authRepository.getCurrentUserId().toString()
+        _currentUserRole.value = authRepository.getCurrentUserRole()
+
+        if (_currentUserRole.value == Role.PATIENT) {
+            _currentPatient.value = patientRepository.getPatientById(_currentUserId.value)
+        } else if (_currentUserRole.value == Role.DOCTOR) {
+            _doctor.value = doctorRepository.getDoctorById(_currentUserId.value)
+        }
+    }
+
+    suspend fun getCurrentUserRole(): Role {
+        setCurrentUser()
+        return _currentUserRole.value
     }
 
 
     fun loadChatRooms() {
         launchCatching {
-            val userId = _currentUserId.value
-            val userRole = _currentUserRole.value
+            val userId = authRepository.getCurrentUserId()
+            val userRole = authRepository.getCurrentUserRole()
 
             println("Loading chat rooms for user ID: $userId and role: $userRole")
 
             // Load chat rooms based on user role
             _chatRooms.value = when (userRole) {
-                Role.PATIENT -> addChatRoomRepository.getChatRoomsByPatientId(userId)
-                Role.DOCTOR -> addChatRoomRepository.getChatRoomsByDoctorId(userId)
+                Role.PATIENT -> userId?.let { addChatRoomRepository.getChatRoomsByPatientId(it) }!!
+                Role.DOCTOR -> userId?.let { addChatRoomRepository.getChatRoomsByDoctorId(it) }!!
                 else -> emptyList()
             }
             println("Loaded chat rooms: ${_chatRooms.value.size}")
