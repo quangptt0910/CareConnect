@@ -55,6 +55,7 @@ class AppointmentDataSource @Inject constructor(
             .get()
             .await().toObjects(Appointment::class.java)
     }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByPatientId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->
@@ -127,22 +128,21 @@ class AppointmentDataSource @Inject constructor(
     suspend fun getPatientAppointmentsByMonth(patientId: String?, date: String): List<Appointment> {
         val local = date.toLocalDate()
         val ym = YearMonth.of(local.year, local.month)
-        val start = ym.atDay(1)
-        val end = ym.plusMonths(1).atDay(1)
+        val start = ym.atDay(1).toString()
+        val end = ym.plusMonths(1).atDay(1).toString()
 
         return firestore
             .collection("appointments")
             .whereEqualTo("patientId", patientId)
-            .whereGreaterThanOrEqualTo("appointmentDate", start)
-            .whereLessThan("appointmentDate", end)
             .get()
             .await().toObjects(Appointment::class.java)
+
     }
     // Get appointments by status
     suspend fun getAppointmentsByStatus(status: AppointmentStatus): List<Appointment> {
         return firestore
             .collection("appointments")
-            .whereEqualTo("appointmentStatus", status)
+            .whereEqualTo("status", status.name)
             .get()
             .await()
             .toObjects(Appointment::class.java)
@@ -153,7 +153,7 @@ class AppointmentDataSource @Inject constructor(
         return  firestore
                 .collection("appointments")
                 .whereEqualTo("doctorId", doctorId)
-                .whereEqualTo("appointmentStatus", status)
+                .whereEqualTo("status", status.name)
                 .get()
                 .await()
                 .toObjects(Appointment::class.java)
@@ -164,7 +164,7 @@ class AppointmentDataSource @Inject constructor(
         return firestore
                 .collection("appointments")
                 .whereEqualTo("patientId", patientId)
-                .whereEqualTo("appointmentStatus", status)
+                .whereEqualTo("status", status)
                 .get()
                 .await()
                 .toObjects(Appointment::class.java)

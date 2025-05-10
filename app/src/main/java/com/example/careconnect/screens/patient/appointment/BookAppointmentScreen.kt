@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,9 +33,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -42,10 +40,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.common.LoadingIndicator
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.SnackBarMessage
+import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.ui.theme.CareConnectTheme
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 
 @Composable
@@ -68,8 +71,8 @@ fun BookAppointmentScreen(
         onDateSelected = { date ->
             viewModel.onDateSelected(date, showSnackBar)
         },
-        onTimeSelected = { time ->
-            viewModel.onTimeSelected(time)
+        onTimeSelected = { timeSlot ->
+            viewModel.onTimeSelected(timeSlot)
         },
         onBookAppointment = {
             viewModel.bookAppointment(showSnackBar)
@@ -83,7 +86,7 @@ fun BookAppointmentScreenContent(
     doctor: Doctor? = Doctor(),
     uiState: BookAppointmentUiState,
     onDateSelected: (LocalDate) -> Unit,
-    onTimeSelected: (String) -> Unit,
+    onTimeSelected: (TimeSlot) -> Unit,
     onBookAppointment: () -> Unit,
 ) {
     Surface(
@@ -115,16 +118,34 @@ fun BookAppointmentScreenContent(
                         .padding(start = 20.dp, bottom = 16.dp)
                 )
 
-                InlineDatePicker {  }
+                InlineDatePicker { selectedDate ->
+                    onDateSelected(Instant.ofEpochMilli(selectedDate)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate())
+                }
 
-                val times = listOf("09:00 AM", "10:30 AM", "12:00 PM", "02:00 PM", "03:30 PM","04:00 PM", "05:30 PM", "07:00 PM", "08:30 PM")
-                TimeSelectionChips(availableTimes = times) { selectedTime ->
-                    println("User selected: $selectedTime")
+                // Time slots
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                    Text(
+                        text = "Available Time Slots",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    when {
+                        uiState.isLoading -> LoadingIndicator()
+                        uiState.availableSlots.isEmpty() -> NoSlotsMessage()
+                        else -> TimeSelectionSection(
+                            slots = uiState.availableSlots,
+                            selectedTimeSlot = uiState.selectedTimeSlot,
+                            onTimeSelected = onTimeSelected
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = {}) {
+                Button(onClick = onBookAppointment) {
                     Text("Book an Appointment",
                         style = MaterialTheme.typography.titleLarge)
                 }
@@ -134,6 +155,33 @@ fun BookAppointmentScreenContent(
 
 
 
+    }
+}
+
+@Composable
+private fun TimeSelectionSection(
+    slots: List<TimeSlot>,
+    selectedTimeSlot: TimeSlot?,
+    onTimeSelected: (TimeSlot) -> Unit
+) {
+    TimeSelectionChips(
+        availableTimeSlots = slots,
+        onTimeSelected = onTimeSelected,
+        selectedTimeSlot = selectedTimeSlot
+    )
+}
+
+@Composable
+private fun NoSlotsMessage() {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "No available time slots for this date",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -171,9 +219,13 @@ fun SmallTopAppBarExample() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InlineDatePicker(onDateSelected: (Long?) -> Unit) {
+fun InlineDatePicker(onDateSelected: (Long) -> Unit) {
     val datePickerState = rememberDatePickerState()
-
+    LaunchedEffect(datePickerState.selectedDateMillis) {
+        datePickerState.selectedDateMillis?.let { selectedDate ->
+            onDateSelected(selectedDate)
+        }
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -191,22 +243,45 @@ fun InlineDatePicker(onDateSelected: (Long?) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TimeSelectionChips(availableTimes: List<String>, onTimeSelected: (String) -> Unit) {
-    var selectedTime by remember { mutableStateOf<String?>(null) }
-
+fun TimeSelectionChips(
+    availableTimeSlots: List<TimeSlot>,
+    selectedTimeSlot: TimeSlot?,
+    onTimeSelected: (TimeSlot) -> Unit
+) {
     FlowRow(
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         maxItemsInEachRow = 4 // Limit to 4 chips per row
     ) {
-        availableTimes.forEach { time ->
+        availableTimeSlots.forEach { slot ->
+            val timeRange = "${slot.startTime} - ${slot.endTime}"
+            val isSelected = selectedTimeSlot == slot
+            val isAvailable = slot.isAvailable
+
             FilterChip(
-                selected = time == selectedTime,
-                onClick = {
-                    selectedTime = time
-                    onTimeSelected(time)
-                },
-                label = { Text(time, style = MaterialTheme.typography.bodySmall) },
+                selected = isSelected,
+                onClick = { if (isAvailable) onTimeSelected(slot) },
+                label = {
+                    Text(
+                        text = timeRange,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = when {
+                            !isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
+                            isSelected -> MaterialTheme.colorScheme.onPrimary
+                            else -> MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+                        },
+                enabled = isAvailable,
+                colors = FilterChipDefaults.filterChipColors(
+                    labelColor = when {
+                        !isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
+                        isSelected -> MaterialTheme.colorScheme.onPrimary
+                        else -> MaterialTheme.colorScheme.onSurface
+                    },
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                ),
                 modifier = Modifier.width(80.dp)
             )
         }
@@ -224,7 +299,10 @@ fun BookAppointmentScreenPreview() {
                 name = "John",
                 surname = "Doe",
                 address = "123 Main St",
-                specialization = "Family Medicine"
+                specialization = "Family Medicine",
+                schedule = DoctorSchedule(
+
+                )
             ),
             uiState = uiState,
             onDateSelected = {},

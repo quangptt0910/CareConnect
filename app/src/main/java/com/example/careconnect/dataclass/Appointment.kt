@@ -18,9 +18,9 @@ data class Appointment(
 )
 
 enum class AppointmentStatus(val title: String, val color: Color, val value: Int) {
-    PENDING("Pending", Color(0xFFFFC107), 0),    // Appointment is scheduled but not yet confirmed
-    COMPLETED("Completed", Color(0xFF00E676), 1),  // Appointment has been completed
-    CANCELED("Canceled", Color(0xFFE53935), 2),   // Appointment has been canceled
-    NO_SHOW("No Show", Color(0xFF757575), 3)     // Patient did not show up for the appointment
+    PENDING("Pending", Color(0xFFDEB01E), 0),    // Appointment is scheduled but not yet confirmed
+    COMPLETED("Completed", Color(0xFF02A552), 1),  // Appointment has been completed
+    CANCELED("Canceled", Color(0xFFC61C19), 2),   // Appointment has been canceled
+    NO_SHOW("No Show", Color(0xFF4B4848), 3)     // Patient did not show up for the appointment
 }
 

@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessAlarms
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -20,7 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
@@ -78,34 +83,6 @@ fun RegularCardEditor(
 }
 
 
-@Composable
-fun AppointmentCard(
-    appointment: Appointment,
-    modifier: Modifier = Modifier
-) {
-    ElevatedCard(
-        modifier = modifier.padding(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Text(text = "Appointment ID: ${appointment.id}",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-
-            Text(text = "Patient ID: ${appointment.patientId}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Text(text = "Doctor ID: ${appointment.doctorId}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-
-}
 
  @Preview
 @Composable
@@ -114,93 +91,163 @@ fun AppointmentCardPreview() {
         id = "123",
         patientId = "456",
         doctorId = "789",
+        patientName = "John Doe",
+        doctorName = "Dr. Smith",
+        type = "Consultation",
+        address = "123 Main St",
         appointmentDate = "2023-05-15",
-        startTime = "10:00 AM",
-        endTime = "11:00 AM",
+        startTime = "10:00",
+        endTime = "11:00",
         status = AppointmentStatus.PENDING
     )
-    AppointmentCard(appointment =appointment)
+    AppointmentCard(appt = appointment,
+        displayFields = listOf(
+            "Patient" to { it.patientName },
+            "Type" to { it.type },
+            "Address" to { it.address }
+        )
+        )
 }
 
 @Composable
-fun AppointmentCard(appt: Appointment) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun AppointmentCard(
+    modifier: Modifier = Modifier,
+    appt: Appointment,
+    displayFields: List<Pair<String, (Appointment) -> String>> = listOf(
+        "Patient" to { it.patientName },
+        "Doctor" to { it.doctorName },
+        "Type" to { it.type },
+        "Address" to { it.address }
+    ),
+
+) {
+    Card(modifier = modifier.fillMaxWidth(),colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "${appt.startTime} - ${appt.endTime}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = appt.status.title,
-                    color = appt.status.color,
-                    style = MaterialTheme.typography.bodyMedium
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Status",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = appt.status.toString().lowercase()
+                            .replaceFirstChar { it.uppercase() },
+                        color = appt.status.color,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Date And Time",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = appt.appointmentDate + ", " + appt.startTime + "-" + appt.endTime,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            // Improved Details Section with aligned values
+            if (displayFields.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+
+                // Use the new, simpler approach with the Grid layout
+                DetailsGrid(
+                    displayFields = displayFields,
+                    getValue = { field -> field(appt) },
+                    labelWidth = 80.dp // Adjust this value as needed
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            Text(text = "Patient: ${appt.patientName}")
-            Text(text = "Doctor: ${appt.doctorName}")
-            Text(text = "Type: ${appt.type}")
-            Text(text = "Address: ${appt.address}")
         }
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun CardEditorPreview() {
-//    MaterialTheme {
-//        Surface(
-//            color = MaterialTheme.colorScheme.background,
-//            modifier = Modifier.padding(16.dp)
-//        ) {
-//            Column {
-//                // Card with content
-//                RegularCardEditor(
-//                    title = R.string.app_name, // Using app_name as placeholder, replace with actual string resource
-//                    icon = Icons.Default.Phone,
-//                    content = "+1 (555) 123-4567",
-//                    modifier = Modifier.fillMaxWidth(),
-//                    onEditClick = {}
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Card with empty content
-//                RegularCardEditor(
-//                    title = R.string.app_name, // Replace with actual string resource
-//                    icon = Icons.Default.Email,
-//                    content = "",
-//                    modifier = Modifier.fillMaxWidth(),
-//                    onEditClick = {}
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Card with long content
-//                RegularCardEditor(
-//                    title = R.string.app_name, // Replace with actual string resource
-//                    icon = Icons.Default.LocationOn,
-//                    content = "123 Medical Center Drive, Suite 456, Healthcare City, CA 90210",
-//                    modifier = Modifier.fillMaxWidth(),
-//                    onEditClick = {}
-//                )
-//
-//                Spacer(modifier = Modifier.height(16.dp))
-//
-//                // Card with custom highlight color (uses private CardEditor directly)
-//                CardEditor(
-//                    title = R.string.app_name, // Replace with actual string resource
-//                    icon = Icons.Default.Edit,
-//                    content = "Custom highlight color example",
-//                    onEditClick = {},
-//                    highlightColor = MaterialTheme.colorScheme.primary,
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//            }
-//        }
-//    }
-//}
+@Composable
+private fun DetailsGrid(
+    displayFields: List<Pair<String, (Appointment) -> String>>,
+    getValue: (((Appointment) -> String)) -> String,
+    labelWidth: Dp = 80.dp, // Adjustable parameter
+    spaceBetween: Dp = 8.dp,
+    labelEndPadding: Dp = 8.dp
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(spaceBetween)) {
+        displayFields.forEach { (label, valueGetter) ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Fixed-width label container aligned to the start (left)
+                Text(
+                    text = "$label:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .width(labelWidth)
+                        .padding(end = labelEndPadding),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Value with remaining space
+                Text(
+                    text = getValue(valueGetter),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    content: @Composable () -> Unit,
+) {
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.fillMaxWidth().padding(4.dp)
+        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(4.dp)
+            )
+            content()
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun StatCardPreview() {
+    StatCard(
+        title = "Title",
+        value = "Value",
+        modifier = Modifier.fillMaxWidth(),
+        content = {
+            Icon(
+                imageVector = Icons.Filled.AccessAlarms,
+                contentDescription = null,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
+    )
+}

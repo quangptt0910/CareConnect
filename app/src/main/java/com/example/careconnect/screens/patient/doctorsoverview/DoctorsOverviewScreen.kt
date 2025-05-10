@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,11 +72,10 @@ fun DoctorsOverviewScreenContent(
 
             if (doctors.isEmpty()) {
                 // Handle no matches found
-                androidx.compose.material3.Text(
+               Text(
                     text = "No doctors found for \"$specialty\"",
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.titleMedium
-
                 )
             } else {
                 doctors.forEach { doctor ->

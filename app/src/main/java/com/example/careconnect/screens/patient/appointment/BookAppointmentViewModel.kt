@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 data class BookAppointmentUiState(
     val selectedDate: LocalDate = LocalDate.now(),
-    val selectedTime: String? = null,
+    val selectedTimeSlot: TimeSlot? = null,
     val availableSlots: List<TimeSlot> = emptyList(),
     val isLoading: Boolean = false
 )
@@ -41,7 +41,7 @@ class BookAppointmentViewModel @Inject constructor(
 
     // UI State handling
     private val _selectedDate = MutableStateFlow(LocalDate.now())
-    private val _selectedTime = MutableStateFlow<String?>(null)
+    private val _selectedTimeSlot = MutableStateFlow<TimeSlot?>(null)
     private val _availableSlots = MutableStateFlow<List<TimeSlot>>(emptyList())
     private val _isLoading = MutableStateFlow(false)
 
@@ -73,13 +73,13 @@ class BookAppointmentViewModel @Inject constructor(
 
     val uiState: StateFlow<BookAppointmentUiState> = combine(
         _selectedDate,
-        _selectedTime,
+        _selectedTimeSlot,
         _availableSlots,
         _isLoading
-    ) { selectedDate, selectedTime, availableSlots, isLoading ->
+    ) { selectedDate, selectedTimeSlot, availableSlots, isLoading ->
         BookAppointmentUiState(
             selectedDate = selectedDate,
-            selectedTime = selectedTime,
+            selectedTimeSlot = selectedTimeSlot,
             availableSlots = availableSlots,
             isLoading = isLoading
         )
@@ -91,12 +91,12 @@ class BookAppointmentViewModel @Inject constructor(
 
     fun onDateSelected(date: LocalDate, showSnackBar: (SnackBarMessage) -> Unit) {
         _selectedDate.value = date
-        _selectedTime.value = null
+        _selectedTimeSlot.value = null
         loadAvailableSlots(showSnackBar)
     }
 
-    fun onTimeSelected(time: String) {
-        _selectedTime.value = time
+    fun onTimeSelected(timeSlot: TimeSlot) {
+        _selectedTimeSlot.value = timeSlot
     }
 
 
@@ -107,8 +107,9 @@ class BookAppointmentViewModel @Inject constructor(
                 val currentState = uiState.value
                 val currentDoctor = _doctor.value
                 val currentPatient = patientRepository.getPatientById(authRepository.getCurrentUserId() ?: "")
+                val selectedSlot = currentState.selectedTimeSlot
 
-                if (currentState.selectedTime == null) {
+                if (currentState.selectedTimeSlot == null) {
                     showSnackBar(SnackBarMessage.IdMessage(R.string.please_select_time))
                     return@launchCatching
                 }
@@ -118,27 +119,15 @@ class BookAppointmentViewModel @Inject constructor(
                     return@launchCatching
                 }
 
-                // Find the selected time slot
-                val selectedSlot = currentState.availableSlots.find {
-                    it.startTime == currentState.selectedTime
-                } ?: throw IllegalStateException("Selected time slot not found")
-
-                // Calculate end time based on appointment duration
-                val startTime = currentState.selectedTime
-                val appointmentDurationMinutes = selectedSlot.appointmentMinutes
-
-                // Calculate end time (simple implementation - production code would need more robust time handling)
-                val endTime = calculateEndTime(startTime, appointmentDurationMinutes)
-
                 val appointment = Appointment(
                     patientId = currentPatient?.id ?: "",
                     doctorId = _doctorId.value ?: "",
-                    patientName = "${currentPatient?.name} ${currentPatient?.surname}",
-                    doctorName = "${currentDoctor.name} ${currentDoctor.surname}",
+                    patientName = "${currentPatient?.name}",
+                    doctorName = currentDoctor.name,
                     type = selectedSlot.slotType.name,
                     appointmentDate = currentState.selectedDate.toDateString(),
-                    startTime = startTime,
-                    endTime = endTime,
+                    startTime = selectedSlot.startTime,
+                    endTime = selectedSlot.endTime,
                     address = currentDoctor.address,
                     status = AppointmentStatus.PENDING
                 )
@@ -154,27 +143,12 @@ class BookAppointmentViewModel @Inject constructor(
         }
     }
 
-    private fun calculateEndTime(startTime: String, durationMinutes: Int): String {
-        // Parse start time (assuming 24-hour format like "09:00")
-        val timeParts = startTime.split(":")
-        val hour = timeParts[0].toInt()
-        val minute = timeParts[1].toInt()
-
-        // Calculate end time
-        var totalMinutes = hour * 60 + minute + durationMinutes
-        val endHour = (totalMinutes / 60) % 24
-        val endMinute = totalMinutes % 60
-
-        // Format to 24-hour time
-        return String.format("%02d:%02d", endHour, endMinute)
-    }
-
     private fun loadAvailableSlots(showSnackBar: (SnackBarMessage) -> Unit) {
         launchCatching(showSnackBar) {
             _isLoading.value = true
             try {
                 _availableSlots.value = doctorRepository.getAvailableSlots(
-                    doctorId = "",
+                    doctorId = _doctorId.value ?: "",
                     date = _selectedDate.value
                 )
             } catch (e: Exception) {
@@ -187,10 +161,10 @@ class BookAppointmentViewModel @Inject constructor(
     }
 
     private fun refreshSlots(showSnackBar: (SnackBarMessage) -> Unit) {
-        viewModelScope.launch {
+        launchCatching(showSnackBar){
             try {
                 // Force refresh from network
-                doctorRepository.clearCache("doctor_id_placeholder")
+                doctorRepository.clearCache(doctorId = _doctorId.value ?: "")
                 loadAvailableSlots(showSnackBar)
             } catch (e: Exception) {
                 showSnackBar(SnackBarMessage.StringMessage(
