@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Add
@@ -25,6 +24,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -60,11 +60,12 @@ fun DoctorHomeScreen(
 ) {
     val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
     val pendingAppointmentList by viewModel.pendingAppointments.collectAsStateWithLifecycle()
-
+    val upcomingAppointmentList by viewModel.appointments.collectAsStateWithLifecycle()
 
     DoctorHomeScreenContent(
         openSettingsScreen = openSettingsScreen,
         patientList = patientList,
+        upcomingAppointmentList = upcomingAppointmentList,
         pendingAppointmentList = pendingAppointmentList
     )
 }
@@ -73,7 +74,7 @@ fun DoctorHomeScreen(
 fun DoctorHomeScreenContent(
     openSettingsScreen: () -> Unit = {},
     patientList: List<Patient> = emptyList(),
-    appointmentList: List<Appointment> = emptyList(),
+    upcomingAppointmentList: List<Appointment> = emptyList(),
     pendingAppointmentList: List<Appointment> = emptyList()
 ) {
     val date = LocalDate.now()
@@ -188,6 +189,8 @@ fun DoctorHomeScreenContent(
                 }
             }
 
+            HorizontalDivider()
+
             Text(
                 text = "Upcoming appointments",
                 style = MaterialTheme.typography.titleLarge,
@@ -197,32 +200,8 @@ fun DoctorHomeScreenContent(
                     .padding(15.dp)
             )
 
-
-
-
             DailyAppointmentsSection(
-                appointments = listOf(
-                    Appointment(
-                        id = "1",
-                        patientId = "",
-                        doctorId = "",
-                        appointmentDate = "",
-                        startTime = "10:00 AM",
-                        endTime = "11:00 AM",
-                        address = "",
-                        status = AppointmentStatus.PENDING
-                    ),
-                    Appointment(
-                        id = "2",
-                        patientId = "",
-                        doctorId = "",
-                        appointmentDate = "",
-                        startTime = "11:00 AM",
-                        endTime = "12:00 PM",
-                        address = "",
-                        status = AppointmentStatus.PENDING
-                    ),
-                )
+                appointments = upcomingAppointmentList
             )
 
             Text(
@@ -320,26 +299,12 @@ fun DailyAppointmentsSection(appointments: List<Appointment>) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(appointments) { appointment ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(text = appointment.startTime, style = MaterialTheme.typography.bodyLarge)
-                        Text(text = "Name Surname", style = MaterialTheme.typography.titleMedium)
-                    }
-                    IconButton(onClick = { /* View/Start consultation */ }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
-                    }
-                }
-            }
+            AppointmentCard(
+                appt = appointment,
+                displayFields = listOf(
+                    "Patient" to { it.patientName },
+                    "Type" to { it.type },)
+                )
         }
     }
 }

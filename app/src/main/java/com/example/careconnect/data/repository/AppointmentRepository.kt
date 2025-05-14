@@ -46,6 +46,9 @@ class AppointmentRepository @Inject constructor(
     suspend fun getDoctorAppointmentsByStatus(doctorId: String?, status: AppointmentStatus) =
         appointmentDataSource.getDoctorAppointmentsByStatus(doctorId, status)
 
+    suspend fun getDoctorAppointmentsUpcoming(doctorId: String?, date: String) =
+        appointmentDataSource.getDoctorAppointmentsUpcoming(doctorId, date)
+
     suspend fun getPatientAppointmentsByStatus(patientId: String?, status: AppointmentStatus) =
         appointmentDataSource.getPatientAppointmentsByStatus(patientId, status)
 

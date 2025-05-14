@@ -152,13 +152,14 @@ fun AppointmentCard(
             }
             // Improved Details Section with aligned values
             if (displayFields.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
 
                 // Use the new, simpler approach with the Grid layout
                 DetailsGrid(
                     displayFields = displayFields,
                     getValue = { field -> field(appt) },
-                    labelWidth = 80.dp // Adjust this value as needed
+                    labelWidth = 80.dp ,// Adjust this value as needed
+                    spaceBetween = 1.dp
                 )
             }
         }
@@ -169,9 +170,9 @@ fun AppointmentCard(
 private fun DetailsGrid(
     displayFields: List<Pair<String, (Appointment) -> String>>,
     getValue: (((Appointment) -> String)) -> String,
-    labelWidth: Dp = 80.dp, // Adjustable parameter
-    spaceBetween: Dp = 8.dp,
-    labelEndPadding: Dp = 8.dp
+    labelWidth: Dp = 60.dp, // Adjustable parameter
+    spaceBetween: Dp = 4.dp,
+    labelEndPadding: Dp = 6.dp
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(spaceBetween)) {
         displayFields.forEach { (label, valueGetter) ->
@@ -194,7 +195,7 @@ private fun DetailsGrid(
                 // Value with remaining space
                 Text(
                     text = getValue(valueGetter),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )

@@ -160,6 +160,16 @@ class AppointmentDataSource @Inject constructor(
 
     }
 
+    suspend fun getDoctorAppointmentsUpcoming(doctorId: String?, date: String): List<Appointment> {
+        return firestore
+                .collection("appointments")
+                .whereEqualTo("doctorId", doctorId)
+                .whereGreaterThanOrEqualTo("appointmentDate", date)
+                .get()
+                .await()
+                .toObjects(Appointment::class.java)
+    }
+
     suspend fun getPatientAppointmentsByStatus(patientId: String?, status: AppointmentStatus): List<Appointment> {
         return firestore
                 .collection("appointments")
