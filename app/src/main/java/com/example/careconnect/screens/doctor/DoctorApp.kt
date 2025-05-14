@@ -13,6 +13,7 @@ import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
 import com.example.careconnect.screens.doctor.patients.PatientsProfileScreen
 import com.example.careconnect.screens.doctor.patients.PatientsScreen
+import com.example.careconnect.screens.doctor.patients.medicalhistory.MedicalHistorySectionScreen
 import com.example.careconnect.screens.doctor.patients.medicalreports.CreateMedicalReportScreen
 import com.example.careconnect.screens.doctor.patients.medicalreports.MedicalReportsScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
@@ -21,11 +22,13 @@ import com.example.careconnect.screens.patient.chat.ChatScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.DOCTOR_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE
+import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_HISTORY_SECTION_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getDoctorChatRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsCreateMedicalReportRoute
+import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalHistorySectionRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalReportRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
 
@@ -85,6 +88,9 @@ fun DoctorApp(
                     },
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getDoctorChatRoute(chatId, patientId, doctorId))
+                    },
+                    openMedicalHistoryScreen = { patientId, section ->
+                        navController.navigate(getDoctorPatientsMedicalHistorySectionRoute(patientId, section))
                     }
                 )
             }
@@ -109,6 +115,14 @@ fun DoctorApp(
             composable(DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE) { backStackEntry ->
                 CreateMedicalReportScreen(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: ""
+                )
+            }
+
+            composable(DOCTOR_PATIENTS_MEDICAL_HISTORY_SECTION_ROUTE) { backStackEntry ->
+                MedicalHistorySectionScreen(
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    section = backStackEntry.arguments?.getString("section") ?: "",
+                    onBack = { navController.popBackStack() }
                 )
             }
 

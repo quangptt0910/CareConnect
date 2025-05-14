@@ -39,7 +39,8 @@ fun PatientsProfileScreen(
     patientId: String,
     viewModel: PatientsProfileViewModel = hiltViewModel(),
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
-    openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->}
+    openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->},
+    openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -59,7 +60,8 @@ fun PatientsProfileScreen(
         getChatId = {
             val doctor = viewModel.getCurrentDoctor()
             patient?.let { viewModel.getOrCreateChatRoomId(it, doctor) } ?: ""
-        }
+        },
+        openMedicalHistoryScreen = openMedicalHistoryScreen
     )
 }
 
@@ -69,7 +71,8 @@ fun PatientsProfileScreenContent(
     patient: Patient? = null,
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
     getChatId: suspend () -> String = {""},
-    openChatScreen: (chatId: String) -> Unit = {}
+    openChatScreen: (chatId: String) -> Unit = {},
+    openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
 ){
     val coroutineScope = rememberCoroutineScope()
 
@@ -154,13 +157,13 @@ fun PatientsProfileScreenContent(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     MedicalCategoryCard(R.drawable.medicine, "Medications") {
-                        // Navigate to Medications Screen
+                        openMedicalHistoryScreen(patientId, "Medications")
                     }
                     MedicalCategoryCard(R.drawable.allergies, "Allergies") {
-                        // Navigate to Allergies Screen
+                        openMedicalHistoryScreen(patientId, "Allergies")
                     }
                     MedicalCategoryCard(R.drawable.conditions, "Conditions") {
-                        // Navigate to Medical History Screen
+                        openMedicalHistoryScreen(patientId, "Conditions")
                     }
                 }
             }
@@ -172,10 +175,10 @@ fun PatientsProfileScreenContent(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     MedicalCategoryCard(R.drawable.surgeries, "Surgeries") {
-                        // Navigate to Immunizations Screen
+                        openMedicalHistoryScreen(patientId, "Surgeries")
                     }
                     MedicalCategoryCard(R.drawable.immunizations, "Immunizations") {
-                        // Navigate to Immunizations Screen
+                        openMedicalHistoryScreen(patientId, "Immunizations")
                     }
                     MedicalCategoryCard(R.drawable.medical_report, "Medical Reports") {
                         openMedicalReportsScreen(patientId)

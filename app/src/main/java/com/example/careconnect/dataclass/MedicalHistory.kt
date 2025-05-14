@@ -21,6 +21,7 @@ data class MedicalHistory(
 )
 
 data class Allergy(
+    val type: String = "ALLERGY",
     val allergen: String = "",  // Allergen name (e.g., "Peanuts")
     val reaction: String = "",  // Description of the reaction (e.g., "Hives, difficulty breathing")
     val severity: String = "",  // Severity of the allergic reaction (e.g., "Mild", "Severe")
@@ -28,12 +29,14 @@ data class Allergy(
 )
 
 data class Condition(
+    val type: String = "CONDITION",
     val name: String = "",  // Name of the condition (e.g., "Diabetes")
     val diagnosedDate: String = "",  // Date when the condition was diagnosed
     val status: String = ""  // Current status (e.g., "Controlled", "Active", "In remission")
 )
 
 data class Medication(
+    val type: String = "MEDICATION",
     val name: String = "",  // Name of the medication (e.g., "Insulin")
     val dosage: String = "",  // Dosage (e.g., "10mg")
     val startDate: String = "",  // When the medication was started
@@ -42,6 +45,7 @@ data class Medication(
 )
 
 data class Surgery(
+    val type: String = "SURGERY",
     val surgeryName: String = "",  // Name of the surgery (e.g., "Appendectomy")
     val surgeryDate: String = "",  // Date of the surgery
     val hospital: String = "",  // Name of the hospital where the surgery was performed
@@ -49,6 +53,7 @@ data class Surgery(
 )
 
 data class Immunization(
+    val type: String = "IMMUNIZATION",
     val vaccineName: String = "",  // Name of the vaccine (e.g., "MMR Vaccine")
     val dateAdministered: String = "",  // Date when the vaccine was administered
     val administeredBy: String = "",  // Who administered the vaccine (e.g., "Dr. Smith")
