@@ -61,4 +61,13 @@ class DoctorHomeViewModel @Inject constructor(
 
         }
     }
+
+    fun updateAppointmentStatus(appointment: Appointment, newStatus: AppointmentStatus) {
+        launchCatching {
+            val updatedAppointment = appointment.copy(status = newStatus)
+            appointmentRepository.updateAppointment(updatedAppointment)
+
+            loadPendingAppointments()
+        }
+    }
 }

@@ -66,7 +66,13 @@ fun DoctorHomeScreen(
         openSettingsScreen = openSettingsScreen,
         patientList = patientList,
         upcomingAppointmentList = upcomingAppointmentList,
-        pendingAppointmentList = pendingAppointmentList
+        pendingAppointmentList = pendingAppointmentList,
+        onAccept = { appt ->
+            viewModel.updateAppointmentStatus(appt, AppointmentStatus.CONFIRM)
+        },
+        onDecline = { appt ->
+            viewModel.updateAppointmentStatus(appt, AppointmentStatus.CANCELED)
+        }
     )
 }
 
@@ -75,7 +81,9 @@ fun DoctorHomeScreenContent(
     openSettingsScreen: () -> Unit = {},
     patientList: List<Patient> = emptyList(),
     upcomingAppointmentList: List<Appointment> = emptyList(),
-    pendingAppointmentList: List<Appointment> = emptyList()
+    pendingAppointmentList: List<Appointment> = emptyList(),
+    onAccept: (Appointment) -> Unit = {},
+    onDecline: (Appointment) -> Unit = {}
 ) {
     val date = LocalDate.now()
 
@@ -183,8 +191,8 @@ fun DoctorHomeScreenContent(
                 pendingAppointmentList.forEach { appt ->
                     PendingAppointmentCard(
                         appt = appt,
-                        onAccept = { /* Handle accept action */ },
-                        onDecline = { /* Handle decline action */ }
+                        onAccept = { onAccept(appt) },
+                        onDecline = { onDecline(appt) }
                     )
                 }
             }
