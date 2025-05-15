@@ -38,27 +38,45 @@ class DoctorHomeViewModel @Inject constructor(
 
     init {
         loadPendingAppointments()
+        loadUpcomingAppointments()
     }
 
     fun loadPendingAppointments() {
         launchCatching {
-            println("DEBUG: PendingAppt uid: ${authRepository.currentUser?.uid}")
             _pendingAppointments.value = appointmentRepository.getDoctorAppointmentsByStatus(
                 authRepository.currentUser?.uid,
                 AppointmentStatus.PENDING
             )
+        }
+    }
 
+    fun loadUpcomingAppointments() {
+        launchCatching {
+            println("DEBUG: UpcomingAppt uid: ${authRepository.currentUser?.uid}")
+            val userId = authRepository.currentUser?.uid
+            if (userId == null) {
+                println("ERROR: User ID is null when trying to load upcoming appointments")
+                return@launchCatching
+            }
             val today = LocalDate.now().toString()
-            _appointments.value = appointmentRepository.getDoctorAppointmentsUpcoming(
-                authRepository.currentUser?.uid,
-                today
-            ).filter { appt -> // Start the filter, limit and sort
+            println("DEBUG: Fetching appointments for date $today and later")
+            val upcomingAppointments = try {
+                appointmentRepository.getDoctorAppointmentsUpcoming(userId, today)
+            } catch (e: Exception) {
+                println("DEBUG: Exception in getDoctorAppointmentsUpcoming: ${e.message}")
+                e.printStackTrace()
+                emptyList() // Return empty list on error
+            }
+            println("DEBUG: Found ${upcomingAppointments.size} upcoming appointments")
+            _appointments.value = upcomingAppointments.filter { appt -> // Start the filter, limit and sort
                 appt.status == AppointmentStatus.CONFIRM // only tale the confirmed one
             }.sortedWith ( // sort by date then start time
                 compareBy<Appointment> { LocalDate.parse(it.appointmentDate) }
                     .thenBy { it.startTime }
             ).take(3) // Limit to 3
 
+            println("DEBUG: Found ${upcomingAppointments.size} upcoming appointments, " +
+                    "${_appointments.value.size} after filtering")
         }
     }
 
@@ -68,6 +86,7 @@ class DoctorHomeViewModel @Inject constructor(
             appointmentRepository.updateAppointment(updatedAppointment)
 
             loadPendingAppointments()
+            loadUpcomingAppointments()
         }
     }
 }

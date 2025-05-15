@@ -319,7 +319,6 @@ fun DailyAppointmentsSection(appointments: List<Appointment>) {
 
 @Composable
 fun PendingAppointmentCard(
-    modifier: Modifier = Modifier,
     appt: Appointment,
     onAccept: () -> Unit,
     onDecline: () -> Unit,

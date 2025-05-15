@@ -157,7 +157,6 @@ class AppointmentDataSource @Inject constructor(
                 .get()
                 .await()
                 .toObjects(Appointment::class.java)
-
     }
 
     suspend fun getDoctorAppointmentsUpcoming(doctorId: String?, date: String): List<Appointment> {
