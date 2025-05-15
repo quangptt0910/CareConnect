@@ -20,10 +20,13 @@ data class Message(
     val text: String = "",
     val author: Author = Author(),
     val timestamp: Long = System.currentTimeMillis(),
-    val imageUri: Uri? = null
+    val imageUrl: String? = null
 ) {
     // Empty constructor for Firebase
     constructor() : this("", "", Author(), System.currentTimeMillis(), null)
+
+    val imageUri: Uri?
+        get() = imageUrl?.let { Uri.parse(it) }
 
     val isFromMe: Boolean
         get() = author.id == Firebase.auth.currentUser?.uid

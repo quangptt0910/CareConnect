@@ -1,6 +1,7 @@
 package com.example.careconnect.screens.patient.chat
 
 import android.net.Uri
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -21,9 +22,12 @@ import com.example.careconnect.dataclass.chat.Message
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 
 @HiltViewModel
@@ -36,6 +40,8 @@ class ChatViewModel @Inject constructor(
 //    val messages: List<Message> get() = _messages  // Publicly exposed list
     private val _currentUser = mutableStateOf<Author?>(null)
     private val currentUser: MutableState<Author?> = _currentUser
+
+    val scr = LazyListState()
 
     val me : Author
         get() = currentUser.value ?: Author()
@@ -117,17 +123,23 @@ class ChatViewModel @Inject constructor(
 
     // Function to send an image
     fun sendImage(uri: Uri, message: Message, chatId: String) {
-        currentUser.let {
-            val newMessage = message.copy(imageUri = uri)
-            _messages.add(newMessage)
+        val storageRef = FirebaseStorage.getInstance().reference
+        val fileName = "chat_images/${UUID.randomUUID()}.jpg"
+        val imageRef = storageRef.child(fileName)
 
-            // Send message to Firebase
-            launchCatching {
+        launchCatching {
+            currentUser.let {
+                // upload to storage
+                imageRef.putFile(uri).await()
+                val downloadUrl = imageRef.downloadUrl.await()
+
+
+                val newMessage = message.copy(imageUrl = downloadUrl.toString())
+                _messages.add(newMessage)
+
+                // Send message to Firebase
                 chatRemoteDataSource.sendMessage(chatId, newMessage)
             }
         }
     }
-
-
-
 }

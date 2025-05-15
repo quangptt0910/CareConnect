@@ -104,6 +104,14 @@ fun ChatScreenContent(
     patient: Patient,
 ) {
 
+    val listState = model.scr
+
+    LaunchedEffect(model.messages.size){
+        if (model.messages.isNotEmpty()){
+            listState.animateScrollToItem(model.messages.lastIndex)
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -139,6 +147,7 @@ fun ChatScreenContent(
                         end.linkTo(parent.end)
                         height = Dimension.fillToConstraints
                     },
+                state = listState
                 //reverseLayout = true // Makes chat scroll from bottom up
             ) {
                 items(model.messages) { message ->
@@ -202,10 +211,10 @@ fun ChatItem(message: Message) {
             }
 
             // Display image if the message contains an image URI
-            message.imageUri?.let { uri ->
+            message.imageUrl?.let { url ->
                 Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
                 AsyncImage(
-                    model = uri,
+                    model = url,
                     contentDescription = "Sent Image",
                     modifier = Modifier
                         .size(200.dp)
@@ -291,7 +300,7 @@ fun ChatBox(
             message = Message(
                 text = "",
                 author = viewModel.me,
-                imageUri = it
+                imageUrl = null
             ),
             chatId = viewModel.chatRoom?.chatId ?: ""
         ) }
