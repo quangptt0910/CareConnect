@@ -39,6 +39,7 @@ fun PatientsProfileScreen(
     patientId: String,
     viewModel: PatientsProfileViewModel = hiltViewModel(),
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
+    openPrescriptionsScreen: (patientId: String) -> Unit = {},
     openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->},
     openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
 ){
@@ -54,6 +55,7 @@ fun PatientsProfileScreen(
         patientId = patientId,
         patient = patient,
         openMedicalReportsScreen = openMedicalReportsScreen,
+        openPrescriptionsScreen = openPrescriptionsScreen,
         openChatScreen = { chatId ->
             doctorId?.let { openChatScreen(chatId, patientId, it) }
         },
@@ -72,6 +74,7 @@ fun PatientsProfileScreenContent(
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
     getChatId: suspend () -> String = {""},
     openChatScreen: (chatId: String) -> Unit = {},
+    openPrescriptionsScreen: (patientId: String) -> Unit = {},
     openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
 ){
     val coroutineScope = rememberCoroutineScope()
@@ -198,7 +201,7 @@ fun PatientsProfileScreenContent(
                         // Navigate to Medical History Screen
                     }
                     MedicalCategoryCard(R.drawable.prescriptions, "Prescriptions") {
-                        // Navigate to Medical History Screen
+                        openPrescriptionsScreen(patientId)
                     }
                     MedicalCategoryCard(R.drawable.chat, "Chat") {
                         coroutineScope.launch {

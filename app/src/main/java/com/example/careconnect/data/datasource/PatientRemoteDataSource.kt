@@ -45,6 +45,7 @@ class PatientRemoteDataSource @Inject constructor(
 
     suspend fun createPrescription(patientId: String, prescription: Prescription) {
         try {
+            Log.d("Firestore", "Creating prescription for patient: $patientId")
             firestore.collection("patients")
                 .document(patientId)
                 .collection("prescriptions")

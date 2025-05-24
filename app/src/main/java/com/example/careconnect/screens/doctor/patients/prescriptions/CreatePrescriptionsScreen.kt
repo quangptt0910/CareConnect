@@ -1,6 +1,7 @@
 package com.example.careconnect.screens.doctor.patients.prescriptions
 
 import android.app.DatePickerDialog
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,10 +25,10 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,7 +55,7 @@ import java.util.Locale
 
 
 @Composable
-fun CreatePrescriptionsScreen(
+fun CreatePrescriptionScreen(
     patientId: String,
     viewModel: CreatePrescriptionsViewModel = hiltViewModel()
 ){
@@ -76,9 +77,8 @@ fun CreatePrescriptionsScreen(
 fun CreatePrescriptionsScreenContent(
     patientId: String,
     patient: Patient? = null,
-    onCreatePrescription: (String, Prescription) -> Unit
+    onCreatePrescription: (String, Prescription, Context) -> Unit
 ) {
-    val context = LocalContext.current
     val datePicker = rememberDatePickerState()
     val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
@@ -89,6 +89,7 @@ fun CreatePrescriptionsScreenContent(
     var instructions by remember { mutableStateOf("") }
     var validUntil by remember { mutableStateOf<Timestamp?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val dosageOptions = listOf(
         "1 tablet once a day",
@@ -127,7 +128,7 @@ fun CreatePrescriptionsScreenContent(
                     expanded = dosageExpanded,
                     onExpandedChange = { dosageExpanded = !dosageExpanded }
                 ) {
-                    TextField(
+                    OutlinedTextField(
                         value = selectedDosage,
                         onValueChange = {},
                         readOnly = true,
@@ -155,7 +156,7 @@ fun CreatePrescriptionsScreenContent(
 
                 // Refills Number Picker with Up/Down Arrows
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextField(
+                    OutlinedTextField(
                         value = refills.toString(),
                         onValueChange = {},
                         label = { Text("Refills Allowed") },
@@ -187,7 +188,7 @@ fun CreatePrescriptionsScreenContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Valid Until Date Picker
-                TextField(
+                OutlinedTextField(
                     value = validUntil?.let { dateFormatter.format(it.toDate()) } ?: "",
                     onValueChange = {},
                     label = { Text("Valid Until") },
@@ -233,7 +234,7 @@ fun CreatePrescriptionsScreenContent(
                                 issueDate = Timestamp.now(),
                                 validUntil = validUntil
                             )
-                            onCreatePrescription(patientId, prescription)
+                            onCreatePrescription(patientId, prescription, context)
                         },
                         dialogTitle = "Submit Prescription",
                         dialogText = "Are you sure you want to submit this prescription?",
@@ -295,7 +296,7 @@ fun CreatePrescriptionsScreenPreview(){
     CareConnectTheme {
         CreatePrescriptionsScreenContent(
             patientId = "123",
-            onCreatePrescription = { _, _ -> }
+            onCreatePrescription = { _, _, _ -> }
 
         )
     }

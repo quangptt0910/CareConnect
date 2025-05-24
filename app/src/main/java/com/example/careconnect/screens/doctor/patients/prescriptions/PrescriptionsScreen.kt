@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
-fun PrescriptionsScreen(
+fun PrescriptionScreen(
     patientId: String,
     openCreatePrescriptionsScreen: (patientId: String) -> Unit
 
