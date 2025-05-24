@@ -64,6 +64,7 @@ class ChatViewModel @Inject constructor(
         messageListenerRegistration?.remove() // Clean up any existing listener
 
         messageListenerRegistration = chatRemoteDataSource.listenToMessages(chatId) { newMessages ->
+            println("🔥 observeMessages received ${newMessages.size} messages")
             _messages.value = newMessages
         }
     }
@@ -106,14 +107,14 @@ class ChatViewModel @Inject constructor(
 //
 //    }
 //
-//    fun loadChat(chatId: String) {
-//        println("ChatViewModel: Loading chat with ID: $chatId")
-//        launchCatching {
-//            chatRoom = chatMessagesRepository.getChatRoomById(chatId) // <-- This sets the chatRoom
-//            messages = chatMessagesRepository.getMessages(chatId)
-//            println("ChatViewModel: chatRoom=$chatRoom, messages=$messages")
-//        }
-//    }
+    fun loadChat(chatId: String) {
+        println("ChatViewModel: Loading chat with ID: $chatId")
+        launchCatching {
+            chatRoom = chatMessagesRepository.getChatRoomById(chatId) // <-- This sets the chatRoom
+            observeMessages(chatId)
+            println("ChatViewModel: chatRoom=$chatRoom, messages=$messages")
+        }
+    }
 
 
     // Function to send a new message
@@ -129,7 +130,7 @@ class ChatViewModel @Inject constructor(
             chatRemoteDataSource.sendMessage(chatId, newMessage)
         }
 
-        //loadChat(chatId)
+        loadChat(chatId)
     }
 
     // Function to send an image

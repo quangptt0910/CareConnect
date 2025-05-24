@@ -34,6 +34,8 @@ class ChatMessagesRemoteDataSource @Inject constructor(
     }
 
     fun listenToMessages(chatId: String, onMessagesChanged: (List<Message>) -> Unit): ListenerRegistration {
+        println("🔁 Setting up Firestore listener for chatId: $chatId")
+
         return currentCollection(chatId)
             .orderBy("timestamp")
             .addSnapshotListener { snapshot, error ->
@@ -43,6 +45,7 @@ class ChatMessagesRemoteDataSource @Inject constructor(
                 }
 
                 val messages = snapshot.toObjects(Message::class.java)
+                println("📦 Parsed ${messages.size} messages")
                 onMessagesChanged(messages)
             }
     }

@@ -80,7 +80,7 @@ fun ChatScreen(
         println("ChatScreen: doctor=$doctor")
         patient = viewModel.getPatient(patientId)
         println("ChatScreen: patient=$patient")
-        viewModel.observeMessages(chatId)
+        viewModel.loadChat(chatId)
         viewModel.initializeCurrentUser(patient, doctor, patientId)
     }
 
@@ -89,6 +89,7 @@ fun ChatScreen(
     // Pass only the necessary data to ChatScreenContent
     if (doctor != null && patient != null && chatRoom != null) {
         ChatScreenContent(
+            model = viewModel,
             chatRoom = chatRoom,
             patient = patient!!,
             doctor = doctor!!
@@ -100,7 +101,7 @@ fun ChatScreen(
 
 @Composable
 fun ChatScreenContent(
-    model: ChatViewModel = hiltViewModel(),
+    model: ChatViewModel,
     chatRoom: ChatRoom,
     doctor: Doctor,
     patient: Patient,
@@ -109,11 +110,17 @@ fun ChatScreenContent(
     val listState = rememberLazyListState()
     val messages by model.messages.collectAsState()
 
+    println("🟡 Composable sees ${messages.size} messages")
+
 
     LaunchedEffect(messages){
+        println("🟢 LaunchedEffect triggered with ${messages.size} messages")
+
         if (messages.isNotEmpty()){
+            println("There are messages")
             listState.animateScrollToItem(messages.lastIndex)
         }
+        else (println("No messages"))
     }
 
     Surface(
