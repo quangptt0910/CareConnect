@@ -191,13 +191,13 @@ class AuthRemoteDataSource @Inject constructor(
         auth.signInWithCredential(credential).await()
     }
 
-    suspend fun patientRecord() {
+    suspend fun patientRecord(): Boolean {
         val user = auth.currentUser!!
         val uid = user.uid
         val ref = firestore.collection("patients").document(uid)
         val snap = ref.get().await()
 
-        if (snap.exists()) {
+        if (!snap.exists()) {
             val fullName = user.displayName.orEmpty().split(" ", limit = 2)
             val name    = fullName.getOrNull(0).orEmpty()
             val surname = fullName.getOrNull(1).orEmpty()
@@ -211,8 +211,9 @@ class AuthRemoteDataSource @Inject constructor(
                 // all other fields stay at their defaults
             )
             ref.set(patient).await()
+            return true // New USER patient
         }
-
+        return false // Existing USER patient
     }
 
 

@@ -57,9 +57,8 @@ class AuthRepository @Inject constructor(
         authRemoteDataSource.handleGoogleLogin(credential)
     }
 
-    suspend fun patientRecord() {
-        authRemoteDataSource.patientRecord()
-
+    suspend fun patientRecord(): Boolean {
+        return authRemoteDataSource.patientRecord()
     }
 
 
