@@ -53,7 +53,7 @@ import java.util.Locale
 
 @Composable
 fun ProfileInfoScreen(
-    viewModel: ProfileInforViewModel = hiltViewModel(),
+    viewModel: ProfileInfoViewModel = hiltViewModel(),
     openSplashScreen: () -> Unit,
     showSnackBar: (SnackBarMessage) -> Unit
 ) {

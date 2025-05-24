@@ -1,5 +1,7 @@
 package com.example.careconnect.data.injection
 
+import android.content.Context
+import androidx.credentials.CredentialManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -11,6 +13,7 @@ import com.google.firebase.storage.storage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
 @Module
@@ -29,6 +32,11 @@ object FirebaseHiltModule {
 
     @Provides
     fun firebaseStorage(): FirebaseStorage = Firebase.storage
+
+    @Provides
+    fun provideCredentialManager(@ApplicationContext context: Context): CredentialManager {
+        return CredentialManager.create(context)
+    }
 
 
 }

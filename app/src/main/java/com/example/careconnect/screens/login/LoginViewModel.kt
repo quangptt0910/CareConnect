@@ -1,5 +1,7 @@
 package com.example.careconnect.screens.login
 
+import androidx.credentials.Credential
+import androidx.credentials.GetCredentialRequest
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
@@ -8,8 +10,10 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
@@ -45,6 +49,30 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    // Google sign-in flows
+    private val _googleRequest = MutableSharedFlow<GetCredentialRequest>()
+    val googleRequest = _googleRequest.asSharedFlow()
+
+    fun onGoogleSignInClick() {
+        launchCatching {
+            val request = authRepository.googleLogin()
+            _googleRequest.emit(request)
+
+        }
+    }
+
+    fun onGoogleCredential(credential: Credential, showSnackBar: (SnackBarMessage) -> Unit) {
+        launchCatching(showSnackBar) {
+            try {
+                authRepository.handleGoogleLogin(credential)
+                _shouldRestartApp.value = true
+            } catch (e: Exception) {
+                val errorMessage = getAuthErrorMessage(e)
+                showSnackBar(SnackBarMessage.IdMessage(errorMessage))
+                return@launchCatching
+            }
+        }
+    }
 
     private fun getAuthErrorMessage(e: Exception): Int {
         return when (e) {
@@ -54,4 +82,5 @@ class LoginViewModel @Inject constructor(
             else -> R.string.generic_error
         }
     }
+
 }

@@ -1,5 +1,7 @@
 package com.example.careconnect.data.repository
 
+import androidx.credentials.Credential
+import androidx.credentials.GetCredentialRequest
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.datasource.AuthRemoteDataSource.UserData
 import com.example.careconnect.dataclass.Role
@@ -35,7 +37,7 @@ class AuthRepository @Inject constructor(
         return authRemoteDataSource.getCurrentUserRole()
     }
 
-    fun signOut() {
+    suspend fun signOut() {
         authRemoteDataSource.signOut()
     }
 
@@ -45,6 +47,19 @@ class AuthRepository @Inject constructor(
 
     fun getCurrentUserId(): String? {
         return authRemoteDataSource.getCurrentUserId()
+    }
+
+    fun googleLogin(): GetCredentialRequest {
+        return authRemoteDataSource.googleLogin()
+    }
+
+    suspend fun handleGoogleLogin(credential: Credential) {
+        authRemoteDataSource.handleGoogleLogin(credential)
+    }
+
+    suspend fun patientRecord() {
+        authRemoteDataSource.patientRecord()
+
     }
 
 
