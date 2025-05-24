@@ -26,6 +26,10 @@ class LoginViewModel @Inject constructor(
     val shouldRestartApp: StateFlow<Boolean>
         get() = _shouldRestartApp.asStateFlow()
 
+    private val _navigateToProfile = MutableStateFlow(false)
+    val navigateToProfile: StateFlow<Boolean>
+        get() = _navigateToProfile.asStateFlow()
+
     fun login(
         email: String,
         password: String,
@@ -65,13 +69,24 @@ class LoginViewModel @Inject constructor(
         launchCatching(showSnackBar) {
             try {
                 authRepository.handleGoogleLogin(credential)
-                _shouldRestartApp.value = true
+                val isNewUser = authRepository.patientRecord()
+
+                if (isNewUser) {
+                    _navigateToProfile.value = true
+                } else {
+                    _shouldRestartApp.value = true
+                }
             } catch (e: Exception) {
                 val errorMessage = getAuthErrorMessage(e)
                 showSnackBar(SnackBarMessage.IdMessage(errorMessage))
                 return@launchCatching
             }
         }
+    }
+
+    fun resetNavigate() {
+        _shouldRestartApp.value = false
+        _navigateToProfile.value = false
     }
 
     private fun getAuthErrorMessage(e: Exception): Int {

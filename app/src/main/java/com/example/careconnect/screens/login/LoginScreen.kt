@@ -59,39 +59,50 @@ import com.example.careconnect.ui.theme.primaryLight
 fun LoginScreen(
     openSignUpScreen: () -> Unit,
     openSplashScreen: () -> Unit,
+    openProfileScreen: () -> Unit,
     showSnackBar: (SnackBarMessage) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
+    val navigateToProfile by viewModel.navigateToProfile.collectAsStateWithLifecycle()
 
     println("Debug: LoginScreen")
-    if (shouldRestartApp) {
-        openSplashScreen()
-    } else {
-        LoginScreenContent(
-            openSignUpScreen = openSignUpScreen,
-            login = viewModel::login,
-            onGoogleSignInClick = viewModel::onGoogleSignInClick,
-            showSnackBar = showSnackBar,
-        )
+    when {
+        shouldRestartApp -> {
+            viewModel.resetNavigate()
+            openSplashScreen()
+        }
 
-        val context = LocalContext.current
-        val credentialManager = remember { CredentialManager.create(context) }
+        navigateToProfile -> {
+            viewModel.resetNavigate()
+            openProfileScreen()
+        }
 
-        LaunchedEffect(viewModel.googleRequest) {
-            viewModel.googleRequest.collect { request: GetCredentialRequest ->
-                try {
-                    val result = credentialManager.getCredential(
-                        request = request,
-                        context = context
-                    )
-                    viewModel.onGoogleCredential(result.credential, showSnackBar)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+        else -> {
+            LoginScreenContent(
+                openSignUpScreen = openSignUpScreen,
+                login = viewModel::login,
+                onGoogleSignInClick = viewModel::onGoogleSignInClick,
+                showSnackBar = showSnackBar,
+            )
+
+            val context = LocalContext.current
+            val credentialManager = remember { CredentialManager.create(context) }
+
+            LaunchedEffect(viewModel.googleRequest) {
+                viewModel.googleRequest.collect { request: GetCredentialRequest ->
+                    try {
+                        val result = credentialManager.getCredential(
+                            request = request,
+                            context = context
+                        )
+                        viewModel.onGoogleCredential(result.credential, showSnackBar)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }
-
     }
 
 }

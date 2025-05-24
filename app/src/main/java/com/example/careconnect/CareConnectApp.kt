@@ -42,6 +42,7 @@ fun CareConnectApp(
     navController: NavHostController = rememberNavController(),
     startDestination: String = SPLASH_ROUTE,
     getMessage: (SnackBarMessage) -> String,
+
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -78,7 +79,7 @@ fun CareConnectNavHost(
     navController: NavHostController,
     startDestination: String = SPLASH_ROUTE,
     showSnackBar: (SnackBarMessage) -> Unit,
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
@@ -109,6 +110,9 @@ fun CareConnectNavHost(
                 },
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+                },
+                openProfileScreen = {
+                    navController.navigate(PROFILE_ROUTE) { launchSingleTop = true }
                 },
                 showSnackBar = showSnackBar
             )
