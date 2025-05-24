@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.careconnect.R
 import com.example.careconnect.ui.navigation.Route.DOCTOR_APPOINTMENTS_ROUTE
@@ -23,6 +24,6 @@ enum class BarRoutesDoctor(
     CHAT(R.string.chat, Icons.AutoMirrored.Filled.Chat, DOCTOR_CHAT_MENU_ROUTE),
     PATIENTS(R.string.patients, Icons.Filled.People, DOCTOR_PATIENTS_ROUTE),
     APPOINTMENTS(R.string.appointments, Icons.Filled.CalendarToday, DOCTOR_APPOINTMENTS_ROUTE),
-    PROFILE(R.string.profile, Icons.Filled.CalendarToday, DOCTOR_PROFILE_ROUTE)
+    PROFILE(R.string.profile, Icons.Filled.Person, DOCTOR_PROFILE_ROUTE)
 
 }

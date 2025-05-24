@@ -5,6 +5,7 @@ import com.example.careconnect.dataclass.chat.Message
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
@@ -31,6 +32,21 @@ class ChatMessagesRemoteDataSource @Inject constructor(
         val snapshot = firestore.collection("chatrooms").document(chatId).get().await()
         return snapshot.toObject(ChatRoom::class.java)
     }
+
+    fun listenToMessages(chatId: String, onMessagesChanged: (List<Message>) -> Unit): ListenerRegistration {
+        return currentCollection(chatId)
+            .orderBy("timestamp")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) {
+                    println("Error listening to messages: $error")
+                    return@addSnapshotListener
+                }
+
+                val messages = snapshot.toObjects(Message::class.java)
+                onMessagesChanged(messages)
+            }
+    }
+
 
 
     private fun currentCollection(chatId: String): CollectionReference =

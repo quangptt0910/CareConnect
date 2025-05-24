@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,7 +80,7 @@ fun ChatScreen(
         println("ChatScreen: doctor=$doctor")
         patient = viewModel.getPatient(patientId)
         println("ChatScreen: patient=$patient")
-        viewModel.loadChat(chatId)
+        viewModel.observeMessages(chatId)
         viewModel.initializeCurrentUser(patient, doctor, patientId)
     }
 
@@ -104,6 +106,16 @@ fun ChatScreenContent(
     patient: Patient,
 ) {
 
+    val listState = rememberLazyListState()
+    val messages by model.messages.collectAsState()
+
+
+    LaunchedEffect(messages){
+        if (messages.isNotEmpty()){
+            listState.animateScrollToItem(messages.lastIndex)
+        }
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -125,23 +137,24 @@ fun ChatScreenContent(
         }
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (messages, chatBox) = createRefs()
+            val (messageListRef, chatBox) = createRefs()
 
             // Message List
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 100.dp)
-                    .constrainAs(messages) {
+                    .constrainAs(messageListRef) {
                         top.linkTo(parent.top)
                         bottom.linkTo(chatBox.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         height = Dimension.fillToConstraints
                     },
+                state = listState
                 //reverseLayout = true // Makes chat scroll from bottom up
             ) {
-                items(model.messages) { message ->
+                items(messages) { message ->
                     ChatItem(message)
                 }
             }
@@ -202,10 +215,10 @@ fun ChatItem(message: Message) {
             }
 
             // Display image if the message contains an image URI
-            message.imageUri?.let { uri ->
+            message.imageUrl?.let { url ->
                 Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
                 AsyncImage(
-                    model = uri,
+                    model = url,
                     contentDescription = "Sent Image",
                     modifier = Modifier
                         .size(200.dp)
@@ -291,7 +304,7 @@ fun ChatBox(
             message = Message(
                 text = "",
                 author = viewModel.me,
-                imageUri = it
+                imageUrl = null
             ),
             chatId = viewModel.chatRoom?.chatId ?: ""
         ) }
