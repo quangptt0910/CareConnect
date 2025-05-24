@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -42,6 +44,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
@@ -67,8 +71,27 @@ fun LoginScreen(
         LoginScreenContent(
             openSignUpScreen = openSignUpScreen,
             login = viewModel::login,
-            showSnackBar = showSnackBar
+            onGoogleSignInClick = viewModel::onGoogleSignInClick,
+            showSnackBar = showSnackBar,
         )
+
+        val context = LocalContext.current
+        val credentialManager = remember { CredentialManager.create(context) }
+
+        LaunchedEffect(viewModel.googleRequest) {
+            viewModel.googleRequest.collect { request: GetCredentialRequest ->
+                try {
+                    val result = credentialManager.getCredential(
+                        request = request,
+                        context = context
+                    )
+                    viewModel.onGoogleCredential(result.credential, showSnackBar)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
     }
 
 }

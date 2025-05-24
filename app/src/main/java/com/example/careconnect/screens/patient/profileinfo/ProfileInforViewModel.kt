@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class ProfileInforViewModel @Inject constructor(
+class ProfileInfoViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ): MainViewModel() {
     private val _shouldRestartApp = MutableStateFlow(false)
