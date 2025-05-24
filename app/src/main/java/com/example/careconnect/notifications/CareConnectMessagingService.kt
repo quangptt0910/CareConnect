@@ -1,0 +1,79 @@
+package com.example.careconnect.notifications
+
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import com.example.careconnect.MainActivity
+import com.example.careconnect.R
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+class CareConnectMessagingService : FirebaseMessagingService() {
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        CoroutineScope(Dispatchers.IO).launch {
+            FCMTokenManager().updateFCMToken(this@CareConnectMessagingService)
+        }
+    }
+
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
+
+        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "CareConnect"
+        val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+        val notificationType = remoteMessage.data["type"] ?: ""
+        val appointmentId = remoteMessage.data["appointmentId"] ?: ""
+
+        showNotification(title, body, notificationType, appointmentId)
+    }
+
+    private fun showNotification(title: String, body: String, type: String, appointmentId: String) {
+        val channelId = "appointment_notifications"
+        createNotificationChannel(channelId)
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("notification_type", type)
+            putExtra("appointment_id", appointmentId)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.notifications_24px)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+    }
+
+    private fun createNotificationChannel(channelId: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Appointment Notifications"
+            val descriptionText = "Notifications for appointment updates and reminders"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(channelId, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+}

@@ -96,6 +96,7 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("com.google.firebase:firebase-functions:21.1.1")
+    implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-storage")
 
     // Cloud messaging
@@ -117,6 +118,6 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.10.1")
     implementation("io.coil-kt:coil-compose:2.4.0")
 
-
+    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 
 }

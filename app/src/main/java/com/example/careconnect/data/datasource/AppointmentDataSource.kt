@@ -1,8 +1,10 @@
 package com.example.careconnect.data.datasource
 
+import android.util.Log
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
 import com.example.careconnect.dataclass.toLocalDate
+import com.example.careconnect.notifications.NotificationManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.dataObjects
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,6 +18,7 @@ import javax.inject.Inject
 
 class AppointmentDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
+    private val notification: NotificationManager
 ){
 
     suspend fun getAllAppointments(): List<Appointment> {
@@ -184,12 +187,52 @@ class AppointmentDataSource @Inject constructor(
         return firestore.collection("appointments").document(appointmentId).get().await().toObject(Appointment::class.java)
     }
 
-    suspend fun createAppointment(appointment: Appointment): String {
-       return firestore.collection("appointments").add(appointment).await().id
+    suspend fun createAppointment(appointment: Appointment): Boolean {
+       return try {
+           val docRef = firestore.collection("appointments").add(appointment).await()
+           val appointment = appointment.copy(id = docRef.id)
+            docRef.update("id", docRef.id).await()
+
+           notification.triggerAppointmentNotification(appointment, "APPOINTMENT_REQUEST")
+
+           true
+       }
+       catch (e: Exception) {
+           Log.e("AppointmentRepository", "Failed to create appointment", e)
+           false
+       }
     }
 
-    suspend fun updateAppointment(appointment: Appointment) {
-        firestore.collection("appointments").document(appointment.id).set(appointment).await()
+    suspend fun updateAppointment(appointment: Appointment): Boolean {
+        return try {
+            firestore.collection("appointments").document(appointment.id).set(appointment).await()
+            true
+        } catch (e: Exception) {
+            Log.e("AppointmentRepository", "Failed to update appointment", e)
+            false
+        }
+    }
+
+    suspend fun updateAppointmentStatus(appointmentId: String, newStatus: AppointmentStatus): Boolean {
+        return try {
+            firestore.collection("appointments").document(appointmentId).update("status", newStatus).await()
+            val appointment = getAppointmentById(appointmentId)
+
+            appointment?.let {
+                val notificationType = when (newStatus) {
+                    AppointmentStatus.CONFIRM -> "APPOINTMENT_CONFIRM"
+                    AppointmentStatus.COMPLETED -> "APPOINTMENT_COMPLETE"
+                    AppointmentStatus.CANCELED -> "APPOINTMENT_CANCEL"
+                    AppointmentStatus.NO_SHOW -> "APPOINTMENT_NO_SHOW"
+                    else -> return@let
+                }
+                notification.triggerAppointmentNotification(it, notificationType)
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("AppointmentRepository", "Failed to update appointment status", e)
+            false
+        }
     }
 
     suspend fun deleteAppointment(appointmentId: String) {
