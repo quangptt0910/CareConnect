@@ -53,6 +53,7 @@ object Route {
     const val DOCTOR_PATIENTS_PRESCRIPTIONS_ROUTE = "doctor/patients/prescriptions/{patientId}"
     const val DOCTOR_PATIENTS_CREATE_PRESCRIPTIONS_ROUTE = "doctor/patients/create_prescriptions/{patientId}"
     const val DOCTOR_APPOINTMENTS_ROUTE = "doctor/appointments"
+    const val DOCTOR_SCHEDULE_ROUTE = "doctor/schedule"
 
     // Route with parameter helper
     fun adminDoctorEditRoute(doctorId: String) =

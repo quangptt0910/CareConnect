@@ -499,5 +499,6 @@ fun ChatScreenPreview() {
             doctor = Doctor(),
             patient = Patient()
         )
+
     }
 }

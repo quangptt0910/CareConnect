@@ -30,7 +30,7 @@ data class Doctor(
     val specialization: String = "",
     val experience: Int = 2025, // Year start to work
     val schedule: DoctorSchedule = DoctorSchedule(),
-    val profilePhoto: String = "",
+    var profilePhoto: String = "",
     @ServerTimestamp val createdAt: Date? = null
 )
 

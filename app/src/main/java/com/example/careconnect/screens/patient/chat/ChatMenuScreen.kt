@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Role
@@ -155,7 +154,7 @@ fun ChatMenuScreenContent(
                             name = displayName,
                             message = chat.lastMessage,
                             time = formatTimestamp(chat.lastUpdated),
-                            imageRes = R.drawable.carousel_image_1.toString(),
+                            imageRes = profilePhoto,
                             onChatClicked = {
                                 openChatScreen(
                                     chat.doctorId, chat.patientId, chat.chatId

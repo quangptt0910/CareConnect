@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.SnackBarMessage
+import com.example.careconnect.screens.doctor.appointments.DoctorAppointmentScreen
 import com.example.careconnect.screens.doctor.home.DoctorHomeScreen
 import com.example.careconnect.screens.doctor.navigation.BarRoutesDoctor
 import com.example.careconnect.screens.doctor.navigation.BottomBarDoctor
@@ -18,6 +19,7 @@ import com.example.careconnect.screens.doctor.patients.medicalreports.CreateMedi
 import com.example.careconnect.screens.doctor.patients.medicalreports.MedicalReportsScreen
 import com.example.careconnect.screens.doctor.patients.prescriptions.CreatePrescriptionScreen
 import com.example.careconnect.screens.doctor.patients.prescriptions.PrescriptionScreen
+import com.example.careconnect.screens.doctor.profile.DoctorProfileScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
@@ -29,6 +31,7 @@ import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_HISTO
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PRESCRIPTIONS_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
+import com.example.careconnect.ui.navigation.Route.DOCTOR_SCHEDULE_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getDoctorChatRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsCreateMedicalReportRoute
@@ -72,6 +75,10 @@ fun DoctorApp(
                 )
             }
 
+            composable(BarRoutesDoctor.APPOINTMENTS.route) {
+                DoctorAppointmentScreen()
+            }
+
             composable(BarRoutesDoctor.PATIENTS.route) {
                 PatientsScreen(
                     openPatientsProfile = { patientId ->
@@ -80,6 +87,13 @@ fun DoctorApp(
             }
 
             composable(BarRoutesDoctor.PROFILE.route) {
+
+                DoctorProfileScreen(
+                    openScheduleScreen = { navController.navigate(DOCTOR_SCHEDULE_ROUTE) }
+                )
+            }
+
+            composable(DOCTOR_SCHEDULE_ROUTE) {
                 ScheduleScreen(
                     //openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
                     showSnackBar = showSnackBar

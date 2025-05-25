@@ -1,4 +1,7 @@
 package com.example.careconnect.screens.doctor.appointments
 
-class DoctorAppointmentScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun DoctorAppointmentScreen() {
 }
