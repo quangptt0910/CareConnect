@@ -10,12 +10,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
-import javax.inject.Inject
 
-class FCMTokenManager @Inject constructor(
-    private val firestore: FirebaseFirestore,
-    private val auth: FirebaseAuth
-) {
+class FCMTokenManager {
+    private val auth = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
 
     suspend fun updateFCMToken(context: Context) {
         try {

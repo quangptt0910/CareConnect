@@ -9,7 +9,6 @@ import javax.inject.Inject
 class NotificationManager @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
-
     // This will trigger Firebase Functions via Firestore write
     suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String) {
         try {
