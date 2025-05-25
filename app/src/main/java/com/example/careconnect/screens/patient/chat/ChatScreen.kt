@@ -1,9 +1,11 @@
 package com.example.careconnect.screens.patient.chat
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,6 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -224,13 +233,17 @@ fun ChatItem(message: Message) {
             // Display image if the message contains an image URI
             message.imageUrl?.let { url ->
                 Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
-                AsyncImage(
-                    model = url,
-                    contentDescription = "Sent Image",
-                    modifier = Modifier
-                        .size(200.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                ImagePreview(
+                    model = url
+                )
+            }
+
+            message.documentUrl?.let { url ->
+                Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
+                DocumentPreview(
+                    documentName = message.documentName ?: "Document",
+                    documentUrl = url,
+                    isFromMe = message.isFromMe
                 )
             }
         }
@@ -248,6 +261,73 @@ fun ChatItem(message: Message) {
         }
     }
 }
+
+@Composable
+fun ImagePreview(model : String){
+    val context = LocalContext.current
+
+    AsyncImage(
+        model = model,
+        contentDescription = "Sent Image",
+        modifier = Modifier
+            .size(200.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .clickable{
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(model), "*/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            },
+
+        contentScale = ContentScale.Crop,
+    )
+}
+
+@Composable
+fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean) {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFromMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Description,
+                contentDescription = "Document Icon",
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = documentName,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            IconButton(onClick = {
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(Uri.parse(documentUrl), "*/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            }) {
+                Icon(Icons.Default.OpenInNew, contentDescription = "Open Document")
+            }
+        }
+    }
+}
+
 
 
 // ✅ Helper function to format timestamp
@@ -317,6 +397,24 @@ fun ChatBox(
         ) }
     }
 
+    // for document
+
+    val launcher2 = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        val documentName = uri?.lastPathSegment ?: "Document"
+        uri?.let { viewModel.sendDocument(
+            it,
+            message = Message(
+                text = "",
+                author = viewModel.me,
+                documentUrl = null,
+                documentName = documentName
+            ),
+            chatId = viewModel.chatRoom?.chatId ?: ""
+        ) }
+    }
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -336,7 +434,9 @@ fun ChatBox(
             MinimalDropdownMenu(
                 expanded,
                 onDismissRequest = { expanded = false },
-                onImageSend = { launcher.launch("image/*") })
+                onImageSend = { launcher.launch("image/*") },
+                onDocumentSend = { launcher2.launch("application/*") }
+            )
         }
 
         TextField(
@@ -365,7 +465,7 @@ fun ChatBox(
 }
 
 @Composable
-fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImageSend: () -> Unit) {
+fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImageSend: () -> Unit, onDocumentSend: () -> Unit) {
     //var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -381,7 +481,7 @@ fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImage
             )
             DropdownMenuItem(
                 text = { Text("Send document") },
-                onClick = { }
+                onClick = {  onDocumentSend() }
             )
         }
     }

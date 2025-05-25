@@ -48,7 +48,7 @@ class ChatViewModel @Inject constructor(
 
     val scr = LazyListState()
 
-    val me : Author
+    val me: Author
         get() = currentUser.value ?: Author()
 
     private val chatRemoteDataSource = ChatMessagesRemoteDataSource(
@@ -75,7 +75,6 @@ class ChatViewModel @Inject constructor(
     }
 
 
-
     fun initializeCurrentUser(patient: Patient?, doctor: Doctor?, patientId: String) {
         Firebase.auth.currentUser?.let { user ->
             val name = if (user.uid == patientId) patient?.name else doctor?.name
@@ -88,7 +87,7 @@ class ChatViewModel @Inject constructor(
     var chatRoom by mutableStateOf<ChatRoom?>(null)
         private set
 
-    fun setCurrentUser(id: String, name: String){
+    fun setCurrentUser(id: String, name: String) {
         _currentUser.value = Author(id = id, name = name)
     }
 
@@ -100,7 +99,7 @@ class ChatViewModel @Inject constructor(
         return patientRepository.getPatientById(patientId)
     }
 
-//    fun getMessages(chatId: String){
+    //    fun getMessages(chatId: String){
 //        launchCatching {
 //            messages = chatMessagesRepository.getMessages(chatId)
 //        }
@@ -147,6 +146,27 @@ class ChatViewModel @Inject constructor(
 
 
                 val newMessage = message.copy(imageUrl = downloadUrl.toString())
+                _messages.value += newMessage
+
+                // Send message to Firebase
+                chatRemoteDataSource.sendMessage(chatId, newMessage)
+            }
+        }
+    }
+
+    // Function to send a document
+    fun sendDocument(uri: Uri, message: Message, chatId: String) {
+        val storageRef = FirebaseStorage.getInstance().reference
+        val fileName = "chat_documents/${UUID.randomUUID()}.pdf"
+        val documentRef = storageRef.child(fileName)
+
+        launchCatching {
+            currentUser.let {
+                // upload to storage
+                documentRef.putFile(uri).await()
+                val downloadUrl = documentRef.downloadUrl.await()
+
+                val newMessage = message.copy(documentUrl = downloadUrl.toString())
                 _messages.value += newMessage
 
                 // Send message to Firebase

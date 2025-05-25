@@ -86,7 +86,6 @@ class AddChatRoomDataSource @Inject constructor(
                     doctorId = doctor.id,
                     patientId = patient.id,
                     participants = listOf(patient.id, doctor.id),
-                    messages = emptyList(),
                     lastMessage = "",
                     lastUpdated = System.currentTimeMillis()
                 )

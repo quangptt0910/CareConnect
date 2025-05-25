@@ -11,7 +11,6 @@ data class ChatRoom(
     val patientId: String = "",
     val participants: List<String> = listOf(),
     val lastMessage: String="",
-    val messages: List<Message> = listOf(),
     val lastUpdated: Long = 0L
 )
 
@@ -20,13 +19,18 @@ data class Message(
     val text: String = "",
     val author: Author = Author(),
     val timestamp: Long = System.currentTimeMillis(),
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val documentUrl: String? = null,
+    val documentName: String? = null
 ) {
     // Empty constructor for Firebase
     constructor() : this("", "", Author(), System.currentTimeMillis(), null)
 
     val imageUri: Uri?
         get() = imageUrl?.let { Uri.parse(it) }
+
+    val documentUri: Uri?
+        get() = documentUrl?.let { Uri.parse(it) }
 
     val isFromMe: Boolean
         get() = author.id == Firebase.auth.currentUser?.uid
