@@ -45,7 +45,7 @@ data class PatientAppointmentUiState(
 
     val currentDate: LocalDate = LocalDate.now(),
     val filterStatus: Set<AppointmentStatus?> = emptySet(),
-    val sortOption: PatientSortOption = PatientSortOption.TimeAsc
+    val sortOption: PatientSortOption = PatientSortOption.TimeDesc
 )
 
 @HiltViewModel

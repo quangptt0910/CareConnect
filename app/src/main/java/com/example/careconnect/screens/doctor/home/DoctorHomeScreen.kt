@@ -68,7 +68,7 @@ fun DoctorHomeScreen(
         upcomingAppointmentList = upcomingAppointmentList,
         pendingAppointmentList = pendingAppointmentList,
         onAccept = { appt ->
-            viewModel.updateAppointmentStatus(appt, AppointmentStatus.CONFIRM)
+            viewModel.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED)
         },
         onDecline = { appt ->
             viewModel.updateAppointmentStatus(appt, AppointmentStatus.CANCELED)

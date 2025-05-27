@@ -43,16 +43,17 @@ class DoctorHomeViewModel @Inject constructor(
 
     fun loadPendingAppointments() {
         launchCatching {
+            println("DEBUG: getting pending appointments for doctor")
             _pendingAppointments.value = appointmentRepository.getDoctorAppointmentsByStatus(
                 authRepository.currentUser?.uid,
                 AppointmentStatus.PENDING
             )
+            println("DEBUG: PENDING-Found ${_pendingAppointments.value.size} pending appointments")
         }
     }
 
     fun loadUpcomingAppointments() {
         launchCatching {
-            println("DEBUG: UpcomingAppt uid: ${authRepository.currentUser?.uid}")
             val userId = authRepository.currentUser?.uid
             if (userId == null) {
                 println("ERROR: User ID is null when trying to load upcoming appointments")
@@ -69,7 +70,7 @@ class DoctorHomeViewModel @Inject constructor(
             }
             println("DEBUG: Found ${upcomingAppointments.size} upcoming appointments")
             _appointments.value = upcomingAppointments.filter { appt -> // Start the filter, limit and sort
-                appt.status == AppointmentStatus.CONFIRM // only tale the confirmed one
+                appt.status == AppointmentStatus.CONFIRMED // only tale the confirmed one
             }.sortedWith ( // sort by date then start time
                 compareBy<Appointment> { LocalDate.parse(it.appointmentDate) }
                     .thenBy { it.startTime }

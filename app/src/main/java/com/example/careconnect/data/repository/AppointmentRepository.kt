@@ -55,11 +55,11 @@ class AppointmentRepository @Inject constructor(
     suspend fun getAppointmentById(appointmentId: String) =
         appointmentDataSource.getAppointmentById(appointmentId)
 
-    suspend fun createAppointment(appointment: Appointment): Boolean {
+    suspend fun createAppointment(appointment: Appointment): String {
        return appointmentDataSource.createAppointment(appointment)
     }
 
-    suspend fun updateAppointment(appointment: Appointment): Boolean {
+    suspend fun updateAppointment(appointment: Appointment) {
         return appointmentDataSource.updateAppointment(appointment)
     }
 
