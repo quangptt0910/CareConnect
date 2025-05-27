@@ -15,13 +15,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CareConnectMessagingService : FirebaseMessagingService() {
+
+    @Inject
+    lateinit var fcmTokenManager: FCMTokenManager
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         CoroutineScope(Dispatchers.IO).launch {
-            FCMTokenManager().updateFCMToken(this@CareConnectMessagingService)
+            fcmTokenManager.updateFCMToken(this@CareConnectMessagingService)
         }
     }
 
@@ -32,11 +37,12 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
         val notificationType = remoteMessage.data["type"] ?: ""
         val appointmentId = remoteMessage.data["appointmentId"] ?: ""
+        val userType = remoteMessage.data["userType"] ?: ""
 
-        showNotification(title, body, notificationType, appointmentId)
+        showNotification(title, body, notificationType, appointmentId, userType)
     }
 
-    private fun showNotification(title: String, body: String, type: String, appointmentId: String) {
+    private fun showNotification(title: String, body: String, type: String, appointmentId: String, userType: String) {
         val channelId = "appointment_notifications"
         createNotificationChannel(channelId)
 
@@ -44,10 +50,14 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("notification_type", type)
             putExtra("appointment_id", appointmentId)
+            putExtra("user_type", userType)
+            putExtra("from_notification", true)
         }
 
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
+            this,
+            appointmentId.hashCode(),
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

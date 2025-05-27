@@ -8,21 +8,24 @@ import com.example.careconnect.dataclass.UserFCMToken
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FCMTokenManager {
-    private val auth = FirebaseAuth.getInstance()
-    private val firestore = FirebaseFirestore.getInstance()
+@Singleton
+class FCMTokenManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) {
 
     suspend fun updateFCMToken(context: Context) {
         try {
             val currentUser = auth.currentUser ?: return
             val token = FirebaseMessaging.getInstance().token.await()
-//            val deviceId = Settings.Secure.getString(
-//                context.contentResolver,
-//                Settings.Secure.ANDROID_ID
-//            ) ?: ""
+
             val deviceId = getDeviceId(context)
 
             val userToken = UserFCMToken(
@@ -43,17 +46,19 @@ class FCMTokenManager {
             Log.e("FCMTokenManager", "Failed to update FCM token", e)
         }
     }
-}
 
+    private fun getDeviceId(context: Context): String {
+        val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        var deviceId = sharedPreferences.getString("device_id", null)
 
-fun getDeviceId(context: Context): String {
-    val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-    var deviceId = sharedPreferences.getString("device_id", null)
+        if (deviceId == null) {
+            deviceId = UUID.randomUUID().toString()
+            sharedPreferences.edit { putString("device_id", deviceId) }
+        }
 
-    if (deviceId == null) {
-        deviceId = UUID.randomUUID().toString()
-        sharedPreferences.edit { putString("device_id", deviceId) }
+        return deviceId
     }
-
-    return deviceId
 }
+
+
+

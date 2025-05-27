@@ -9,9 +9,18 @@ import javax.inject.Inject
 class NotificationManager @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
+    companion object {
+        private const val TAG = "NotificationManager"
+        private const val NOTIFICATION_TRIGGERS_COLLECTION = "notification_triggers"
+    }
+
     // This will trigger Firebase Functions via Firestore write
-    suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String) {
+    suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String): Boolean {
         try {
+            if (appointment.id.isEmpty()) {
+                Log.e(TAG, "Cannot trigger notification: appointment ID is empty")
+                return false
+            }
             val notificationTrigger = mapOf(
                 "type" to notificationType,
                 "appointmentId" to appointment.id,
@@ -26,13 +35,44 @@ class NotificationManager @Inject constructor(
             )
 
             // This write will trigger the Firebase Function
-            firestore.collection("notification_triggers")
+            val docRef = firestore.collection("notification_triggers")
                 .add(notificationTrigger)
                 .await()
 
-            Log.d("NotificationManager", "Notification trigger created")
+            Log.d(TAG, "Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
+            true
         } catch (e: Exception) {
             Log.e("NotificationManager", "Failed to create notification trigger", e)
+            false
+        }
+        return true
+    }
+
+    //  Method to check if notification was processed
+    suspend fun checkNotificationStatus(notificationId: String): NotificationStatus? {
+        return try {
+            val doc = firestore.collection(NOTIFICATION_TRIGGERS_COLLECTION)
+                .document(notificationId)
+                .get()
+                .await()
+
+            if (doc.exists()) {
+                val data = doc.data!!
+                NotificationStatus(
+                    processed = data["processed"] as? Boolean ?: false,
+                    error = data["error"] as? String,
+                    sentAt = data["sentAt"]
+                )
+            } else null
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to check notification status", e)
+            null
         }
     }
 }
+
+data class NotificationStatus(
+    val processed: Boolean,
+    val error: String?,
+    val sentAt: Any? // Firestore timestamp
+)

@@ -42,6 +42,8 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -62,7 +64,11 @@ fun CareConnectApp(
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                val tokenManager = FCMTokenManager()
+                val tokenManager = FCMTokenManager(
+                    context = context,
+                    auth = FirebaseAuth.getInstance(),
+                    firestore = FirebaseFirestore.getInstance()
+                )
                 tokenManager.updateFCMToken(context)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -76,7 +82,6 @@ fun CareConnectApp(
             val appointmentId = it.getStringExtra("appointment_id")
             if (notificationType != null && appointmentId != null) {
                 // Navigate based on notification type
-                // Use your existing navigation logic here
             }
         }
     }
