@@ -21,7 +21,7 @@ class FCMTokenManager @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
 
-    suspend fun updateFCMToken(context: Context) {
+    suspend fun updateFCMToken() {
         try {
             val currentUser = auth.currentUser ?: return
             val token = FirebaseMessaging.getInstance().token.await()

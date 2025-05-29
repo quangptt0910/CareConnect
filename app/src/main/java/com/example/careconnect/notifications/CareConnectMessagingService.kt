@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.careconnect.MainActivity
 import com.example.careconnect.R
@@ -25,8 +26,9 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Log.d("FCMService", "NEW_TOKEN: $token")
         CoroutineScope(Dispatchers.IO).launch {
-            fcmTokenManager.updateFCMToken(this@CareConnectMessagingService)
+            fcmTokenManager.updateFCMToken()
         }
     }
 
@@ -76,7 +78,7 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
     private fun createNotificationChannel(channelId: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Appointment Notifications"
+            val name = getString(R.string.appointment_notifications)
             val descriptionText = "Notifications for appointment updates and reminders"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(channelId, name, importance).apply {

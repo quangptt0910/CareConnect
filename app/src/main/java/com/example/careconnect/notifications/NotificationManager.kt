@@ -16,7 +16,7 @@ class NotificationManager @Inject constructor(
 
     // This will trigger Firebase Functions via Firestore write
     suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String): Boolean {
-        try {
+        return try {
             if (appointment.id.isEmpty()) {
                 Log.e(TAG, "Cannot trigger notification: appointment ID is empty")
                 return false
@@ -45,7 +45,6 @@ class NotificationManager @Inject constructor(
             Log.e("NotificationManager", "Failed to create notification trigger", e)
             false
         }
-        return true
     }
 
     //  Method to check if notification was processed
@@ -59,7 +58,7 @@ class NotificationManager @Inject constructor(
             if (doc.exists()) {
                 val data = doc.data!!
                 NotificationStatus(
-                    processed = data["processed"] as? Boolean ?: false,
+                    processed = data["processed"] as? Boolean == true,
                     error = data["error"] as? String,
                     sentAt = data["sentAt"]
                 )

@@ -321,16 +321,13 @@ fun PatientAppointmentCard(appt: Appointment) {
             ) {
                 Text(
                     text = "${appt.appointmentDate}",
-                    style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
                     text = "${appt.startTime} - ${appt.endTime}",
-                    style = MaterialTheme.typography.headlineSmall
                 )
                 Text(
                     text = appt.status.title,
                     color = appt.status.color,
-                    style = MaterialTheme.typography.headlineSmall
                 )
             }
             Spacer(Modifier.height(4.dp))

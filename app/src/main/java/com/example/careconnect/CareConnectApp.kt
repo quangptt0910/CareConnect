@@ -3,6 +3,7 @@ package com.example.careconnect
 import android.Manifest
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -45,13 +46,13 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CareConnectApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    startDestination: String = SPLASH_ROUTE,
     getMessage: (SnackBarMessage) -> String,
     intent: Intent? = null
 ) {
@@ -61,17 +62,43 @@ fun CareConnectApp(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+//    LaunchedEffect(Unit) {
+//        scope.launch {
+//            try {
+//                val tokenManager = FCMTokenManager(
+//                    context = context,
+//                    auth = FirebaseAuth.getInstance(),
+//                    firestore = FirebaseFirestore.getInstance()
+//                )
+//                tokenManager.updateFCMToken()
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//            }
+//        }
+//    }
+
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                val tokenManager = FCMTokenManager(
-                    context = context,
-                    auth = FirebaseAuth.getInstance(),
-                    firestore = FirebaseFirestore.getInstance()
-                )
-                tokenManager.updateFCMToken(context)
+                val tokenManager = FCMTokenManager(context, FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
+                tokenManager.updateFCMToken()
+
+                // Add verification
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                if (currentUser != null) {
+                    val tokenDoc = FirebaseFirestore.getInstance()
+                        .collection("user_tokens")
+                        .document(currentUser.uid)
+                        .get()
+                        .await()    
+
+                    Log.d("FCMDebug", "Token exists in DB: ${tokenDoc.exists()}")
+                    if (tokenDoc.exists()) {
+                        Log.d("FCMDebug", "Token data: ${tokenDoc.data}")
+                    }
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("FCMDebug", "Token update failed", e)
             }
         }
     }
@@ -82,6 +109,7 @@ fun CareConnectApp(
             val appointmentId = it.getStringExtra("appointment_id")
             if (notificationType != null && appointmentId != null) {
                 // Navigate based on notification type
+                navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
             }
         }
     }
