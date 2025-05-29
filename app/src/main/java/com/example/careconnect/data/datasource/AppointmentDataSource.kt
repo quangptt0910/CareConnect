@@ -190,9 +190,12 @@ class AppointmentDataSource @Inject constructor(
 
     suspend fun createAppointment(appointment: Appointment): String {
        return try {
-           val appointmentForSave = appointment.copy(id = "")
+           val appointmentForSave = appointment.copy(id = "", status = AppointmentStatus.PENDING)
+
            val docRef = firestore.collection("appointments").add(appointmentForSave).await()
+
            val savedAppointment = appointment.copy(id = docRef.id)
+
            notification.triggerAppointmentNotification(savedAppointment, "APPOINTMENT_PENDING")
 
            return docRef.id

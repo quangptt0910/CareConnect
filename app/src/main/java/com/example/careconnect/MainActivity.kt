@@ -39,4 +39,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
+    private fun handleNotificationIntent(intent: Intent) {
+        if (intent.getBooleanExtra("from_notification", false)) {
+            val notificationType = intent.getStringExtra("notification_type")
+            val appointmentId = intent.getStringExtra("appointment_id")
+            val userType = intent.getStringExtra("user_type")
+            val notificationAction = intent.getStringExtra("notification_action")
+        }
+    }
+
 }
