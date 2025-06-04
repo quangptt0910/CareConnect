@@ -5,7 +5,9 @@ import com.example.careconnect.dataclass.Appointment
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class NotificationManager @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {

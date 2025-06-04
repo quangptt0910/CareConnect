@@ -207,17 +207,28 @@ class AppointmentDataSource @Inject constructor(
     }
 
     suspend fun updateAppointment(appointment: Appointment) {
-        firestore.collection("appointments").document(appointment.id).set(appointment).await()
-        appointment.let{
-            val notificationType = when (it.status) {
-                AppointmentStatus.CONFIRMED -> "APPOINTMENT_CONFIRMED"
-                AppointmentStatus.COMPLETED -> "APPOINTMENT_COMPLETED"
-                AppointmentStatus.CANCELED -> "APPOINTMENT_CANCELED"
-                AppointmentStatus.NO_SHOW -> "APPOINTMENT_NO_SHOW"
-                else -> return@let
-                }
-                notification.triggerAppointmentNotification(it, notificationType)
-            }
+        try {
+            firestore.collection("appointments").document(appointment.id)
+                .update(
+                    mapOf(
+                        "patientId" to appointment.patientId,
+                        "doctorId" to appointment.doctorId,
+                        "patientName" to appointment.patientName,
+                        "doctorName" to appointment.doctorName,
+                        "type" to appointment.type,
+                        "appointmentDate" to appointment.appointmentDate,
+                        "startTime" to appointment.startTime,
+                        "endTime" to appointment.endTime,
+                        "address" to appointment.address,
+                        "status" to appointment.status
+                    )
+                )
+                .await()
+
+            Log.d("AppointmentRepository", "Appointment updated successfully")
+        } catch (e: Exception) {
+            Log.e("AppointmentRepository", "Failed to update appointment", e)
+        }
     }
 
     suspend fun updateAppointmentStatus(appointmentId: String, newStatus: AppointmentStatus): Boolean {

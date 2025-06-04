@@ -44,7 +44,7 @@ fun SplashScreen(
     SplashScreenContent(showSnackBar = showSnackBar)
 
     LaunchedEffect(navigateRoute) {
-        delay(500L)
+        delay(300L)
         if (navigateRoute != null) {
             when (navigateRoute) {
                 "admin" -> openAdminScreen()
