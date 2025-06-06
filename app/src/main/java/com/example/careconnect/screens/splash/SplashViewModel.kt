@@ -3,6 +3,7 @@ package com.example.careconnect.screens.splash
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.repository.AuthRepository
+import com.example.careconnect.notifications.FCMTokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +18,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val fcmTokenManager: FCMTokenManager
 ) : MainViewModel() {
 
     private val _navigationRoute = MutableStateFlow<String?>(null)
@@ -25,6 +27,7 @@ class SplashViewModel @Inject constructor(
 
     init {
         launchCatching {
+            fcmTokenManager.debugFCMToken()
             val userData = authRepository.currentUserFlow.first()
             println("Debug Splash: $userData")
             val route = when(userData) {

@@ -164,7 +164,7 @@ class BookAppointmentViewModel @Inject constructor(
         launchCatching(showSnackBar){
             try {
                 // Force refresh from network
-                doctorRepository.clearCache(doctorId = _doctorId.value ?: "")
+                // doctorRepository.clearCache(doctorId = _doctorId.value ?: "")
                 loadAvailableSlots(showSnackBar)
             } catch (e: Exception) {
                 showSnackBar(SnackBarMessage.StringMessage(

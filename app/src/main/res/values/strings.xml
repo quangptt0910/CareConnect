@@ -99,7 +99,7 @@
 
 
     <!-- Firebase cloud messaging -->
-    <string name="default_notification_channel_id">default_notification_channel_id</string>
+    <string name="default_notification_channel_id">appointment_notifications</string>
     <string name="appointment_notifications">Appointment Notifications</string>
 
     <!-- BottomBar -->

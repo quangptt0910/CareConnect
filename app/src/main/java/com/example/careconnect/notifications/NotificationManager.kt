@@ -19,10 +19,22 @@ class NotificationManager @Inject constructor(
     // This will trigger Firebase Functions via Firestore write
     suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String): Boolean {
         return try {
-            if (appointment.id.isEmpty()) {
-                Log.e(TAG, "Cannot trigger notification: appointment ID is empty")
+
+            if (appointment.id.isEmpty() ||
+                appointment.patientId.isEmpty() ||
+                appointment.doctorId.isEmpty() ||
+                appointment.patientName.isEmpty() ||
+                appointment.doctorName.isEmpty()) {
+                Log.e(TAG, "Cannot trigger notification: missing required appointment data")
                 return false
             }
+
+            val validTypes = listOf("PENDING", "CONFIRMED", "COMPLETED", "CANCELED", "NO_SHOW")
+            if (notificationType !in validTypes) {
+                Log.e(TAG, "Invalid notification type: $notificationType")
+                return false
+            }
+
             val notificationTrigger = mapOf(
                 "type" to notificationType,
                 "appointmentId" to appointment.id,
@@ -41,7 +53,12 @@ class NotificationManager @Inject constructor(
                 .add(notificationTrigger)
                 .await()
 
-            Log.d(TAG, "Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
+            Log.d(TAG, "✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
+            println("DEBUG: ✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
+            // Wait a bit and check if it was processed
+            kotlinx.coroutines.delay(2000)
+            val status = checkNotificationStatus(docRef.id)
+            Log.d(TAG, "Notification status after 2 seconds: $status")
             true
         } catch (e: Exception) {
             Log.e("NotificationManager", "Failed to create notification trigger", e)

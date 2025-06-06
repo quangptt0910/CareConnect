@@ -2,7 +2,7 @@ package com.example.careconnect.dataclass
 
 // Notification data classes
 data class NotificationData(
-    val type: NotificationType = NotificationType.APPOINTMENT_REQUEST,
+    val type: AppointmentStatus = AppointmentStatus.PENDING,
     val appointmentId: String = "",
     val title: String = "",
     val body: String = "",
@@ -10,10 +10,3 @@ data class NotificationData(
     val receiverId: String = "",
     val data: Map<String, String> = emptyMap()
 )
-
-enum class NotificationType {
-    APPOINTMENT_REQUEST,
-    APPOINTMENT_CONFIRMED,
-    APPOINTMENT_DECLINED,
-    APPOINTMENT_REMINDER
-}

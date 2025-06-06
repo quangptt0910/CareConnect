@@ -58,6 +58,40 @@ class FCMTokenManager @Inject constructor(
 
         return deviceId
     }
+
+    suspend fun debugFCMToken() {
+        try {
+            val currentUser = auth.currentUser
+            Log.d("FCMTokenManager", "Current user: ${currentUser?.uid}")
+
+            if (currentUser == null) {
+                Log.e("FCMTokenManager", "No authenticated user")
+                return
+            }
+
+            val token = FirebaseMessaging.getInstance().token.await()
+            Log.d("FCMTokenManager", "FCM Token: $token")
+
+            // Check if token exists in Firestore
+            val tokenDoc = firestore.collection("user_tokens")
+                .document(currentUser.uid)
+                .get()
+                .await()
+
+            if (tokenDoc.exists()) {
+                Log.d("FCMTokenManager", "Existing token in Firestore: ${tokenDoc.data}")
+                println("Debug: Existing token in Firestore: ${tokenDoc.data}")
+            } else {
+                Log.w("FCMTokenManager", "No token found in Firestore for user: ${currentUser.uid}")
+            }
+
+            // Update token
+            updateFCMToken()
+
+        } catch (e: Exception) {
+            Log.e("FCMTokenManager", "Error in debugFCMToken", e)
+        }
+    }
 }
 
 

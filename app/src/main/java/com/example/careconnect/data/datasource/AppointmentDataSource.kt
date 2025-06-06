@@ -196,7 +196,7 @@ class AppointmentDataSource @Inject constructor(
 
            val savedAppointment = appointment.copy(id = docRef.id)
 
-           notification.triggerAppointmentNotification(savedAppointment, "APPOINTMENT_PENDING")
+           notification.triggerAppointmentNotification(savedAppointment, "PENDING")
 
            return docRef.id
        }
@@ -225,6 +225,8 @@ class AppointmentDataSource @Inject constructor(
                 )
                 .await()
 
+            notification.triggerAppointmentNotification(appointment, appointment.status.name)
+
             Log.d("AppointmentRepository", "Appointment updated successfully")
         } catch (e: Exception) {
             Log.e("AppointmentRepository", "Failed to update appointment", e)
@@ -238,10 +240,10 @@ class AppointmentDataSource @Inject constructor(
 
             appointment?.let {
                 val notificationType = when (newStatus) {
-                    AppointmentStatus.CONFIRMED -> "APPOINTMENT_CONFIRMED"
-                    AppointmentStatus.COMPLETED -> "APPOINTMENT_COMPLETED"
-                    AppointmentStatus.CANCELED -> "APPOINTMENT_CANCELED"
-                    AppointmentStatus.NO_SHOW -> "APPOINTMENT_NO_SHOW"
+                    AppointmentStatus.CONFIRMED -> "CONFIRMED"
+                    AppointmentStatus.COMPLETED -> "COMPLETED"
+                    AppointmentStatus.CANCELED -> "CANCELED"
+                    AppointmentStatus.NO_SHOW -> "NO_SHOW"
                     else -> return@let
                 }
                 notification.triggerAppointmentNotification(it, notificationType)
