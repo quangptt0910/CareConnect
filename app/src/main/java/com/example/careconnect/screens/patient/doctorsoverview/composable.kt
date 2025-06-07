@@ -27,8 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 
 
 @Composable
@@ -38,7 +38,7 @@ fun FilledCardExample(
     speciality: String,
     address: String,
     doctorId: String,
-    imageRes: Int, // Resource ID of the profile image
+    imageRes: String, // Resource ID of the profile image
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     openBookingScreen: () -> Unit = {}
 ) {
@@ -56,7 +56,7 @@ fun FilledCardExample(
             supportingContent = { Text(text = speciality + "\n" + address) },
             leadingContent = {
                 Image(
-                    painter = painterResource(id = imageRes),
+                    painter = rememberAsyncImagePainter(imageRes),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -76,7 +76,6 @@ fun FilledCardExample(
                 ){
                     Text(text = "View Profile")
                 }
-
 
                 Button(
                     onClick = { openBookingScreen() },

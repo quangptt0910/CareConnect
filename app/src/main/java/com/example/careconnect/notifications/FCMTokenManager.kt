@@ -29,10 +29,9 @@ class FCMTokenManager @Inject constructor(
             val deviceId = getDeviceId(context)
 
             val userToken = UserFCMToken(
-                userId = currentUser.uid,
                 fcmToken = token,
                 deviceId = deviceId,
-                platform = "android"
+                platform = "android",
             )
 
             // Store in separate collection for easy access

@@ -13,8 +13,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -22,7 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.dataclass.SnackBarMessage
-import com.example.careconnect.notifications.FCMTokenManager
 import com.example.careconnect.screens.admin.AdminApp
 import com.example.careconnect.screens.doctor.DoctorApp
 import com.example.careconnect.screens.login.LoginScreen
@@ -43,10 +45,13 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+
+data class NotificationData(
+    val type: String,
+    val appointmentId: String,
+    val userType: String
+)
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -62,54 +67,59 @@ fun CareConnectApp(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var notificationHandled by remember { mutableStateOf(false) }
+    var notificationData by remember { mutableStateOf<NotificationData?>(null) }
+
 //    LaunchedEffect(Unit) {
 //        scope.launch {
 //            try {
-//                val tokenManager = FCMTokenManager(
-//                    context = context,
-//                    auth = FirebaseAuth.getInstance(),
-//                    firestore = FirebaseFirestore.getInstance()
-//                )
+//                val tokenManager = FCMTokenManager(context, FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
 //                tokenManager.updateFCMToken()
+//
+//                // Add verification
+//                val currentUser = FirebaseAuth.getInstance().currentUser
+//                if (currentUser != null) {
+//                    val tokenDoc = FirebaseFirestore.getInstance()
+//                        .collection("user_tokens")
+//                        .document(currentUser.uid)
+//                        .get()
+//                        .await()
+//
+//                    Log.d("FCMDebug", "Token exists in DB: ${tokenDoc.exists()}")
+//                    if (tokenDoc.exists()) {
+//                        Log.d("FCMDebug", "Token data: ${tokenDoc.data}")
+//                    }
+//                }
 //            } catch (e: Exception) {
-//                e.printStackTrace()
+//                Log.e("FCMDebug", "Token update failed", e)
 //            }
 //        }
 //    }
 
-    LaunchedEffect(Unit) {
-        scope.launch {
-            try {
-                val tokenManager = FCMTokenManager(context, FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
-                tokenManager.updateFCMToken()
-
-                // Add verification
-                val currentUser = FirebaseAuth.getInstance().currentUser
-                if (currentUser != null) {
-                    val tokenDoc = FirebaseFirestore.getInstance()
-                        .collection("user_tokens")
-                        .document(currentUser.uid)
-                        .get()
-                        .await()    
-
-                    Log.d("FCMDebug", "Token exists in DB: ${tokenDoc.exists()}")
-                    if (tokenDoc.exists()) {
-                        Log.d("FCMDebug", "Token data: ${tokenDoc.data}")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("FCMDebug", "Token update failed", e)
-            }
-        }
-    }
-
+    // Handle notification navigation
     LaunchedEffect(intent) {
-        intent?.let {
-            val notificationType = it.getStringExtra("notification_type")
-            val appointmentId = it.getStringExtra("appointment_id")
-            if (notificationType != null && appointmentId != null) {
-                // Navigate based on notification type
-                navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
+        intent?.let { notificationIntent ->
+            val fromNotification = notificationIntent.getBooleanExtra("from_notification", false)
+            val notificationType = notificationIntent.getStringExtra("notification_type")
+            val appointmentId = notificationIntent.getStringExtra("appointment_id")
+            val userType = notificationIntent.getStringExtra("user_type")
+
+            Log.d("NotificationDebug", "From notification: $fromNotification")
+            Log.d("NotificationDebug", "Notification type: $notificationType")
+            Log.d("NotificationDebug", "User type: $userType")
+            Log.d("NotificationDebug", "Appointment ID: $appointmentId")
+
+            if (fromNotification && !notificationHandled) {
+                notificationHandled = true
+
+                // Store notification data for splash screen to handle
+                notificationData = NotificationData(
+                    type = notificationType ?: "",
+                    appointmentId = appointmentId ?: "",
+                    userType = userType ?: ""
+                )
+
+                Log.d("NotificationDebug", "Notification data stored for splash screen")
             }
         }
     }
@@ -133,7 +143,8 @@ fun CareConnectApp(
                     navController = navController,
                     startDestination = SPLASH_ROUTE,
                     snackbarHostState = snackbarHostState,
-                    showSnackBar = showSnackbar
+                    showSnackBar = showSnackbar,
+                    notificationData = notificationData
                 )
             }
         }
@@ -160,7 +171,8 @@ fun CareConnectNavHost(
     navController: NavHostController,
     startDestination: String = SPLASH_ROUTE,
     showSnackBar: (SnackBarMessage) -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    notificationData: NotificationData? = null
 ) {
     NavHost(
         navController = navController,
@@ -180,7 +192,8 @@ fun CareConnectNavHost(
                 openAdminScreen = {
                     navController.navigate(ADMIN_APP) { launchSingleTop = true }
                 },
-                showSnackBar = showSnackBar
+                showSnackBar = showSnackBar,
+                notificationData = notificationData
             )
         }
 

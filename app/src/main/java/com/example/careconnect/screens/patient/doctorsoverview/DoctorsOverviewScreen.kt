@@ -13,13 +13,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.careconnect.R
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -36,7 +36,7 @@ fun DoctorsOverviewScreen(
         viewModel.setSpecialty(specialty)
     }
 
-    val doctors by viewModel.doctors.collectAsState()
+    val doctors by viewModel.doctors.collectAsStateWithLifecycle()
 
     DoctorsOverviewScreenContent(
         doctors = doctors,
@@ -67,9 +67,16 @@ fun DoctorsOverviewScreenContent(
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 100.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 70.dp)
         ) {
-
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                text = "$specialty Doctors",
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center
+            )
             if (doctors.isEmpty()) {
                 // Handle no matches found
                Text(
@@ -85,12 +92,12 @@ fun DoctorsOverviewScreenContent(
                         speciality = doctor.specialization,
                         address = doctor.address,
                         doctorId = doctor.id,
-                        imageRes = R.drawable.carousel_image_1,
+                        imageRes = doctor.profilePhoto,
                         openBookingScreen = { openBookingScreen(doctor.id) },
                         openDoctorProfileScreen = { openDoctorProfileScreen(doctor.id) }
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(15.dp))
                 }
             }
         }

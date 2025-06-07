@@ -42,8 +42,8 @@ class NotificationManager @Inject constructor(
                 "doctorId" to appointment.doctorId,
                 "patientName" to appointment.patientName,
                 "doctorName" to appointment.doctorName,
-                "appointmentDate" to appointment.appointmentDate,
-                "startTime" to appointment.startTime,
+                "appointmentDate" to appointment.appointmentDate.ifEmpty { "N/A" },
+                "startTime" to appointment.startTime.ifEmpty { "N/A" },
                 "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
                 "processed" to false
             )
@@ -56,9 +56,9 @@ class NotificationManager @Inject constructor(
             Log.d(TAG, "✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
             println("DEBUG: ✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
             // Wait a bit and check if it was processed
-            kotlinx.coroutines.delay(2000)
-            val status = checkNotificationStatus(docRef.id)
-            Log.d(TAG, "Notification status after 2 seconds: $status")
+//            kotlinx.coroutines.delay(2000)
+//            val status = checkNotificationStatus(docRef.id)
+//            Log.d(TAG, "Notification status after 2 seconds: $status")
             true
         } catch (e: Exception) {
             Log.e("NotificationManager", "Failed to create notification trigger", e)
@@ -66,27 +66,6 @@ class NotificationManager @Inject constructor(
         }
     }
 
-    //  Method to check if notification was processed
-    suspend fun checkNotificationStatus(notificationId: String): NotificationStatus? {
-        return try {
-            val doc = firestore.collection(NOTIFICATION_TRIGGERS_COLLECTION)
-                .document(notificationId)
-                .get()
-                .await()
-
-            if (doc.exists()) {
-                val data = doc.data!!
-                NotificationStatus(
-                    processed = data["processed"] as? Boolean == true,
-                    error = data["error"] as? String,
-                    sentAt = data["sentAt"]
-                )
-            } else null
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to check notification status", e)
-            null
-        }
-    }
 }
 
 data class NotificationStatus(

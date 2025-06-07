@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.NotificationData
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -36,10 +37,17 @@ fun SplashScreen(
     openPatientScreen: () -> Unit,
     openLoginScreen: () -> Unit,
     showSnackBar: (SnackBarMessage) -> Unit,
+    notificationData: NotificationData? = null,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     println("Debug: SplashScreen")
     val navigateRoute by viewModel.navigationRoute.collectAsStateWithLifecycle()
+
+    LaunchedEffect(notificationData) {
+        if (notificationData != null) {
+            viewModel.handleNotificationData(notificationData)
+        }
+    }
 
     SplashScreenContent(showSnackBar = showSnackBar)
 

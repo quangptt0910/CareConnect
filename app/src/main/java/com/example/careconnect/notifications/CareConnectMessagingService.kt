@@ -34,13 +34,14 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "🔔 FCM Service created")
         createNotificationChannel()
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCMService", "NEW_TOKEN: $token")
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Default).launch {
             fcmTokenManager.updateFCMToken()
         }
     }
@@ -76,23 +77,33 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.notifications_24px)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_round)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .build()
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+        val notification = notificationBuilder.build()
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = appointmentId.hashCode()
         notificationManager.notify(notificationId, notification)
     }
 
     private fun createNotificationChannel() {
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            // Check if channel already exists
+            val existingChannel = notificationManager.getNotificationChannel(CHANNEL_ID)
+            if (existingChannel != null) {
+                Log.d(TAG, "📱 Notification channel already exists")
+                return
+            }
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 CHANNEL_NAME,
@@ -109,7 +120,6 @@ class CareConnectMessagingService : FirebaseMessagingService() {
                 )
             }
 
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
             Log.d(TAG, "Notification channel created")
         }
