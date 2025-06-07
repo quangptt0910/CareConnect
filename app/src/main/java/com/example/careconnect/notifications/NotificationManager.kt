@@ -13,7 +13,6 @@ class NotificationManager @Inject constructor(
 ) {
     companion object {
         private const val TAG = "NotificationManager"
-        private const val NOTIFICATION_TRIGGERS_COLLECTION = "notification_triggers"
     }
 
     // This will trigger Firebase Functions via Firestore write
@@ -55,10 +54,7 @@ class NotificationManager @Inject constructor(
 
             Log.d(TAG, "✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
             println("DEBUG: ✅ Notification trigger created successfully with ID: ${docRef.id} for type: $notificationType")
-            // Wait a bit and check if it was processed
-//            kotlinx.coroutines.delay(2000)
-//            val status = checkNotificationStatus(docRef.id)
-//            Log.d(TAG, "Notification status after 2 seconds: $status")
+
             true
         } catch (e: Exception) {
             Log.e("NotificationManager", "Failed to create notification trigger", e)
@@ -68,8 +64,3 @@ class NotificationManager @Inject constructor(
 
 }
 
-data class NotificationStatus(
-    val processed: Boolean,
-    val error: String?,
-    val sentAt: Any? // Firestore timestamp
-)
