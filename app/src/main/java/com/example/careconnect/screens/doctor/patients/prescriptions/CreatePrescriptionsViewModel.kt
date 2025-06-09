@@ -28,6 +28,9 @@ class CreatePrescriptionsViewModel @Inject constructor(
     private val _patient = MutableStateFlow<Patient?>(null)
     val patient: StateFlow<Patient?> = _patient
 
+    private val _prescriptionCreated = MutableStateFlow(false)
+    val prescriptionCreated: StateFlow<Boolean> = _prescriptionCreated
+
     private val _currentDoctorId = MutableStateFlow<String?>(null)
     val currentDoctorId: StateFlow<String?> = _currentDoctorId
 
@@ -52,6 +55,7 @@ class CreatePrescriptionsViewModel @Inject constructor(
 
     fun createPrescription(patientId: String, prescription: Prescription, context: Context) {
         viewModelScope.launch {
+            _prescriptionCreated.value = false
             val doctorId = _currentDoctorId.value
             val patient = _patient.value ?: return@launch
             val doctor = doctorRepository.getDoctorById(doctorId ?: return@launch)
@@ -82,6 +86,7 @@ class CreatePrescriptionsViewModel @Inject constructor(
                 // Step 3: Save report with PDF URL to Firestore
                 val finalReport = completedPrescription.copy(prescriptionPdfUrl = downloadUrl)
                 patientRepository.createPrescription(patientId, finalReport)
+                _prescriptionCreated.value = true
 
             } catch (e: Exception) {
                 Log.e("Prescription", "Error uploading PDF", e)

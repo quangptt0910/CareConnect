@@ -2,6 +2,7 @@ package com.example.careconnect.screens.doctor.patients.prescriptions
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,9 +45,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Prescription
 import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
+import com.example.careconnect.screens.doctor.patients.medicalreports.AlertDialogExample
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
@@ -57,13 +60,24 @@ import java.util.Locale
 @Composable
 fun CreatePrescriptionScreen(
     patientId: String,
-    viewModel: CreatePrescriptionsViewModel = hiltViewModel()
+    viewModel: CreatePrescriptionsViewModel = hiltViewModel(),
+    navController: NavController
 ){
+    val context = LocalContext.current
+
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
     }
 
     val patient by viewModel.patient.collectAsStateWithLifecycle()
+    val prescriptionCreated by viewModel.prescriptionCreated.collectAsStateWithLifecycle()
+
+    LaunchedEffect(prescriptionCreated) {
+        if (prescriptionCreated) {
+            Toast.makeText(context, "Prescription submitted", Toast.LENGTH_SHORT).show()
+            navController.popBackStack()
+        }
+    }
 
     CreatePrescriptionsScreenContent(
         patientId = patientId,

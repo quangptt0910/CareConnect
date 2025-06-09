@@ -67,7 +67,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
 
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -120,4 +120,6 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
 
+    // qr code qrkit
+    implementation("network.chaintech:qr-kit:3.0.6")
 }

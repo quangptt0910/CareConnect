@@ -137,7 +137,8 @@ fun DoctorApp(
 
             composable(DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE) { backStackEntry ->
                 CreateMedicalReportScreen(
-                    patientId = backStackEntry.arguments?.getString("patientId") ?: ""
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    navController = navController
                 )
             }
 
@@ -152,7 +153,8 @@ fun DoctorApp(
 
             composable(DOCTOR_PATIENTS_CREATE_PRESCRIPTIONS_ROUTE) { backStackEntry ->
                 CreatePrescriptionScreen(
-                    patientId = backStackEntry.arguments?.getString("patientId") ?: ""
+                    patientId = backStackEntry.arguments?.getString("patientId") ?: "",
+                    navController = navController
                 )
             }
 

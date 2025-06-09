@@ -30,6 +30,10 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun getPatientId(): String {
+        return auth.currentUser?.uid ?: ""
+    }
+
     suspend fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
         try {
             firestore.collection("patients")
@@ -222,5 +226,43 @@ class PatientRemoteDataSource @Inject constructor(
             throw e // or handle accordingly
             }
         return immunizations
+    }
+
+    suspend fun getPrescriptions(patientId: String): List<Prescription> {
+        val prescriptions = mutableListOf<Prescription>()
+        try {
+            val querySnapshot = firestore.collection("patients")
+                .document(patientId)
+                .collection("prescriptions")
+                .get()
+                .await()
+            for (document in querySnapshot.documents) {
+                val prescription = document.toObject(Prescription::class.java)
+                prescription?.let { prescriptions.add(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to fetch prescriptions", e)
+            throw e // or handle accordingly
+        }
+        return prescriptions
+    }
+
+    suspend fun getMedicalReports(patientId: String): List<MedicalReport> {
+        val medicalReports = mutableListOf<MedicalReport>()
+        try {
+            val querySnapshot = firestore.collection("patients")
+                .document(patientId)
+                .collection("medicalReports")
+                .get()
+                .await()
+            for (document in querySnapshot.documents) {
+                val medicalReport = document.toObject(MedicalReport::class.java)
+                medicalReport?.let { medicalReports.add(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to fetch medical reports", e)
+            throw e // or handle accordingly
+        }
+        return medicalReports
     }
 }

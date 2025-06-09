@@ -18,11 +18,16 @@ import com.example.careconnect.screens.patient.doctorsoverview.DoctorsProfileVie
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
+import com.example.careconnect.screens.patient.profile.MedicalReportScreen
+import com.example.careconnect.screens.patient.profile.PatientProfileScreen
+import com.example.careconnect.screens.patient.profile.PrescriptionScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.HOME_PATIENT_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_MEDICAL_REPORT_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_PRESCRIPTION_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getPatientBookingAppointmentsBookRoute
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
@@ -63,7 +68,10 @@ fun PatientApp(
                 )
             }
             composable(BarRoutes.PROFILE.route) {
-
+                PatientProfileScreen(
+                    openPrescriptionsScreen = { navController.navigate(PATIENT_PROFILE_PRESCRIPTION_ROUTE) },
+                    openMedicalReportsScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) }
+                )
             }
             composable(BarRoutes.APPOINTMENTS.route) {
                 PatientAppointmentScreen()
@@ -122,6 +130,14 @@ fun PatientApp(
                     doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
                     showSnackBar = showSnackBar
                 )
+            }
+
+            composable(PATIENT_PROFILE_PRESCRIPTION_ROUTE) {
+                PrescriptionScreen()
+            }
+
+            composable(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) {
+                MedicalReportScreen()
             }
         }
 

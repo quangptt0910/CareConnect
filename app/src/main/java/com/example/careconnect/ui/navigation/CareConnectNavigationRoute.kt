@@ -39,6 +39,8 @@ object Route {
     const val PATIENT_DOCTORS_OVERVIEW = "patient/doctors/overview/{specialty}"
     const val PATIENT_DOCTORS_PROFILE = "patient/doctors/profile/{doctorId}"
     const val PATIENT_BOOKING_APPOINTMENTS_ROUTE = "patient/appointments/book/{doctorId}"
+    const val PATIENT_PROFILE_PRESCRIPTION_ROUTE = "patient/profile/prescription"
+    const val PATIENT_PROFILE_MEDICAL_REPORT_ROUTE = "patient/profile/medical_report"
 
     // Doctor-specific Routes
     const val DOCTOR_APP = "doctor_app"

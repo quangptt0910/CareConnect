@@ -18,6 +18,10 @@ class PatientRepository @Inject constructor(
         return patientRemoteDataSource.getPatientById(patientId)
     }
 
+    suspend fun getPatientId(): String {
+        return patientRemoteDataSource.getPatientId()
+    }
+
     suspend fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
         return patientRemoteDataSource.createMedicalReport(patientId, medicalReport)
     }
@@ -64,5 +68,13 @@ class PatientRepository @Inject constructor(
 
     suspend fun setImmunizations(patientId: String): MutableList<Immunization> {
         return patientRemoteDataSource.setImmunizations(patientId)
+    }
+
+    suspend fun getPrescriptions(patientId: String): List<Prescription> {
+        return patientRemoteDataSource.getPrescriptions(patientId)
+    }
+
+    suspend fun getMedicalReports(patientId: String): List<MedicalReport> {
+        return patientRemoteDataSource.getMedicalReports(patientId)
     }
 }

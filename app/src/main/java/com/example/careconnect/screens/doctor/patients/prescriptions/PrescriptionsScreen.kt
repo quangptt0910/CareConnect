@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -11,33 +13,57 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.careconnect.screens.patient.profile.PrescriptionCard
+import com.example.careconnect.screens.patient.profile.PrescriptionUiModel
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
 fun PrescriptionScreen(
+    viewModel: PrescriptionsViewModel = hiltViewModel(),
     patientId: String,
     openCreatePrescriptionsScreen: (patientId: String) -> Unit
 
 ){
+    val prescriptions by viewModel.prescriptions.collectAsState()
+
+    LaunchedEffect(patientId) {
+        viewModel.fetchPrescriptions(patientId)
+    }
+
     PrescriptionsScreenContent(
         patientId = patientId,
-        openCreatePrescriptionsScreen = openCreatePrescriptionsScreen
+        openCreatePrescriptionsScreen = openCreatePrescriptionsScreen,
+        prescriptions = prescriptions
     )
 }
 
 @Composable
 fun PrescriptionsScreenContent(
     patientId: String,
-    openCreatePrescriptionsScreen: (patientId: String) -> Unit = {}
+    openCreatePrescriptionsScreen: (patientId: String) -> Unit = {},
+    prescriptions: List<PrescriptionUiModel>
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ){
+        LazyColumn {
+            items(prescriptions) { prescription ->
+                PrescriptionCard(
+                    prescription,
+                    generateQRCode = {  }
+                )
+            }
+        }
+
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -60,7 +86,9 @@ fun PrescriptionsScreenPreview(){
     CareConnectTheme {
         PrescriptionsScreenContent(
             patientId = "123",
-            openCreatePrescriptionsScreen = {}
+            openCreatePrescriptionsScreen = {},
+            prescriptions = listOf(
+            )
         )
     }
 }

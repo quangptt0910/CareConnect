@@ -1,6 +1,7 @@
 package com.example.careconnect.screens.doctor.patients.medicalreports
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.navigation.NavController
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,13 +43,24 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun CreateMedicalReportScreen(
     patientId: String,
-    viewModel: CreateMedicalReportViewModel = hiltViewModel()
+    viewModel: CreateMedicalReportViewModel = hiltViewModel(),
+    navController: NavController
 ){
+    val context = LocalContext.current
+
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
     }
 
     val patient by viewModel.patient.collectAsStateWithLifecycle()
+    val medicalReportCreated by viewModel.medicalReportCreated.collectAsStateWithLifecycle()
+
+    LaunchedEffect(medicalReportCreated) {
+        if (medicalReportCreated) {
+            Toast.makeText(context, "Medical report submitted", Toast.LENGTH_SHORT).show()
+            navController.popBackStack()
+        }
+    }
 
     CreateMedicalReportScreenContent(
         patientId = patientId,
