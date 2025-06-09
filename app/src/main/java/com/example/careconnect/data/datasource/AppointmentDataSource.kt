@@ -59,6 +59,14 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    suspend fun getAllDoctorAppointments(doctorId: String): List<Appointment> {
+        return firestore
+            .collection("appointments")
+            .whereEqualTo("doctorId", doctorId)
+            .get()
+            .await().toObjects(Appointment::class.java)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByPatientId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->
@@ -140,6 +148,18 @@ class AppointmentDataSource @Inject constructor(
             .get()
             .await().toObjects(Appointment::class.java)
 
+    }
+
+    suspend fun getDoctorAppointmentsByMonth(doctorId: String?, date: String): List<Appointment> {
+        val local = date.toLocalDate()
+        val ym = YearMonth.of(local.year, local.month)
+        val start = ym.atDay(1).toString()
+        val end = ym.plusMonths(1).atDay(1).toString()
+        return firestore
+            .collection("appointments")
+            .whereEqualTo("doctorId", doctorId)
+            .get()
+            .await().toObjects(Appointment::class.java)
     }
     // Get appointments by status
     suspend fun getAppointmentsByStatus(status: AppointmentStatus): List<Appointment> {

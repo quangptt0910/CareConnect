@@ -22,6 +22,9 @@ class AppointmentRepository @Inject constructor(
     suspend fun getAllPatientAppointments(patientId: String) =
         appointmentDataSource.getAllPatientAppointments(patientId)
 
+    suspend fun getAllDoctorAppointments(doctorId: String) =
+        appointmentDataSource.getAllDoctorAppointments(doctorId)
+
     fun getAppointmentsByPatientId(patientId: Flow<String?>) =
         appointmentDataSource.getAppointmentsByPatientId(patientId)
 
@@ -36,6 +39,9 @@ class AppointmentRepository @Inject constructor(
 
     suspend fun getPatientAppointmentsByDate(patientId: String?, date: String) =
         appointmentDataSource.getPatientAppointmentsByDate(patientId, date)
+
+    suspend fun getDoctorAppointmentsByMonth(doctorId: String?, date: String) =
+        appointmentDataSource.getDoctorAppointmentsByMonth(doctorId, date)
 
     suspend fun getPatientAppointmentsByMonth(doctorId: String?, date: String) =
         appointmentDataSource.getPatientAppointmentsByMonth(doctorId, date)
