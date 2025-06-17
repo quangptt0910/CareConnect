@@ -33,8 +33,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(
     openAdminScreen: () -> Unit,
-    openDoctorScreen: () -> Unit,
-    openPatientScreen: () -> Unit,
+    openDoctorScreen: (NotificationData?) -> Unit,
+    openPatientScreen: (NotificationData?) -> Unit,
     openLoginScreen: () -> Unit,
     showSnackBar: (SnackBarMessage) -> Unit,
     notificationData: NotificationData? = null,
@@ -44,20 +44,18 @@ fun SplashScreen(
     val navigateRoute by viewModel.navigationRoute.collectAsStateWithLifecycle()
 
     LaunchedEffect(notificationData) {
-        if (notificationData != null) {
-            viewModel.handleNotificationData(notificationData)
-        }
+        notificationData?.let { viewModel.handleNotificationData(it) }
     }
 
     SplashScreenContent(showSnackBar = showSnackBar)
 
     LaunchedEffect(navigateRoute) {
-        delay(300L)
+        delay(100L)
         if (navigateRoute != null) {
             when (navigateRoute) {
                 "admin" -> openAdminScreen()
-                "doctor" -> openDoctorScreen()
-                "patient" -> openPatientScreen()
+                "doctor" -> openDoctorScreen(viewModel.getNotificationForNavigation())
+                "patient" -> openPatientScreen(viewModel.getNotificationForNavigation())
                 "login" -> openLoginScreen()
                 else -> openLoginScreen()
             }

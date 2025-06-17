@@ -96,8 +96,6 @@ object Route {
 
     fun getDoctorPatientsPrescriptionsRoute(patientId: String) =
         "doctor/patients/prescriptions/$patientId"
-
-
 }
 
 @Stable

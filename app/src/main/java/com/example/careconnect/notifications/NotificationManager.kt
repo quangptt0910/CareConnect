@@ -2,6 +2,7 @@ package com.example.careconnect.notifications
 
 import android.util.Log
 import com.example.careconnect.dataclass.Appointment
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -43,7 +44,7 @@ class NotificationManager @Inject constructor(
                 "doctorName" to appointment.doctorName,
                 "appointmentDate" to appointment.appointmentDate.ifEmpty { "N/A" },
                 "startTime" to appointment.startTime.ifEmpty { "N/A" },
-                "timestamp" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                "timestamp" to FieldValue.serverTimestamp(),
                 "processed" to false
             )
 
@@ -58,6 +59,36 @@ class NotificationManager @Inject constructor(
             true
         } catch (e: Exception) {
             Log.e("NotificationManager", "Failed to create notification trigger", e)
+            false
+        }
+    }
+
+    suspend fun triggerChatNotification(
+        chatId: String,
+        message: String,
+        senderId: String,
+        senderName: String,
+        recipientId: String
+    ): Boolean {
+        return try {
+            val notificationTrigger = mapOf(
+                "type" to "CHAT_MESSAGE",
+                "chatId" to chatId,
+                "message" to message,
+                "senderId" to senderId,
+                "senderName" to senderName,
+                "recipientId" to recipientId,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+
+            firestore.collection("chat_notifications")
+                .add(notificationTrigger)
+                .await()
+
+            Log.d(TAG, "✅ Chat notification triggered successfully")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to trigger chat notification", e)
             false
         }
     }

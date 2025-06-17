@@ -3,10 +3,19 @@ package com.example.careconnect.screens.doctor
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.careconnect.NotificationData
+import com.example.careconnect.NotificationType
+import com.example.careconnect.data.datasource.AuthRemoteDataSource
+import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.doctor.appointments.DoctorAppointmentScreen
 import com.example.careconnect.screens.doctor.home.DoctorHomeScreen
@@ -40,13 +49,48 @@ import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalHisto
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsMedicalReportRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsPrescriptionsRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun DoctorApp(
     openSplashScreen: () -> Unit = {},
-    showSnackBar: (SnackBarMessage) -> Unit = {}
+    showSnackBar: (SnackBarMessage) -> Unit = {},
+    notificationData: NotificationData? = null
 ) {
+
+    lateinit var authRepository: AuthRepository
     val navController = rememberNavController()
+    var currentDoctorId by remember { mutableStateOf<String?>(null) }
+
+    // Get current user ID
+    LaunchedEffect(Unit) {
+        val user = authRepository.currentUserFlow.first()
+        if (user is AuthRemoteDataSource.UserData.DoctorData) {
+            currentDoctorId = user.doctor.id
+        }
+    }
+
+    // Handle notifications
+    LaunchedEffect(notificationData, currentDoctorId) {
+        notificationData?.let { data ->
+            when (val type = data.type) {
+                is NotificationType.Chat -> {
+                    // Navigate to chat screen
+                    navController.navigate(
+                        getDoctorChatRoute(
+                            patientId = type.senderId,
+                            doctorId = type.recipientId,
+                            chatId = type.chatId
+                        )
+                    )
+                }
+                is NotificationType.Appointment -> {
+                    // Handle appointment notification if needed
+                    navController.navigate(BarRoutesDoctor.FEED.route)
+                }
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {

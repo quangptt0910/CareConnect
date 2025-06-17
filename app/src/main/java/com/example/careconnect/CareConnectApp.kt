@@ -3,7 +3,6 @@ package com.example.careconnect
 import android.Manifest
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -47,10 +46,21 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 
+sealed class NotificationType {
+    data class Appointment(
+        val appointmentId: String,
+        val userType: String
+    ) : NotificationType()
+
+    data class Chat(
+        val chatId: String,
+        val senderId: String,
+        val recipientId: String
+    ) : NotificationType()
+}
+
 data class NotificationData(
-    val type: String,
-    val appointmentId: String,
-    val userType: String
+    val type: NotificationType
 )
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -67,59 +77,36 @@ fun CareConnectApp(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var notificationHandled by remember { mutableStateOf(false) }
     var notificationData by remember { mutableStateOf<NotificationData?>(null) }
 
-//    LaunchedEffect(Unit) {
-//        scope.launch {
-//            try {
-//                val tokenManager = FCMTokenManager(context, FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())
-//                tokenManager.updateFCMToken()
-//
-//                // Add verification
-//                val currentUser = FirebaseAuth.getInstance().currentUser
-//                if (currentUser != null) {
-//                    val tokenDoc = FirebaseFirestore.getInstance()
-//                        .collection("user_tokens")
-//                        .document(currentUser.uid)
-//                        .get()
-//                        .await()
-//
-//                    Log.d("FCMDebug", "Token exists in DB: ${tokenDoc.exists()}")
-//                    if (tokenDoc.exists()) {
-//                        Log.d("FCMDebug", "Token data: ${tokenDoc.data}")
-//                    }
-//                }
-//            } catch (e: Exception) {
-//                Log.e("FCMDebug", "Token update failed", e)
-//            }
-//        }
-//    }
 
-    // Handle notification navigation
+    // Handle notification intent
     LaunchedEffect(intent) {
-        intent?.let { notificationIntent ->
-            val fromNotification = notificationIntent.getBooleanExtra("from_notification", false)
-            val notificationType = notificationIntent.getStringExtra("notification_type")
-            val appointmentId = notificationIntent.getStringExtra("appointment_id")
-            val userType = notificationIntent.getStringExtra("user_type")
+        intent?.let {
+            val fromNotification = it.getBooleanExtra("from_notification", false)
+            if (fromNotification) {
+                val notificationType = it.getStringExtra("notification_type") ?: ""
+                val chatId = it.getStringExtra("chat_id") ?: ""
+                val senderId = it.getStringExtra("sender_id") ?: ""
+                val recipientId = it.getStringExtra("recipient_id") ?: ""
+                val appointmentId = it.getStringExtra("appointment_id") ?: ""
+                val userType = it.getStringExtra("user_type") ?: ""
 
-            Log.d("NotificationDebug", "From notification: $fromNotification")
-            Log.d("NotificationDebug", "Notification type: $notificationType")
-            Log.d("NotificationDebug", "User type: $userType")
-            Log.d("NotificationDebug", "Appointment ID: $appointmentId")
-
-            if (fromNotification && !notificationHandled) {
-                notificationHandled = true
-
-                // Store notification data for splash screen to handle
-                notificationData = NotificationData(
-                    type = notificationType ?: "",
-                    appointmentId = appointmentId ?: "",
-                    userType = userType ?: ""
-                )
-
-                Log.d("NotificationDebug", "Notification data stored for splash screen")
+                notificationData = when (notificationType) {
+                    "CHAT_MESSAGE" -> NotificationData(
+                        type = NotificationType.Chat(
+                            chatId = chatId,
+                            senderId = senderId,
+                            recipientId = recipientId
+                        )
+                    )
+                    else -> NotificationData(
+                        type = NotificationType.Appointment(
+                            appointmentId = appointmentId,
+                            userType = userType
+                        )
+                    )
+                }
             }
         }
     }
@@ -247,6 +234,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
+                notificationData = notificationData,
                 showSnackBar = showSnackBar
             )
         }
@@ -265,6 +253,7 @@ fun CareConnectNavHost(
                 openSplashScreen = {
                     navController.navigate(SPLASH_ROUTE) { launchSingleTop = true }
                 },
+                notificationData = notificationData,
                 showSnackBar = showSnackBar
             )
         }

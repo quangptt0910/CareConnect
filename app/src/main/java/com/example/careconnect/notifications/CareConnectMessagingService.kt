@@ -27,15 +27,17 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
     companion object {
         private const val TAG = "FCMService"
-        private const val CHANNEL_ID = "appointment_notifications"
-        private const val CHANNEL_NAME = "Appointment Notifications"
-        private const val CHANNEL_DESCRIPTION = "Notifications for appointment updates and reminders"
+        private const val APPOINTMENT_CHANNEL_ID = "appointment_notifications"
+        private const val APPOINTMENT_CHANNEL_NAME = "Appointment Notifications"
+        private const val APPOINTMENT_CHANNEL_DESCRIPTION = "Notifications for appointment updates and reminders"
+        private const val CHAT_CHANNEL_ID = "chat_notifications"
+        private const val CHAT_CHANNEL_NAME = "Chat Messages"
+        private const val CHAT_CHANNEL_DESCRIPTION = "Notifications for new chat messages"
     }
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "🔔 FCM Service created")
-        createNotificationChannel()
     }
 
     override fun onNewToken(token: String) {
@@ -49,18 +51,74 @@ class CareConnectMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
+        val notificationType = remoteMessage.data["type"] ?: ""
+
+        when (notificationType) {
+            "CHAT_MESSAGE" -> handleChatNotification(remoteMessage)
+            else -> handleAppointmentNotification(remoteMessage)
+        }
+    }
+
+    // CHAT NOTIFICATION
+    private fun handleChatNotification(remoteMessage: RemoteMessage) {
+        val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "New Message"
+        val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
+        val chatId = remoteMessage.data["chatId"] ?: ""
+        val senderId = remoteMessage.data["senderId"] ?: ""
+        val senderName = remoteMessage.data["senderName"] ?: ""
+        val recipientId = remoteMessage.data["recipientId"] ?: ""
+
+        showChatNotification(title, body, chatId, senderId, senderName, recipientId)
+    }
+    private fun showChatNotification(title: String, body: String, chatId: String, senderId: String, senderName: String, recipientId: String ) {
+        createNotificationChannel(CHAT_CHANNEL_ID, CHAT_CHANNEL_NAME, CHAT_CHANNEL_DESCRIPTION)
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("notification_type", "CHAT_MESSAGE")
+            putExtra("chat_id", chatId)
+            putExtra("sender_id", senderId)
+            putExtra("recipient_id", recipientId)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            chatId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notificationBuilder = NotificationCompat.Builder(this, CHAT_CHANNEL_ID)
+            .setSmallIcon(R.drawable.groups_24px)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setVibrate(longArrayOf(0, 250, 250, 250))
+
+        val notification = notificationBuilder.build()
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(chatId.hashCode(), notification)
+
+    }
+
+    // APPOINTMENT NOTIFICATION
+    private fun handleAppointmentNotification(remoteMessage: RemoteMessage) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "CareConnect"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
         val notificationType = remoteMessage.data["type"] ?: ""
         val appointmentId = remoteMessage.data["appointmentId"] ?: ""
         val userType = remoteMessage.data["userType"] ?: ""
 
-        showNotification(title, body, notificationType, appointmentId, userType)
+        showAppointmentNotification(title, body, notificationType, appointmentId, userType)
     }
 
-    private fun showNotification(title: String, body: String, type: String, appointmentId: String, userType: String) {
-        val channelId = "appointment_notifications"
-        createNotificationChannel()
+    private fun showAppointmentNotification(title: String, body: String, type: String, appointmentId: String, userType: String) {
+        createNotificationChannel(APPOINTMENT_CHANNEL_ID, APPOINTMENT_CHANNEL_NAME, APPOINTMENT_CHANNEL_DESCRIPTION)
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -77,7 +135,7 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+        val notificationBuilder = NotificationCompat.Builder(this, APPOINTMENT_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_round)
             .setContentTitle(title)
             .setContentText(body)
@@ -93,27 +151,32 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         notificationManager.notify(notificationId, notification)
     }
 
-    private fun createNotificationChannel() {
+
+    private fun createNotificationChannel(channelId: String, channelName: String, channelDescription: String) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             // Check if channel already exists
-            val existingChannel = notificationManager.getNotificationChannel(CHANNEL_ID)
+            val existingChannel = notificationManager.getNotificationChannel(channelId)
             if (existingChannel != null) {
-                Log.d(TAG, "📱 Notification channel already exists")
+                Log.d(TAG, "📱 channel $channelId already exists")
                 return
             }
             val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
+                channelId,
+                channelName,
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = CHANNEL_DESCRIPTION
+                description = channelDescription
                 enableLights(true)
                 lightColor = android.graphics.Color.BLUE
                 enableVibration(true)
-                vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+                vibrationPattern = when (channelId) {
+                    APPOINTMENT_CHANNEL_ID -> longArrayOf(0, 1000, 500, 1000) // Longer pattern for appointments
+                    CHAT_CHANNEL_ID -> longArrayOf(0, 250, 250, 250) // Short bursts for messages
+                    else -> longArrayOf(0, 500)
+                }
                 setSound(
                     RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
                     null
@@ -121,7 +184,7 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             }
 
             notificationManager.createNotificationChannel(channel)
-            Log.d(TAG, "Notification channel created")
+            Log.d(TAG, "Notification channel $channelId created")
         }
     }
 }

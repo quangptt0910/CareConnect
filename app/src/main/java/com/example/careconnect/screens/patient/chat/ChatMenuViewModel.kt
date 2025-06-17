@@ -111,7 +111,7 @@ class ChatMenuViewModel @Inject constructor(
                     }
                 }
 
-                else -> { /* Handle other roles if needed */ }
+                else -> { return }
             }
         }
 

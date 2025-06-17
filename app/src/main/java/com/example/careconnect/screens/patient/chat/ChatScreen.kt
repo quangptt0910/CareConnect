@@ -1,5 +1,7 @@
 package com.example.careconnect.screens.patient.chat
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,10 +24,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -43,7 +45,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.careconnect.dataclass.Doctor
@@ -79,6 +81,8 @@ fun ChatScreen(
     patientId: String,
     doctorId: String,
 ){
+    val context = LocalContext.current
+
     var doctor by remember { mutableStateOf<Doctor?>(null) }
     var patient by remember { mutableStateOf<Patient?>(null) }
 
@@ -89,9 +93,13 @@ fun ChatScreen(
         println("ChatScreen: doctor=$doctor")
         patient = viewModel.getPatient(patientId)
         println("ChatScreen: patient=$patient")
-        viewModel.loadChat(chatId)
-        viewModel.initializeCurrentUser(patient, doctor, patientId)
+
+        viewModel.initialize(chatId, patientId, doctorId)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(chatId.hashCode())
     }
+
 
     val chatRoom = viewModel.chatRoom
 
@@ -117,7 +125,7 @@ fun ChatScreenContent(
 ) {
 
     val listState = rememberLazyListState()
-    val messages by model.messages.collectAsState()
+    val messages by model.messages.collectAsStateWithLifecycle()
 
     println("🟡 Composable sees ${messages.size} messages")
 
@@ -272,7 +280,7 @@ fun ImagePreview(model : String){
         modifier = Modifier
             .size(200.dp)
             .clip(RoundedCornerShape(8.dp))
-            .clickable{
+            .clickable {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(Uri.parse(model), "*/*")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -322,7 +330,7 @@ fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean
                 }
                 context.startActivity(intent)
             }) {
-                Icon(Icons.Default.OpenInNew, contentDescription = "Open Document")
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open Document")
             }
         }
     }
