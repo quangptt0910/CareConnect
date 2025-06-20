@@ -11,13 +11,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.careconnect.NotificationData
 import com.example.careconnect.NotificationType
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
-import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.patient.appointment.BookAppointmentScreen
 import com.example.careconnect.screens.patient.appointment.PatientAppointmentScreen
@@ -48,16 +48,17 @@ import kotlinx.coroutines.flow.first
 fun PatientApp(
     openSplashScreen: () -> Unit = {},
     showSnackBar: (SnackBarMessage) -> Unit = {},
-    notificationData: NotificationData? = null
+    notificationData: NotificationData? = null,
+    viewModel: PatientAppViewModel = hiltViewModel()
 ) {
-    lateinit var authRepository: AuthRepository
+
     val context = LocalContext.current
     val navController = rememberNavController()
     var currentPatientId by remember { mutableStateOf<String?>(null) }
 
     // Get current user ID
     LaunchedEffect(Unit) {
-        val user = authRepository.currentUserFlow.first()
+        val user = viewModel.authRepository.currentUserFlow.first()
         if (user is AuthRemoteDataSource.UserData.PatientData) {
             currentPatientId = user.patient.id
         }

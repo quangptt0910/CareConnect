@@ -1,6 +1,6 @@
 package com.example.careconnect.data.datasource
 
-import android.content.ContentValues.TAG
+import android.content.Context
 import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.Credential
@@ -8,6 +8,9 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.ClearCredentialException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
+import com.example.careconnect.R
 import com.example.careconnect.dataclass.Admin
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Gender
@@ -32,6 +35,7 @@ class AuthRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val credentialManager: CredentialManager,
+
 ) {
 
     val currentUser: FirebaseUser? get() = auth.currentUser
@@ -148,8 +152,9 @@ class AuthRemoteDataSource @Inject constructor(
         auth.signOut()
 
         try {
-            val clearRequest = ClearCredentialStateRequest()
+            val clearRequest = ClearCredentialStateRequest(TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
             credentialManager.clearCredentialState(clearRequest)
+            currentGoogleIdToken = null // Clear the stored token
         } catch (e: ClearCredentialException) {
             Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
         }
@@ -158,37 +163,83 @@ class AuthRemoteDataSource @Inject constructor(
     suspend fun deleteAccount() {
         auth.currentUser!!.delete().await()
     }
+    suspend fun signInWithGoogle(context: Context) {
+        try {
 
-     fun googleLogin(): GetCredentialRequest {
-        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(true)
-            .setServerClientId("1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com")
-            .build()
+            val serverClientId = context.getString(R.string.web_client_id)
 
-        val notAuthGoogleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId("1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com")
+            val authRequest = createGoogleSignInRequest(serverClientId, true)
+
+            val result = try {
+                Log.d(TAG, "Attempting Google Sign-In with authorized accounts only")
+                credentialManager.getCredential(
+                    request = authRequest,
+                    context = context
+                )
+            } catch (e: Exception) {
+                Log.d(TAG, "Couldn't get user for auth request credentials: ${e.localizedMessage}")
+
+                val notAuthRequest = createGoogleSignInRequest(serverClientId, false)
+
+                credentialManager.getCredential(
+                    request = notAuthRequest,
+                    context = context
+                )
+            }
+
+            handleGoogleLogin(result.credential)
+        } catch (e: NoCredentialException) {
+            Log.e(TAG, "No credentials available: ${e.localizedMessage}")
+            throw Exception("Cannot found google credentials/ sign in with Google. Please try again.")
+        } catch (e: GetCredentialException) {
+            Log.e(TAG, "Get credential failed: ${e.localizedMessage}")
+            throw Exception("Google Sign-In failed. Please try again.")
+        } catch (e: Exception) {
+            Log.e(TAG, "Google Sign-In error: ${e.localizedMessage}")
+            throw e
+        }
+    }
+
+     private fun createGoogleSignInRequest(serverClientId: String, filterByAuthorizedAccounts: Boolean): GetCredentialRequest {
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder() // already approved or auth_ed
+            .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
+            .setServerClientId(serverClientId)
+            .setAutoSelectEnabled(false)
             .build()
 
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
-            .addCredentialOption(notAuthGoogleIdOption)
             .build()
+
         return request
     }
 
+    private var currentGoogleIdToken: String? = null
+
     suspend fun handleGoogleLogin(credential: Credential) {
-        if(credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-        } else {
-            Log.w("TAG", "Credential is not of type Google ID!")
+        try {
+            if(credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                currentGoogleIdToken = googleIdTokenCredential.idToken
+                firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+            } else {
+                Log.w("TAG", "Credential is not of type Google ID!")
+                throw Exception("Invalid credential type")
+            }
+        } catch (e: Exception) {
+            Log.e("TAG", "Error handling Google login: ${e.localizedMessage}")
+            throw e
         }
     }
 
     suspend fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential).await()
+        try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            auth.signInWithCredential(credential).await()
+        } catch (e: Exception) {
+            Log.e("TAG", "Firebase auth failed: ${e.localizedMessage}")
+            throw e
+        }
     }
 
     suspend fun patientRecord(): Boolean {
@@ -223,5 +274,9 @@ class AuthRemoteDataSource @Inject constructor(
         data class PatientData(val patient: Patient) : UserData()
         object NoUser: UserData()
         object Error: UserData()
+    }
+
+    companion object {
+        private const val TAG = "AuthRemoteDataSource"
     }
 }

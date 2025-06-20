@@ -43,7 +43,7 @@ class CareConnectMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCMService", "NEW_TOKEN: $token")
-        CoroutineScope(Dispatchers.Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             fcmTokenManager.updateFCMToken()
         }
     }

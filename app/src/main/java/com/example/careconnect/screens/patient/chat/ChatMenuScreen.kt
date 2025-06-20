@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,7 +41,6 @@ fun ChatMenuScreen(
     openChatScreen : (doctorId: String, patientId: String, chatId: String) -> Unit,
     viewModel: ChatMenuViewModel = hiltViewModel()
 ){
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.setCurrentUser()
@@ -89,9 +87,8 @@ fun ChatMenuScreenContent(
     chatPartners: Map<String, Any>,
     userRole: Role,
     onDoctorSelected: (Doctor, Boolean) -> Unit,
-    openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit,
-
-    ) {
+    openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

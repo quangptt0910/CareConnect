@@ -108,4 +108,6 @@
     <string name="booking">Booking</string>
     <string name="profile">Profile</string>
     <string name="tasks">Tasks</string>
+
+    <string name="web_client_id">1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com</string>
 </resources>
