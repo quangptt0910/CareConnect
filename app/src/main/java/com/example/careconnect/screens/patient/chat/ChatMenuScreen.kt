@@ -43,10 +43,6 @@ fun ChatMenuScreen(
     viewModel: ChatMenuViewModel = hiltViewModel()
 ){
 
-    LaunchedEffect(Unit) {
-        viewModel.setCurrentUser()
-    }
-
     val doctor by viewModel.doctor.collectAsState()
     val patient by viewModel.currentPatient.collectAsState()
     val userRole by viewModel.currentUserRole.collectAsState()

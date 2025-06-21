@@ -1,5 +1,7 @@
 package com.example.careconnect.dataclass
 
+import com.google.firebase.firestore.DocumentId
+
 
 /*
  * Data class for patient medical history
@@ -8,10 +10,8 @@ package com.example.careconnect.dataclass
  * Patient should have their own medical history before they start a consultation
  */
 data class MedicalHistory(
+    @DocumentId val id: String = "",
     val patientId: String = "",  // Firebase UID of the patient
-    val patientName: String = "",
-    val patientSurname: String = "",
-    val dateOfBirth: String = "",  // Date of birth of the patient (e.g., "1990-05-15")
 
     val allergies: List<Allergy> = listOf(),  // List of allergies
     val medicalConditions: List<Condition> = listOf(),  // List of medical conditions (e.g., diabetes, asthma)

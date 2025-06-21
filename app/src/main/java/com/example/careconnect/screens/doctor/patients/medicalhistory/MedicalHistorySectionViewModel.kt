@@ -98,4 +98,48 @@ class MedicalHistorySectionViewModel @Inject constructor(
             _immunizations.value = immunizationsData
         }
     }
+
+    suspend fun updateCondition(patientId: String, condition: Condition) {
+        patientRepository.updateCondition(patientId, condition)
+    }
+
+    suspend fun updateImmunization(patientId: String, immunization: Immunization) {
+        patientRepository.updateImmunization(patientId, immunization)
+    }
+
+    suspend fun updateSurgery(patientId: String, surgery: Surgery) {
+        patientRepository.updateSurgery(patientId, surgery)
+    }
+
+    suspend fun updateSurgery(patientId: String, medication: Medication) {
+        patientRepository.updateMedication(patientId, medication)
+    }
+
+    suspend fun updateAllergy(patientId: String, allergy: Allergy) {
+        patientRepository.updateAllergy(patientId, allergy)
+    }
+
+    suspend fun updateMedication(patientId: String, medication: Medication) {
+        patientRepository.updateMedication(patientId, medication)
+    }
+
+    suspend fun deleteMedication(patientId: String, medication: Medication) {
+        patientRepository.deleteMedication(patientId, medication)
+    }
+
+    suspend fun deleteAllergy(patientId: String, allergy: Allergy) {
+        patientRepository.deleteAllergy(patientId, allergy)
+    }
+
+    suspend fun deleteCondition(patientId: String, condition: Condition) {
+        patientRepository.deleteCondition(patientId, condition)
+    }
+
+    suspend fun deleteSurgery(patientId: String, surgery: Surgery) {
+        patientRepository.deleteSurgery(patientId, surgery)
+    }
+
+    suspend fun deleteImmunization(patientId: String, immunization: Immunization) {
+        patientRepository.deleteImmunization(patientId, immunization)
+    }
 }

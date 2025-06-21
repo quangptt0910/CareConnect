@@ -265,4 +265,18 @@ class PatientRemoteDataSource @Inject constructor(
         }
         return medicalReports
     }
+
+    suspend fun updateCondition(patientId: String, condition: Condition) {
+        try {
+            firestore.collection("patients")
+                .document(patientId)
+                .collection("medicalHistory")
+                .add(condition)
+                .await()
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to update condition", e)
+            throw e // or handle accordingly
+        }
+
+    }
 }

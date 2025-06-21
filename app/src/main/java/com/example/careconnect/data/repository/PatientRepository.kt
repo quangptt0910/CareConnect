@@ -77,4 +77,45 @@ class PatientRepository @Inject constructor(
     suspend fun getMedicalReports(patientId: String): List<MedicalReport> {
         return patientRemoteDataSource.getMedicalReports(patientId)
     }
+
+    suspend fun updateCondition(patientId: String, condition: Condition) {
+        return patientRemoteDataSource.updateCondition(patientId, condition)
+    }
+
+    suspend fun updateImmunization(patientId: String, immunization: Immunization) {
+        return patientRemoteDataSource.updateImmunization(patientId, immunization)
+    }
+
+    suspend fun updateMedication(patientId: String, medication: Medication) {
+        return patientRemoteDataSource.updateMedication(patientId, medication)
+    }
+
+    suspend fun updateSurgery(patientId: String, surgery: Surgery) {
+        return patientRemoteDataSource.updateSurgery(patientId, surgery)
+    }
+
+    suspend fun updateAllergy(patientId: String, allergy: Allergy) {
+        return patientRemoteDataSource.updateAllergy(patientId, allergy)
+    }
+
+    suspend fun deleteMedication(patientId: String, medication: Medication) {
+        return patientRemoteDataSource.deleteMedication(patientId, medication)
+    }
+
+    suspend fun deleteAllergy(patientId: String, allergy: Allergy) {
+        return patientRemoteDataSource.deleteAllergy(patientId, allergy)
+    }
+
+    suspend fun deleteCondition(patientId: String, condition: Condition) {
+        return patientRemoteDataSource.deleteCondition(patientId, condition)
+    }
+
+    suspend fun deleteSurgery(patientId: String, surgery: Surgery) {
+        return patientRemoteDataSource.deleteSurgery(patientId, surgery)
+    }
+
+    suspend fun deleteImmunization(patientId: String, immunization: Immunization) {
+        return patientRemoteDataSource.deleteImmunization(patientId, immunization)
+    }
+
 }

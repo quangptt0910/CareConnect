@@ -160,7 +160,8 @@ fun DoctorApp(
                     },
                     openMedicalHistoryScreen = { patientId, section ->
                         navController.navigate(getDoctorPatientsMedicalHistorySectionRoute(patientId, section))
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 

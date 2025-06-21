@@ -49,6 +49,12 @@ class ChatMenuViewModel @Inject constructor(
         _uiState.update { it.copy(searchQuery = query) }
     }
 
+    init {
+        launchCatching {
+            setCurrentUser()
+        }
+    }
+
     suspend fun setCurrentUser() {
         _currentUserId.value = authRepository.getCurrentUserId().toString()
         _currentUserRole.value = authRepository.getCurrentUserRole()

@@ -1,10 +1,11 @@
 package com.example.careconnect.screens.doctor.patients
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -15,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -40,6 +40,7 @@ fun PatientsProfileScreen(
     viewModel: PatientsProfileViewModel = hiltViewModel(),
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
     openPrescriptionsScreen: (patientId: String) -> Unit = {},
+    onBack: () -> Unit = {},
     openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->},
     openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
 ){
@@ -63,13 +64,15 @@ fun PatientsProfileScreen(
             val doctor = viewModel.getCurrentDoctor()
             patient?.let { viewModel.getOrCreateChatRoomId(it, doctor) } ?: ""
         },
-        openMedicalHistoryScreen = openMedicalHistoryScreen
+        openMedicalHistoryScreen = openMedicalHistoryScreen,
+        onBack = onBack
     )
 }
 
 @Composable
 fun PatientsProfileScreenContent(
     patientId: String,
+    onBack: () -> Unit = {},
     patient: Patient? = null,
     openMedicalReportsScreen: (patientId: String) -> Unit = {},
     getChatId: suspend () -> String = {""},
@@ -79,20 +82,22 @@ fun PatientsProfileScreenContent(
 ){
     val coroutineScope = rememberCoroutineScope()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ){
-        SmallTopAppBarExample3()
+    Scaffold(
+        topBar = {
+            PatientsProfileDoctorTopBar(
+                onBack = onBack
+            )
+        }
+    ){ paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize().padding(top = 90.dp),
+                .fillMaxSize().padding(paddingValues),
             horizontalAlignment = CenterHorizontally
         ) {
 
             item {
                 ElevatedCard(
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+                    modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp)
                         .fillMaxWidth()
                 ) {
                     if (patient != null) {
@@ -119,6 +124,8 @@ fun PatientsProfileScreenContent(
                         )
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     Text(
                         text = "Medical Information",
                         style = MaterialTheme.typography.titleLarge,
@@ -135,12 +142,12 @@ fun PatientsProfileScreenContent(
                             modifier = Modifier.padding(10.dp)
                         )
                         Text(
-                            text = "Height: ${patient?.height}",
+                            text = "Height: ${patient?.height} cm",
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(10.dp)
                         )
                         Text(
-                            text = "Weight: ${patient?.weight}",
+                            text = "Weight: ${patient?.weight} kg",
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(10.dp)
                         )
@@ -220,36 +227,32 @@ fun PatientsProfileScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample3() {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                modifier = Modifier,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-                title = {
-                    Text(
-                        "Patient Profile",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
+fun PatientsProfileDoctorTopBar(
+    onBack: () -> Unit
+) {
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
+        title = {
+            Text(
+                "Patient Profile",
+                style = MaterialTheme.typography.titleLarge
             )
         },
-    ){
-        Box(modifier = Modifier.padding(it))
-    }
+        navigationIcon = {
+            IconButton(onClick = { onBack() }) {
+                Icon(
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
+            }
+        }
+    )
 }
+
 
 @Preview
 @Composable
