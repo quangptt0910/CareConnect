@@ -9,6 +9,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,14 +37,20 @@ fun SettingsScreen(
 ) {
     val shouldRestart by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
 
-    if (shouldRestart) {
-        openSplashScreen()
-    } else {
-        SettingsContent(
-            signOut = viewModel::signOut,
-            showSnackBar = showSnackBar
-        )
-    }
+        if (shouldRestart) {
+            println("DEBUG: Triggering navigation to splash screen")
+            LaunchedEffect(Unit) {
+                viewModel.onRestart()
+                openSplashScreen()
+            }
+            return
+        }
+   
+    SettingsContent(
+        signOut = viewModel::signOut,
+        showSnackBar = showSnackBar
+    )
+
 }
 
 

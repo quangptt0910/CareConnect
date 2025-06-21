@@ -150,13 +150,20 @@ class AuthRemoteDataSource @Inject constructor(
 
     suspend fun signOut() {
         auth.signOut()
+        println("AuthRemote: SignedOut clicked")
 
+        // Only clear google credential of signed in with google
         try {
-            val clearRequest = ClearCredentialStateRequest(TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
-            credentialManager.clearCredentialState(clearRequest)
-            currentGoogleIdToken = null // Clear the stored token
+            val currentUser = auth.currentUser
+            val googleSignIn = currentUser?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true
+            if (googleSignIn || currentGoogleIdToken != null) {
+                val clearRequest = ClearCredentialStateRequest(TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
+                credentialManager.clearCredentialState(clearRequest)
+                currentGoogleIdToken = null // Clear the stored token
+            }
         } catch (e: ClearCredentialException) {
             Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
+            currentGoogleIdToken = null
         }
     }
 
