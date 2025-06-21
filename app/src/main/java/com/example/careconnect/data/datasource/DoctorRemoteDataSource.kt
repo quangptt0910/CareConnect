@@ -4,9 +4,11 @@ import android.util.Log
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.PatientRef
+import com.example.careconnect.dataclass.Task
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toDateString
 import com.example.careconnect.dataclass.toLocalDate
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -323,9 +325,35 @@ class DoctorRemoteDataSource @Inject constructor(
             .sortedBy { it.startTime }
     }
 
+    suspend fun getTasks(doctorId: String): List<Task> {
+        return firestore.collection(DOCTORS_COLLECTION)
+            .document(doctorId)
+            .collection(TASKS_COLLECTION)
+            .get()
+            .await()
+            .toObjects(Task::class.java)
+    }
+
+    suspend fun addTask(doctorId: String, task: Task): DocumentReference {
+        return firestore.collection(DOCTORS_COLLECTION)
+            .document(doctorId)
+            .collection(TASKS_COLLECTION)
+            .add(task)
+            .await() // suspend function to wait for the result
+    }
+
+    suspend fun deleteTask(doctorId: String, task: Task) {
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).delete()
+    }
+
+    suspend fun updateTask(doctorId: String, task: Task) {
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).set(task)
+    }
+
     companion object {
         private const val DOCTORS_COLLECTION = "doctors"
         private const val PATIENTS_LIST_COLLECTION = "patients_list"
         private const val PATIENTS_COLLECTION = "patients"
+        private const val TASKS_COLLECTION = "tasks"
     }
 }

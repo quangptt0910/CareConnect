@@ -1,14 +1,13 @@
 package com.example.careconnect.screens.doctor.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
@@ -19,6 +18,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,12 +30,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +52,7 @@ import com.example.careconnect.common.StatCard
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Task
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
 
@@ -61,17 +64,34 @@ fun DoctorHomeScreen(
     val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
     val pendingAppointmentList by viewModel.pendingAppointments.collectAsStateWithLifecycle()
     val upcomingAppointmentList by viewModel.appointments.collectAsStateWithLifecycle()
+    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
+
+
+    val totalAppointments = pendingAppointmentList.size + upcomingAppointmentList.size
+    val totalPatients = patientList.size
 
     DoctorHomeScreenContent(
         openSettingsScreen = openSettingsScreen,
         patientList = patientList,
         upcomingAppointmentList = upcomingAppointmentList,
         pendingAppointmentList = pendingAppointmentList,
+        totalAppointments = totalAppointments,
+        totalPatients = totalPatients,
         onAccept = { appt ->
             viewModel.updateAppointmentStatus(appt, AppointmentStatus.CONFIRMED)
         },
         onDecline = { appt ->
             viewModel.updateAppointmentStatus(appt, AppointmentStatus.CANCELED)
+        },
+        tasks = tasks,
+        onAddTask = { task ->
+            viewModel.addTask(task)
+        },
+        onUpdateTask = { task ->
+            viewModel.updateTask(task)
+        },
+        onDeleteTask = { task ->
+            viewModel.deleteTask(task)
         }
     )
 }
@@ -82,113 +102,89 @@ fun DoctorHomeScreenContent(
     patientList: List<Patient> = emptyList(),
     upcomingAppointmentList: List<Appointment> = emptyList(),
     pendingAppointmentList: List<Appointment> = emptyList(),
+    tasks: List<Task> = emptyList(),
+    totalAppointments: Int = 0,
+    totalPatients: Int = 0,
     onAccept: (Appointment) -> Unit = {},
-    onDecline: (Appointment) -> Unit = {}
+    onDecline: (Appointment) -> Unit = {},
+    onAddTask: (Task) -> Unit = {},
+    onUpdateTask: (Task) -> Unit = {},
+    onDeleteTask: (Task) -> Unit = {}
 ) {
     val date = LocalDate.now()
+    val openDialog = remember { mutableStateOf(false) }
+    val selectedTask = remember { mutableStateOf<Task?>(null) }
+    val totalTasks = tasks.size
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(15.dp)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            item {
+                // Header Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Welcome back!",
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+
+                    Row {
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
+                        }
+                        IconButton(onClick = openSettingsScreen) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    }
+                }
+
                 Text(
-                    text = "Welcome back!",
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Go to notifications screen
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
-                }
-
-                // Go to settings screen
-                IconButton(
-                    onClick = { openSettingsScreen() },
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                }
-            }
-
-            Text(
-                text = "$date",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                StatCard(
-                    title = stringResource(R.string.appointments),
-                    value = "5",
-                    modifier = Modifier.weight(1f).padding(3.dp),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Outlined.CalendarMonth,
-                            contentDescription = null,
-                        )
-                    }
-                )
-
-                StatCard(
-                    title = stringResource(R.string.patients),
-                    value = "5",
-                    modifier = Modifier.weight(1f).padding(3.dp),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Outlined.PersonOutline,
-                            contentDescription = null,
-                        )
-                    }
-                )
-
-                StatCard(
-                    title = stringResource(R.string.tasks),
-                    value = "5",
-                    modifier = Modifier.weight(1f).padding(3.dp),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Outlined.Checklist,
-                            contentDescription = null,
-                        )
-                    }
+                    text = "$date",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                // Stat cards
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    StatCard(
+                        title = stringResource(R.string.appointments),
+                        value = totalAppointments.toString(),
+                        modifier = Modifier.weight(1f).padding(3.dp),
+                        content = { Icon(Icons.Outlined.CalendarMonth, null) }
+                    )
+                    StatCard(
+                        title = stringResource(R.string.patients),
+                        value = totalPatients.toString(),
+                        modifier = Modifier.weight(1f).padding(3.dp),
+                        content = { Icon(Icons.Outlined.PersonOutline, null) }
+                    )
+                    StatCard(
+                        title = stringResource(R.string.tasks),
+                        value = totalTasks.toString(),
+                        modifier = Modifier.weight(1f).padding(3.dp),
+                        content = { Icon(Icons.Outlined.Checklist, null) }
+                    )
+                }
+            }
 
             if (pendingAppointmentList.isNotEmpty()) {
-                Text(
-                    text = "Appointments Pending",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(15.dp)
-                )
-
-                pendingAppointmentList.forEach { appt ->
+                item {
+                    Text("Appointments Pending", style = MaterialTheme.typography.titleLarge)
+                }
+                items(pendingAppointmentList) { appt ->
                     PendingAppointmentCard(
                         appt = appt,
                         onAccept = { onAccept(appt) },
@@ -197,108 +193,151 @@ fun DoctorHomeScreenContent(
                 }
             }
 
-            HorizontalDivider()
+            item { HorizontalDivider() }
 
-            Text(
-                text = "Upcoming appointments",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(15.dp)
-            )
+            item {
+                Text("Upcoming appointments", style = MaterialTheme.typography.titleLarge)
+            }
 
-            DailyAppointmentsSection(
-                appointments = upcomingAppointmentList
-            )
-
-            Text(
-                text = "My Patients",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(15.dp)
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                if (patientList.isEmpty()) {
-                    ListItem(
-                        headlineContent = { Text(text = "No patients found") },
-                        colors = ListItemDefaults.colors(Color.LightGray)
+            items(upcomingAppointmentList) { appointment ->
+                AppointmentCard(
+                    appt = appointment,
+                    displayFields = listOf(
+                        "Patient" to { it.patientName },
+                        "Type" to { it.type }
                     )
-                } else {
-                    patientList.forEach { patient ->
+                )
+            }
+
+            item {
+                Text("My Patients", style = MaterialTheme.typography.titleLarge)
+            }
+
+            item {
+                Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(4.dp)) {
+                    if (patientList.isEmpty()) {
                         ListItem(
-                            headlineContent = { Text(text = "${patient.name} ${patient.surname}") },
+                            headlineContent = { Text("No patients found") },
                             colors = ListItemDefaults.colors(Color.LightGray)
                         )
+                    } else {
+                        Column {
+                            patientList.forEach { patient ->
+                                ListItem(
+                                    headlineContent = { Text("${patient.name} ${patient.surname}") },
+                                    colors = ListItemDefaults.colors(Color.LightGray)
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-                Text(
-                    text = "Tasks",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(15.dp)
-                )
+            item {
+                Text("Tasks", style = MaterialTheme.typography.titleLarge)
+            }
 
+            item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
-                    val (checkedState, onStateChange) = remember { mutableStateOf(true) }
-                    Row(
-                        Modifier.fillMaxWidth()
-                            .height(56.dp)
-                            .toggleable(
-                                value = checkedState,
-                                onValueChange = { onStateChange(!checkedState) },
-                                role = androidx.compose.ui.semantics.Role.Checkbox
-                            )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = checkedState,
-                            onCheckedChange = {}
-                        )
-                        Text(
-                            text = "Check me out",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-
-
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(onClick = { /* View/Start consultation */ }) {
-                            Icon(
-                                Icons.Outlined.Add,
-                                contentDescription = null,
-                                modifier = Modifier.padding(start = 20.dp)
-                            )
-
+                    Column {
+                        tasks.forEach { task ->
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .toggleable(
+                                        value = task.isChecked,
+                                        onValueChange = { task.isChecked = !task.isChecked },
+                                        role = androidx.compose.ui.semantics.Role.Checkbox
+                                    )
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = task.isChecked,
+                                    onCheckedChange = null
+                                )
+                                Text(
+                                    text = task.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clickable {
+                                            selectedTask.value = task
+                                            openDialog.value = true
+                                        }
+                                )
+                            }
                         }
-                        Text(
-                            text = "Add Task",
-                            style = MaterialTheme.typography.bodyLarge,
+
+                        // Add task
+                        Row(
                             modifier = Modifier
-                                .fillMaxWidth().padding(start = 16.dp, top = 13.dp)
-                        )
+                                .fillMaxWidth()
+                                .clickable {
+                                    val newTask = Task(name = "New Task")
+                                    onAddTask(newTask)
+                                }
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                            Text("Add Task", style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
             }
         }
+
+        if (openDialog.value) {
+            val task = selectedTask.value!!
+            var taskName by remember { mutableStateOf(task.name) }
+
+            AlertDialog(
+                onDismissRequest = { openDialog.value = false },
+                confirmButton = {
+                    Button(onClick = {
+                        val updatedTask = task.copy(name = taskName)
+                        onUpdateTask(updatedTask)
+                        openDialog.value = false
+                    }) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    Row {
+                        Button(onClick = { openDialog.value = false }) {
+                            Text("Cancel")
+                        }
+                        Button(
+                            onClick = {
+                                onDeleteTask(task)
+                                openDialog.value = false
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Delete")
+                        }
+                    }
+                },
+                title = { Text("Edit Task") },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = taskName,
+                            onValueChange = { taskName = it },
+                            label = { Text("Task Name") }
+                        )
+                    }
+                }
+            )
+        }
     }
+}
+
 
 @Composable
 fun DailyAppointmentsSection(appointments: List<Appointment>) {

@@ -1,6 +1,13 @@
 package com.example.careconnect.screens.patient.profile
 
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +31,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.careconnect.R
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 data class MedicalReportUiModel(
     val id: String,
@@ -107,14 +123,17 @@ fun MedicalReportCard(
 
     if (showSheet) {
         ModalBottomSheet(onDismissRequest = { showSheet = false }) {
+            val context = LocalContext.current
+
             TextButton(onClick = {
-                // download logic
+                Log.d("PDF_URL", "URL is: ${medicalReport.pdfUrl}")
+                downloadPdfOnly(context, medicalReport.pdfUrl)
                 showSheet = false
             }) {
                 Text("Download")
             }
             TextButton(onClick = {
-                // view logic (e.g., open PDF viewer screen)
+                viewPdf(context, medicalReport.pdfUrl)
                 showSheet = false
             }) {
                 Text("View")
@@ -122,6 +141,63 @@ fun MedicalReportCard(
         }
     }
 }
+
+fun viewPdf(context: Context, pdfUrl: String) {
+    val uri = Uri.parse(pdfUrl)
+
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "application/pdf")
+        flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_GRANT_READ_URI_PERMISSION
+    }
+
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(context, "No app found to open PDF", Toast.LENGTH_SHORT).show()
+    }
+}
+
+
+fun downloadPdfOnly(context: Context, url: String) {
+
+
+    val fileName = "report_${System.currentTimeMillis()}.pdf"
+    val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val file = File(downloadDir, fileName)
+
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            connection.connect()
+
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                Log.e("PDF_DOWNLOAD", "Server returned HTTP ${connection.responseCode}")
+                return@launch
+            }
+
+            val input = connection.inputStream
+            val output = FileOutputStream(file)
+
+            input.use { inputStream ->
+                output.use { fileOut ->
+                    inputStream.copyTo(fileOut)
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "PDF downloaded to Downloads folder", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            Log.e("PDF_DOWNLOAD", "Download failed", e)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Download failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+}
+
+
 
 @Composable
 @Preview
