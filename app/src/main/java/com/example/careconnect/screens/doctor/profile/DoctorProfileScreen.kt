@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.screens.patient.chat.SmallTopAppBarExample1
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
