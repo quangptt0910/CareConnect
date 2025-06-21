@@ -39,6 +39,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun ChatMenuScreen(
     openChatScreen : (doctorId: String, patientId: String, chatId: String) -> Unit,
+    onBack: () -> Unit,
     viewModel: ChatMenuViewModel = hiltViewModel()
 ){
 
@@ -75,15 +76,15 @@ fun ChatMenuScreen(
         openChatScreen = openChatScreen,
         chatRoom = chatRooms,
         chatPartners = chatPartners,
-        userRole = userRole
+        userRole = userRole,
+        onBack = onBack
     )
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
+    onBack: () -> Unit,
     chatRoom: List<ChatRoom>,
     chatPartners: Map<String, Any>,
     userRole: Role,
@@ -95,9 +96,11 @@ fun ChatMenuScreenContent(
         color = MaterialTheme.colorScheme.background
     ) {
 
-        SmallTopAppBarExample1()
+        ChatMenuTopBar(
+            onBack = onBack
+        )
         Column(
-            modifier = Modifier.padding(top = 80.dp).fillMaxSize()
+            modifier = Modifier.padding(top = 90.dp).fillMaxSize()
         ) {
 
             SearchSectionMenu(
@@ -177,7 +180,9 @@ fun ChatMenuScreenContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample1() {
+fun ChatMenuTopBar(
+    onBack: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -193,7 +198,7 @@ fun SmallTopAppBarExample1() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { onBack() }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -217,10 +222,6 @@ fun SmallTopAppBarExample1() {
         Box(modifier = Modifier.padding(it))
     }
 }
-
-
-
-
 
 @Preview
 @Composable
@@ -258,7 +259,8 @@ fun ChatMenuScreenPreview() {
                 doctorId, patientId, chatId ->
                 println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
             },
-            onSearchQueryChange = {}
+            onSearchQueryChange = {},
+            onBack = {}
         )
     }
 }

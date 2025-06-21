@@ -109,7 +109,8 @@ fun PatientApp(
                 ChatMenuScreen(
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(BarRoutes.PROFILE.route) {
@@ -140,7 +141,8 @@ fun PatientApp(
                 ChatMenuScreen(
                     openChatScreen = { doctorId, patientId, chatId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
-                    }
+                    },
+                    onBack = { navController.popBackStack() }
                 )
             }
 
