@@ -8,7 +8,6 @@ import com.example.careconnect.dataclass.Task
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toDateString
 import com.example.careconnect.dataclass.toLocalDate
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -18,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -325,6 +325,17 @@ class DoctorRemoteDataSource @Inject constructor(
             .sortedBy { it.startTime }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getTasksFlow(doctorIdFlow: Flow<String?>): Flow<List<Task>> {
+        return doctorIdFlow.flatMapLatest { doctorId ->
+            if (doctorId == null) return@flatMapLatest emptyFlow()
+            firestore.collection(DOCTORS_COLLECTION)
+                .document(doctorId)
+                .collection(TASKS_COLLECTION)
+                .dataObjects()
+        }
+    }
+
     suspend fun getTasks(doctorId: String): List<Task> {
         return firestore.collection(DOCTORS_COLLECTION)
             .document(doctorId)
@@ -334,19 +345,20 @@ class DoctorRemoteDataSource @Inject constructor(
             .toObjects(Task::class.java)
     }
 
-    suspend fun addTask(doctorId: String, task: Task): DocumentReference {
+    suspend fun addTask(doctorId: String, task: Task): String {
         return firestore.collection(DOCTORS_COLLECTION)
             .document(doctorId)
             .collection(TASKS_COLLECTION)
             .add(task)
-            .await() // suspend function to wait for the result
+            .await()
+            .id
     }
 
-    suspend fun deleteTask(doctorId: String, task: Task) {
+    fun deleteTask(doctorId: String, task: Task) {
         firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).delete()
     }
 
-    suspend fun updateTask(doctorId: String, task: Task) {
+    fun updateTask(doctorId: String, task: Task) {
         firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).set(task)
     }
 

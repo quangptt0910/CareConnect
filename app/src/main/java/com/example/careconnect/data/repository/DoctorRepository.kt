@@ -5,7 +5,6 @@ import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Task
 import com.example.careconnect.dataclass.TimeSlot
-import com.google.firebase.firestore.DocumentReference
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
@@ -74,15 +73,19 @@ class DoctorRepository @Inject constructor(
 
     }
 
-    suspend fun addTask(doctorId: String,task: Task): DocumentReference {
+    fun getTasksFlow(doctorIdFlow: Flow<String?>): Flow<List<Task>> {
+        return doctorRemoteDataSource.getTasksFlow(doctorIdFlow)
+    }
+
+    suspend fun addTask(doctorId: String,task: Task): String {
         return doctorRemoteDataSource.addTask(doctorId,task)
     }
 
-    suspend fun deleteTask(doctorId: String,task: Task) {
+    fun deleteTask(doctorId: String,task: Task) {
         doctorRemoteDataSource.deleteTask(doctorId,task)
     }
 
-    suspend fun updateTask(doctorId: String,task: Task) {
+    fun updateTask(doctorId: String,task: Task) {
         doctorRemoteDataSource.updateTask(doctorId,task)
     }
 

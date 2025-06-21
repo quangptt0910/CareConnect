@@ -36,15 +36,14 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val shouldRestart by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
-
-        if (shouldRestart) {
-            println("DEBUG: Triggering navigation to splash screen")
-            LaunchedEffect(Unit) {
-                viewModel.onRestart()
-                openSplashScreen()
-            }
-            return
+    if (shouldRestart) {
+        println("DEBUG: Triggering navigation to splash screen")
+        LaunchedEffect(Unit) {
+            viewModel.onRestart()
+            openSplashScreen()
         }
+        return
+    }
    
     SettingsContent(
         signOut = viewModel::signOut,

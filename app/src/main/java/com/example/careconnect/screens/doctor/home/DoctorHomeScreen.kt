@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Add
@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,6 +53,7 @@ import com.example.careconnect.common.StatCard
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Task
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
@@ -64,7 +66,7 @@ fun DoctorHomeScreen(
     val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
     val pendingAppointmentList by viewModel.pendingAppointments.collectAsStateWithLifecycle()
     val upcomingAppointmentList by viewModel.appointments.collectAsStateWithLifecycle()
-    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
+    val tasks = viewModel.tasks.collectAsStateWithLifecycle(emptyList())
 
 
     val totalAppointments = pendingAppointmentList.size + upcomingAppointmentList.size
@@ -83,16 +85,15 @@ fun DoctorHomeScreen(
         onDecline = { appt ->
             viewModel.updateAppointmentStatus(appt, AppointmentStatus.CANCELED)
         },
-        tasks = tasks,
-        onAddTask = { task ->
-            viewModel.addTask(task)
-        },
+        tasks = tasks.value,
+        onAddTask = viewModel::addTask,
         onUpdateTask = { task ->
             viewModel.updateTask(task)
         },
         onDeleteTask = { task ->
             viewModel.deleteTask(task)
-        }
+        },
+        showSnackBar = {}
     )
 }
 
@@ -102,18 +103,20 @@ fun DoctorHomeScreenContent(
     patientList: List<Patient> = emptyList(),
     upcomingAppointmentList: List<Appointment> = emptyList(),
     pendingAppointmentList: List<Appointment> = emptyList(),
-    tasks: List<Task> = emptyList(),
+    tasks: List<Task>,
     totalAppointments: Int = 0,
     totalPatients: Int = 0,
     onAccept: (Appointment) -> Unit = {},
     onDecline: (Appointment) -> Unit = {},
-    onAddTask: (Task) -> Unit = {},
-    onUpdateTask: (Task) -> Unit = {},
-    onDeleteTask: (Task) -> Unit = {}
+    onAddTask: (Task, (SnackBarMessage) -> Unit) -> Unit,
+    onUpdateTask: (Task) -> Unit,
+    onDeleteTask: (Task) -> Unit,
+    showSnackBar: (SnackBarMessage) -> Unit,
 ) {
     val date = LocalDate.now()
-    val openDialog = remember { mutableStateOf(false) }
+    var isAddDialogOpen by remember { mutableStateOf(false) }
     val selectedTask = remember { mutableStateOf<Task?>(null) }
+    var isDeleteDialogOpen by remember { mutableStateOf(false) }
     val totalTasks = tasks.size
 
     Surface(
@@ -248,28 +251,41 @@ fun DoctorHomeScreenContent(
                                 Modifier
                                     .fillMaxWidth()
                                     .height(56.dp)
-                                    .toggleable(
-                                        value = task.isChecked,
-                                        onValueChange = { task.isChecked = !task.isChecked },
-                                        role = androidx.compose.ui.semantics.Role.Checkbox
-                                    )
+//                                    .toggleable(
+//                                        value = task.isChecked,
+//                                        onValueChange = { task.isChecked = !task.isChecked },
+//                                        role = androidx.compose.ui.semantics.Role.Checkbox
+//                                    )
                                     .padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
                                     checked = task.isChecked,
-                                    onCheckedChange = null
+                                    onCheckedChange = {
+                                        val updated = task.copy(isChecked = it)
+                                        onUpdateTask(updated)
+                                    }
                                 )
                                 Text(
                                     text = task.name,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     style = MaterialTheme.typography.bodyLarge,
                                     modifier = Modifier
+                                        .weight(1f)
                                         .padding(start = 8.dp)
                                         .clickable {
                                             selectedTask.value = task
-                                            openDialog.value = true
+                                            isAddDialogOpen = true
                                         }
                                 )
+                                IconButton(
+                                    onClick = {
+                                    selectedTask.value = task
+                                    isDeleteDialogOpen = true
+                                }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete Task")
+                                }
                             }
                         }
 
@@ -278,8 +294,8 @@ fun DoctorHomeScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    val newTask = Task(name = "New Task")
-                                    onAddTask(newTask)
+                                    selectedTask.value = null
+                                    isAddDialogOpen = true
                                 }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -292,34 +308,25 @@ fun DoctorHomeScreenContent(
             }
         }
 
-        if (openDialog.value) {
-            val task = selectedTask.value!!
-            var taskName by remember { mutableStateOf(task.name) }
+        if (isAddDialogOpen) {
+            val isEditing = selectedTask.value != null
+            var taskName by remember { mutableStateOf(selectedTask.value?.name ?: "") }
 
             AlertDialog(
-                onDismissRequest = { openDialog.value = false },
+                onDismissRequest = { isAddDialogOpen = false },
                 confirmButton = {
                     Button(onClick = {
-                        val updatedTask = task.copy(name = taskName)
-                        onUpdateTask(updatedTask)
-                        openDialog.value = false
-                    }) {
+                        val updatedTask = selectedTask.value?.copy(name = taskName) ?: Task(name = taskName)
+                        onAddTask(updatedTask, showSnackBar)
+                        isAddDialogOpen = false
+                    }, enabled = taskName.isNotBlank()) {
                         Text("Save")
                     }
                 },
                 dismissButton = {
                     Row {
-                        Button(onClick = { openDialog.value = false }) {
+                        Button(onClick = { isAddDialogOpen = false }) {
                             Text("Cancel")
-                        }
-                        Button(
-                            onClick = {
-                                onDeleteTask(task)
-                                openDialog.value = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Text("Delete")
                         }
                     }
                 },
@@ -335,25 +342,34 @@ fun DoctorHomeScreenContent(
                 }
             )
         }
-    }
-}
+        // end of isAddDialogOpen
 
-
-@Composable
-fun DailyAppointmentsSection(appointments: List<Appointment>) {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(appointments) { appointment ->
-            AppointmentCard(
-                appt = appointment,
-                displayFields = listOf(
-                    "Patient" to { it.patientName },
-                    "Type" to { it.type },)
+        // delete confirmation dialog
+        if (isDeleteDialogOpen) {
+            val taskToDelete = selectedTask.value
+            if (taskToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { isDeleteDialogOpen = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            onDeleteTask(taskToDelete)
+                            isDeleteDialogOpen = false
+                        }) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { isDeleteDialogOpen = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Delete Task") },
+                    text = { Text("Are you sure you want to delete this task?") }
                 )
+                }
+            }
         }
-    }
+
 }
 
 @Composable
@@ -439,7 +455,15 @@ fun HomeScreenDoctorPreview() {
                     surname = "Bosch"
                 )
             ),
-            pendingAppointmentList = pendingAppointmentList
+            pendingAppointmentList = pendingAppointmentList,
+            showSnackBar = {},
+            onAddTask = { _, _ -> },
+            onUpdateTask = {},
+            onDeleteTask = {},
+            tasks = listOf(
+                Task(name = "Task 1 Super long long name nameeeeeee", isChecked = true),
+                Task(name = "Task 2", isChecked = false)
+            )
         )
     }
 }
