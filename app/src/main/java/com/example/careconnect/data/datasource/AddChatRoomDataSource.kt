@@ -24,6 +24,21 @@ class AddChatRoomDataSource @Inject constructor(
         ).await()
     }
 
+    fun listenToChatRooms(userId: String, onUpdate: (List<ChatRoom>) -> Unit) {
+        firestore.collection(CHATROOMS_COLLECTION)
+            .whereArrayContains("participants", userId)
+            .orderBy("lastUpdated")  // Optional, for sorted updates
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) {
+                    Log.e("Firestore", "Chat room listener error", error)
+                    return@addSnapshotListener
+                }
+
+                val chatRooms = snapshot.toObjects(ChatRoom::class.java)
+                onUpdate(chatRooms)
+            }
+    }
+
     suspend fun loadChatRooms() {
         val currentUserId = auth.currentUser?.uid ?: throw IllegalStateException("User not authenticated")
         firestore.collection(CHATROOMS_COLLECTION)

@@ -12,6 +12,8 @@ import com.example.careconnect.dataclass.chat.ChatRoom
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,6 +42,13 @@ class ChatMenuViewModel @Inject constructor(
     private val _chatPartners = MutableStateFlow<Map<String, Any>>(emptyMap())
     val chatPartners: StateFlow<Map<String, Any>> = _chatPartners
 
+    private val _uiState = MutableStateFlow(ChatMenuUiState())
+    val uiState = _uiState.asStateFlow()
+
+    fun updateSearchQuery(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
     suspend fun setCurrentUser() {
         _currentUserId.value = authRepository.getCurrentUserId().toString()
         _currentUserRole.value = authRepository.getCurrentUserRole()
@@ -49,7 +58,22 @@ class ChatMenuViewModel @Inject constructor(
         } else if (_currentUserRole.value == Role.DOCTOR) {
             _doctor.value = doctorRepository.getDoctorById(_currentUserId.value)
         }
+
+        startListeningToChatRooms()
     }
+
+    suspend fun startListeningToChatRooms() {
+        val userId = _currentUserId.value
+        if (userId.isEmpty()) return
+
+        addChatRoomRepository.listenToChatRooms(userId) { chatRoomList ->
+            _chatRooms.value = chatRoomList
+            launchCatching {
+                loadChatPartners()
+            }
+        }
+    }
+
 
     suspend fun getCurrentUserRole(): Role {
         setCurrentUser()

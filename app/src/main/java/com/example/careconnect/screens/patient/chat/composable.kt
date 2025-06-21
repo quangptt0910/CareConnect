@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -29,47 +27,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.screens.patient.home.LoadingIndicator
-import com.example.careconnect.screens.patient.home.SnackBarMessage
-import com.example.careconnect.screens.patient.home.SuggestionsList
 
-/**
- * Composable function for displaying a search bar and search results.
- *
- * @param uiState UI state containing search information.
- * @param onDoctorSelected Callback for selecting doctor.
- * @param onSearchQueryChange Callback for updating search queries.
- */
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchSectionMenu(
-    uiState: ChatMenuUiState,
-    onDoctorSelected: (Doctor, Boolean) -> Unit,
+    query: String,
     onSearchQueryChange: (String) -> Unit
 ) {
-
     var expanded by remember { mutableStateOf(false) }
 
     SearchBar(
         modifier = Modifier
-            .fillMaxWidth().height(50.dp)
+            .fillMaxWidth()
+            .height(60.dp)
             .padding(horizontal = 16.dp),
         inputField = {
             SearchBarDefaults.InputField(
-                query = uiState.searchQuery,
-                onQueryChange = { query ->
-                    onSearchQueryChange(query)
-                    //if (query.isNotEmpty()) onSearchProducts(query)
-                },
+                query = query,
+                onQueryChange = { onSearchQueryChange(it) },
                 onSearch = { expanded = false },
                 expanded = expanded,
                 onExpandedChange = { expanded = it },
-                placeholder = { Text("Search for doctors...") },
+                placeholder = { Text("Search in chats...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = if (uiState.searchQuery.isNotEmpty()) {
+                trailingIcon = if (query.isNotEmpty()) {
                     {
                         IconButton(onClick = { onSearchQueryChange("") }) {
                             Icon(Icons.Default.Close, contentDescription = null)
@@ -80,37 +64,11 @@ fun SearchSectionMenu(
         },
         expanded = expanded,
         onExpandedChange = { expanded = it },
-    ) {
-        SearchMenuResults(
-            uiState = uiState,
-            onDoctorSelected = onDoctorSelected
-        )
-    }
+    ) {}
 }
 
-/**
- * Displays the search results for food products.
- *
- * @param uiState The UI state containing search results and status.
- * @param onProductSelected Callback invoked when a product is selected or deselected.
- */
-@Composable
-fun SearchMenuResults(
-    uiState: ChatMenuUiState,
-    onDoctorSelected: (Doctor, Boolean) -> Unit
-) {
-    Column(Modifier.verticalScroll(rememberScrollState())) {
-        when {
-            uiState.isLoading -> LoadingIndicator()
-            uiState.SnackBarMessage != null -> SnackBarMessage(uiState.SnackBarMessage)
-            else -> SuggestionsList(
-                suggestions = uiState.suggestions,
-                selectedDoctors = uiState.selectedDoctors,
-                onDoctorSelected = onDoctorSelected
-            )
-        }
-    }
-}
+
+
 
 @Composable
 fun ChatListItem(
@@ -128,7 +86,11 @@ fun ChatListItem(
         ListItem(
             modifier = Modifier.padding(8.dp),
             headlineContent = { Text(text = name) },
-            supportingContent = { Text(text = message) },
+            supportingContent = { Text(
+                text = message,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            ) },
             leadingContent = {
                 Image(
                     painter = rememberAsyncImagePainter(imageRes),

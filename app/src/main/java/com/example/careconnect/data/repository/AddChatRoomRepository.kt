@@ -18,6 +18,10 @@ class AddChatRoomRepository @Inject constructor(
         addChatRoomRemoteDataSource.updateChatRoom(chatId, lastMessage, lastUpdated)
     }
 
+    suspend fun listenToChatRooms(userId: String, onChatRoomsUpdated: (List<ChatRoom>) -> Unit) {
+        addChatRoomRemoteDataSource.listenToChatRooms(userId, onChatRoomsUpdated)
+    }
+
     suspend fun loadChatRooms(){
         addChatRoomRemoteDataSource.loadChatRooms()
     }

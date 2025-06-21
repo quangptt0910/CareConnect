@@ -66,11 +66,12 @@ fun ChatMenuScreen(
     val chatRooms by viewModel.chatRooms.collectAsState()
     val chatPartners by viewModel.chatPartners.collectAsState()
 
-
+    val uiState by viewModel.uiState.collectAsState()
+    val searchQuery = uiState.searchQuery
 
     ChatMenuScreenContent(
-        uiState = ChatMenuUiState(),
-        onDoctorSelected = { _, _ -> },
+        uiState = uiState,
+        onSearchQueryChange = viewModel::updateSearchQuery,
         openChatScreen = openChatScreen,
         chatRoom = chatRooms,
         chatPartners = chatPartners,
@@ -86,7 +87,7 @@ fun ChatMenuScreenContent(
     chatRoom: List<ChatRoom>,
     chatPartners: Map<String, Any>,
     userRole: Role,
-    onDoctorSelected: (Doctor, Boolean) -> Unit,
+    onSearchQueryChange: (String) -> Unit,
     openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit
 ) {
     Surface(
@@ -100,9 +101,8 @@ fun ChatMenuScreenContent(
         ) {
 
             SearchSectionMenu(
-                uiState = ChatMenuUiState(),
-                onDoctorSelected = onDoctorSelected,
-                onSearchQueryChange = { /* Handle search query change */ },
+                query = uiState.searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -115,24 +115,32 @@ fun ChatMenuScreenContent(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            val filteredChats = chatRoom.filter { chat ->
+                val chatPartner = when (userRole) {
+                    Role.PATIENT -> chatPartners[chat.doctorId] as? Doctor
+                    Role.DOCTOR -> chatPartners[chat.patientId] as? Patient
+                    else -> null
+                }
+
+                val fullName = when (chatPartner) {
+                    is Doctor -> "${chatPartner.name} ${chatPartner.surname}"
+                    is Patient -> "${chatPartner.name} ${chatPartner.surname}"
+                    else -> ""
+                }
+
+                fullName.contains(uiState.searchQuery, ignoreCase = true)
+            }
+
             LazyColumn {
-                items(chatRoom.size) { index ->
-                    val chat = chatRoom[index]
+                items(filteredChats.size) { index ->
+                    val chat = filteredChats[index]
 
-                    // Display based on user role
                     val chatPartner = when (userRole) {
-                        Role.PATIENT -> {
-                            // Get doctor info for this chat
-                            chatPartners[chat.doctorId] as? Doctor
-                        }
-
-                        Role.DOCTOR -> {
-                            // Get patient info for this chat
-                            chatPartners[chat.patientId] as? Patient
-                        }
-
+                        Role.PATIENT -> chatPartners[chat.doctorId] as? Doctor
+                        Role.DOCTOR -> chatPartners[chat.patientId] as? Patient
                         else -> null
                     }
+
 
                     chatPartner?.let {
                         val displayName = when (userRole) {
@@ -239,7 +247,6 @@ fun ChatMenuScreenPreview() {
         ChatMenuScreenContent(
             uiState = uiState,
             chatRoom = sampleChatRooms,
-            onDoctorSelected = { _, _ -> },
             chatPartners = mapOf(
                 "doc_001" to Doctor(id = "doc_001", name = "Dr. John", surname = "Doe"),
                 "pat_001" to Patient(id = "pat_001", name = "Jane", surname = ""),
@@ -250,7 +257,8 @@ fun ChatMenuScreenPreview() {
             openChatScreen = {
                 doctorId, patientId, chatId ->
                 println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
-            }
+            },
+            onSearchQueryChange = {}
         )
     }
 }
