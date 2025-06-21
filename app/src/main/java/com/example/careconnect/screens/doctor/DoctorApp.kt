@@ -135,7 +135,8 @@ fun DoctorApp(
             composable(BarRoutesDoctor.PROFILE.route) {
 
                 DoctorProfileScreen(
-                    openScheduleScreen = { navController.navigate(DOCTOR_SCHEDULE_ROUTE) }
+                    openScheduleScreen = { navController.navigate(DOCTOR_SCHEDULE_ROUTE) },
+                    goBack = { navController.popBackStack() }
                 )
             }
 

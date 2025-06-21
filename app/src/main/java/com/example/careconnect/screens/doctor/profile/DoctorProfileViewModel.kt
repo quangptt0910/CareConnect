@@ -46,4 +46,11 @@ class DoctorProfileViewModel @Inject constructor(
         }
     }
 
+    fun updateDoctor(updateDoctor: Doctor) {
+        _doctor.value = updateDoctor
+        viewModelScope.launch {
+            doctorRepository.updateDoctor(updateDoctor)
+        }
+    }
+
 }

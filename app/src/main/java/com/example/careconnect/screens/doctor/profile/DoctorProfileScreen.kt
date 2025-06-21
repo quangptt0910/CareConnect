@@ -23,12 +23,14 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ArrowForwardIos
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +39,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,14 +57,17 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun DoctorProfileScreen(
     viewModel: DoctorProfileViewModel = hiltViewModel(),
-    openScheduleScreen: () -> Unit = {}
+    openScheduleScreen: () -> Unit = {},
+    goBack: () -> Unit = {}
 ){
     val doctor by viewModel.doctor.collectAsState()
 
     DoctorProfileScreenContent(
         doctor = doctor,
         onPhotoSelected = { uri -> viewModel.updateDoctorPhoto(uri) },
-        openScheduleScreen = openScheduleScreen
+        openScheduleScreen = openScheduleScreen,
+        goBack = goBack,
+        onSaveDoctor = { updateDoctor -> viewModel.updateDoctor(updateDoctor) }
     )
 }
 
@@ -68,13 +75,19 @@ fun DoctorProfileScreen(
 fun DoctorProfileScreenContent(
     doctor: Doctor? = null,
     onPhotoSelected: (Uri) -> Unit = {},
-    openScheduleScreen: () -> Unit = {}
+    openScheduleScreen: () -> Unit = {},
+    goBack: () -> Unit = {},
+    onSaveDoctor: (Doctor) -> Unit = {}
 ){
+    val showEditDialog = remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ){
-        SmallTopAppBarExample1()
+        DoctorProfileTopBar(
+            goBack = goBack
+        )
         Column(
             modifier = Modifier.padding(top = 80.dp).fillMaxSize()
         ){
@@ -94,7 +107,7 @@ fun DoctorProfileScreenContent(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     ),
                     modifier = Modifier
-                        .width(350.dp).height(50.dp),
+                        .width(350.dp).height(50.dp).clickable{ showEditDialog.value = true },
 
                 ) {
                     Row(
@@ -152,11 +165,102 @@ fun DoctorProfileScreenContent(
 
     }
 
+    if (showEditDialog.value && doctor != null) {
+        EditDoctorDialog(
+            doctor = doctor,
+            onDismiss = { showEditDialog.value = false },
+            onSave = { updatedDoctor ->
+                onSaveDoctor(updatedDoctor)
+                showEditDialog.value = false
+            }
+        )
+    }
 }
+
+
+@Composable
+fun EditDoctorDialog(
+    doctor: Doctor,
+    onDismiss: () -> Unit,
+    onSave: (Doctor) -> Unit
+) {
+    val name = remember { mutableStateOf(doctor.name) }
+    val surname = remember { mutableStateOf(doctor.surname) }
+    val specialization = remember { mutableStateOf(doctor.specialization) }
+    val address = remember { mutableStateOf(doctor.address) }
+    val phone = remember { mutableStateOf(doctor.phone) }
+
+    val showConfirmDialog = remember { mutableStateOf(false) }
+
+    if (showConfirmDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog.value = false },
+            title = { Text("Confirm Changes") },
+            text = { Text("Are you sure you want to save these changes?") },
+            confirmButton = {
+                Text(
+                    "Yes",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            onSave(
+                                doctor.copy(
+                                    name = name.value,
+                                    surname = surname.value,
+                                    specialization = specialization.value,
+                                    address = address.value,
+                                    phone = phone.value
+                                )
+                            )
+                            showConfirmDialog.value = false
+                        }
+                )
+            },
+            dismissButton = {
+                Text(
+                    "Cancel",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable { showConfirmDialog.value = false }
+                )
+            }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Text("Save", modifier = Modifier
+                .padding(8.dp)
+                .clickable { showConfirmDialog.value = true }
+            )
+        },
+        dismissButton = {
+            Text("Cancel", modifier = Modifier
+                .padding(8.dp)
+                .clickable { onDismiss() }
+            )
+        },
+        title = { Text("Edit Profile") },
+        text = {
+            Column {
+                OutlinedTextField(value = name.value, onValueChange = { name.value = it }, label = { Text("First Name") })
+                OutlinedTextField(value = surname.value, onValueChange = { surname.value = it }, label = { Text("Last Name") })
+                OutlinedTextField(value = specialization.value, onValueChange = { specialization.value = it }, label = { Text("Specialization") })
+                OutlinedTextField(value = address.value, onValueChange = { address.value = it }, label = { Text("Address") })
+                OutlinedTextField(value = phone.value, onValueChange = { phone.value = it }, label = { Text("Phone") })
+            }
+        },
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample1() {
+fun DoctorProfileTopBar(
+    goBack: () -> Unit = {}
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -172,7 +276,7 @@ fun SmallTopAppBarExample1() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { goBack() }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
