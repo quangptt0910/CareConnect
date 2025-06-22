@@ -209,8 +209,9 @@ fun DoctorApp(
             composable(DOCTOR_PATIENTS_MEDICAL_HISTORY_SECTION_ROUTE) { backStackEntry ->
                 MedicalHistorySectionScreen(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: "",
-                    section = backStackEntry.arguments?.getString("section") ?: "",
-                    onBack = { navController.popBackStack() }
+                    sectionType = backStackEntry.arguments?.getString("sectionType") ?: "",
+                    onBack = { navController.popBackStack() },
+                    showSnackbar = showSnackBar
                 )
             }
 
@@ -221,11 +222,7 @@ fun DoctorApp(
                 )
             }
 
-//            composable(HOME_DOCTOR_ROUTE) {
-//                DoctorHomeScreen(
-//                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
-//                )
-//            }
+
         }
     }
 }

@@ -47,7 +47,6 @@ data class Patient(
     val pesel: String = "",
     val height: Double = 0.0,
     val weight: Double = 0.0,
-    val medicalHistory: MedicalHistory = MedicalHistory(),  // Patient's medical history or conditions
 )
 
 

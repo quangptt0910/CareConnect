@@ -20,7 +20,7 @@ import com.example.careconnect.dataclass.Surgery
 @Composable
 fun MedicationDialog(
     onDismiss: () -> Unit,
-    onAdd: (Medication) -> Unit,
+    onSave: (Medication) -> Unit,
     existing: Medication? = null
 ) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
@@ -29,10 +29,13 @@ fun MedicationDialog(
     var startDate by remember { mutableStateOf(existing?.startDate ?: "") }
     var endDate by remember { mutableStateOf(existing?.endDate ?: "") }
 
+    val isEditing = existing != null
+    val dialogTitle = if (isEditing) "Edit Medication" else "Add Medication"
+    val saveButtonText = if (isEditing) "Update" else "Add"
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Add Medication" else "Edit Medication") },
+        title = { Text(dialogTitle)},
         text = {
             Column {
                 OutlinedTextField(name, { name = it }, label = { Text("Name") })
@@ -44,9 +47,14 @@ fun MedicationDialog(
         },
         confirmButton = {
             Button(onClick = {
-                onAdd(Medication("MEDICATION" ,name, dosage, startDate, endDate, frequency))
+                val medication = if (isEditing) {
+                    existing.copy(id = existing.id,name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
+                } else {
+                    Medication(name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
+                }
+                onSave(medication)
             }) {
-                Text(if (existing == null) "Add" else "Save")
+                Text(saveButtonText)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
@@ -54,15 +62,23 @@ fun MedicationDialog(
 }
 
 @Composable
-fun AllergyDialog(onDismiss: () -> Unit, onAdd: (Allergy) -> Unit, existing: Allergy? = null) {
+fun AllergyDialog(
+    onDismiss: () -> Unit,
+    onSave: (Allergy) -> Unit,
+    existing: Allergy? = null
+) {
     var allergen by remember { mutableStateOf(existing?.allergen ?: "") }
     var reaction by remember { mutableStateOf(existing?.reaction ?: "") }
     var severity by remember { mutableStateOf(existing?.severity ?: "") }
     var diagnosedDate by remember { mutableStateOf(existing?.diagnosedDate ?: "") }
 
+    val isEditing = existing != null
+    val dialogTitle = if (isEditing) "Edit Allergy" else "Add Allergy"
+    val saveButtonText = if (isEditing) "Update" else "Add"
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Add Allergy" else "Edit Allergy") },
+        title = { Text(dialogTitle) },
         text = {
             Column {
                 OutlinedTextField(allergen, { allergen = it }, label = { Text("Allergen") })
@@ -73,9 +89,14 @@ fun AllergyDialog(onDismiss: () -> Unit, onAdd: (Allergy) -> Unit, existing: All
         },
         confirmButton = {
             Button(onClick = {
-                onAdd(Allergy("ALLERGY", allergen, reaction, severity, diagnosedDate))
+                val allergy = if (isEditing) {
+                    existing.copy(id = existing.id, allergen = allergen.trim(), reaction = reaction.trim(), severity = severity.trim(), diagnosedDate = diagnosedDate.trim())
+                } else {
+                    Allergy(allergen = allergen.trim(), reaction = reaction.trim(), severity = severity.trim(), diagnosedDate = diagnosedDate.trim())
+                }
+                onSave(allergy)
             }) {
-                Text(if (existing == null) "Add" else "Save")
+                Text(saveButtonText)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
@@ -83,14 +104,18 @@ fun AllergyDialog(onDismiss: () -> Unit, onAdd: (Allergy) -> Unit, existing: All
 }
 
 @Composable
-fun ConditionDialog(onDismiss: () -> Unit, onAdd: (Condition) -> Unit, existing: Condition? = null) {
+fun ConditionDialog(onDismiss: () -> Unit, onSave: (Condition) -> Unit, existing: Condition? = null) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
     var diagnosedDate by remember { mutableStateOf(existing?.diagnosedDate ?: "") }
     var status by remember { mutableStateOf(existing?.status ?: "") }
 
+    val isEditing = existing != null
+    val dialogTitle = if (isEditing) "Edit Condition" else "Add Condition"
+    val saveButtonText = if (isEditing) "Update" else "Add"
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Add Condition" else "Edit Condition") },
+        title = { Text(dialogTitle) },
         text = {
             Column {
                 OutlinedTextField(name, { name = it }, label = { Text("Name") })
@@ -100,9 +125,14 @@ fun ConditionDialog(onDismiss: () -> Unit, onAdd: (Condition) -> Unit, existing:
         },
         confirmButton = {
             Button(onClick = {
-                onAdd(Condition("CONDITION", name, diagnosedDate, status))
+                val condition = if (isEditing) {
+                    existing.copy(name = name.trim(), diagnosedDate = diagnosedDate.trim(), status = status.trim())
+                } else {
+                    Condition(name = name.trim(), diagnosedDate = diagnosedDate.trim(), status = status.trim())
+                }
+                onSave(condition)
             }) {
-                Text(if (existing == null) "Add" else "Save")
+                Text(saveButtonText)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
@@ -110,15 +140,19 @@ fun ConditionDialog(onDismiss: () -> Unit, onAdd: (Condition) -> Unit, existing:
 }
 
 @Composable
-fun SurgeryDialog(onDismiss: () -> Unit, onAdd: (Surgery) -> Unit, existing: Surgery? = null) {
+fun SurgeryDialog(onDismiss: () -> Unit, onSave: (Surgery) -> Unit, existing: Surgery? = null) {
     var surgeryName by remember { mutableStateOf(existing?.surgeryName ?: "") }
     var surgeryDate by remember { mutableStateOf(existing?.surgeryDate ?: "") }
     var hospital by remember { mutableStateOf(existing?.hospital ?: "") }
     var notes by remember { mutableStateOf(existing?.notes ?: "") }
 
+    val isEditing = existing != null
+    val dialogTitle = if (isEditing) "Edit Surgery" else "Add Surgery"
+    val saveButtonText = if (isEditing) "Update" else "Add"
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Add Surgery" else "Edit Surgery") },
+        title = { Text(dialogTitle) },
         text = {
             Column {
                 OutlinedTextField(surgeryName, { surgeryName = it }, label = { Text("Surgery Name") })
@@ -129,9 +163,14 @@ fun SurgeryDialog(onDismiss: () -> Unit, onAdd: (Surgery) -> Unit, existing: Sur
         },
         confirmButton = {
             Button(onClick = {
-                onAdd(Surgery("SURGERY", surgeryName, surgeryDate, hospital, notes))
+                val surgery = if (isEditing) {
+                    existing.copy(surgeryName = surgeryName.trim(), surgeryDate = surgeryDate.trim(), hospital = hospital.trim(), notes = notes.trim())
+                } else {
+                    Surgery(surgeryName = surgeryName.trim(), surgeryDate = surgeryDate.trim(), hospital = hospital.trim(), notes = notes.trim())
+                }
+                onSave(surgery)
             }) {
-                Text(if (existing == null) "Add" else "Save")
+                Text(saveButtonText)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
@@ -139,15 +178,19 @@ fun SurgeryDialog(onDismiss: () -> Unit, onAdd: (Surgery) -> Unit, existing: Sur
 }
 
 @Composable
-fun ImmunizationDialog(onDismiss: () -> Unit, onAdd: (Immunization) -> Unit, existing: Immunization? = null) {
+fun ImmunizationDialog(onDismiss: () -> Unit, onSave: (Immunization) -> Unit, existing: Immunization? = null) {
     var vaccineName by remember { mutableStateOf(existing?.vaccineName ?: "") }
     var dateAdministered by remember { mutableStateOf(existing?.dateAdministered ?: "") }
     var administeredBy by remember { mutableStateOf(existing?.administeredBy ?: "") }
     var nextDueDate by remember { mutableStateOf(existing?.nextDueDate ?: "") }
 
+    val isEditing = existing != null
+    val dialogTitle = if (isEditing) "Edit Immunization" else "Add Immunization"
+    val saveButtonText = if (isEditing) "Update" else "Add"
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existing == null) "Add Immunization" else "Edit Immunization") },
+        title = { Text(dialogTitle) },
         text = {
             Column {
                 OutlinedTextField(vaccineName, { vaccineName = it }, label = { Text("Vaccine Name") })
@@ -158,9 +201,14 @@ fun ImmunizationDialog(onDismiss: () -> Unit, onAdd: (Immunization) -> Unit, exi
         },
         confirmButton = {
             Button(onClick = {
-                onAdd(Immunization("IMMUNIZATION", vaccineName, dateAdministered, administeredBy, nextDueDate))
+                val immunization = if (isEditing) {
+                    existing.copy(vaccineName = vaccineName.trim(), dateAdministered = dateAdministered.trim(), administeredBy = administeredBy.trim(), nextDueDate = nextDueDate.trim())
+                } else {
+                    Immunization(vaccineName = vaccineName.trim(), dateAdministered = dateAdministered.trim(), administeredBy = administeredBy.trim(), nextDueDate = nextDueDate.trim())
+                }
+                onSave(immunization)
             }) {
-                Text(if (existing == null) "Add" else "Save")
+                Text(saveButtonText)
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }

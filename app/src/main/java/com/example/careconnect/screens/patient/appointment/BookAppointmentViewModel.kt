@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -53,12 +52,13 @@ class BookAppointmentViewModel @Inject constructor(
         if (_doctorId.value != doctorId) {
             _doctorId.value = doctorId
             loadDoctorInfo()
-            loadAvailableSlots {  } }
+            loadAvailableSlots {  }
+        }
     }
 
     private fun loadDoctorInfo() {
         val doctorId = _doctorId.value ?: return
-        viewModelScope.launch {
+        launchCatching {
             try {
                 _isLoading.value = true
                 _doctor.value = doctorRepository.getDoctorById(doctorId)

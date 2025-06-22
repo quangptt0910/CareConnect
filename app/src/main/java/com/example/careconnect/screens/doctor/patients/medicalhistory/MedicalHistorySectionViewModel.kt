@@ -1,11 +1,13 @@
 package com.example.careconnect.screens.doctor.patients.medicalhistory
 
-import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.PatientRepository
 import com.example.careconnect.dataclass.Allergy
 import com.example.careconnect.dataclass.Condition
 import com.example.careconnect.dataclass.Immunization
+import com.example.careconnect.dataclass.MedicalHistoryEntry
+import com.example.careconnect.dataclass.MedicalHistoryType
 import com.example.careconnect.dataclass.Medication
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Surgery
@@ -13,7 +15,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MedicalHistorySectionViewModel @Inject constructor(
@@ -22,124 +23,100 @@ class MedicalHistorySectionViewModel @Inject constructor(
     private val _patient = MutableStateFlow<Patient?>(null)
     val patient: StateFlow<Patient?> = _patient
 
-    private val _medications = MutableStateFlow<List<Medication>>(emptyList())
-    val medications: StateFlow<List<Medication>> = _medications
+    private val _entries = MutableStateFlow<List<MedicalHistoryEntry>>(emptyList())
+    val entries: StateFlow<List<MedicalHistoryEntry>> = _entries
 
-    private val _allergies = MutableStateFlow<List<Allergy>>(emptyList())
-    val allergies: StateFlow<List<Allergy>> = _allergies
-
-    private val _conditions = MutableStateFlow<List<Condition>>(emptyList())
-    val conditions: StateFlow<List<Condition>> = _conditions
-
-    private val _surgeries = MutableStateFlow<List<Surgery>>(emptyList())
-    val surgeries: StateFlow<List<Surgery>> = _surgeries
-
-    private val _immunizations = MutableStateFlow<List<Immunization>>(emptyList())
-    val immunizations: StateFlow<List<Immunization>> = _immunizations
-
-    fun loadMedications(patientId: String) {
-        viewModelScope.launch {
-            val medicationsData = patientRepository.setMedicines(patientId)
-            _medications.value = medicationsData
-        }
-    }
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     fun loadPatient(patientId: String) {
-        viewModelScope.launch {
-            val patientData = patientRepository.getPatientById(patientId)
-            _patient.value = patientData
+        launchCatching {
+            _isLoading.value = true
+            try {
+                val patientData = patientRepository.getPatientById(patientId)
+                _patient.value = patientData
+            } catch (e: Exception) {
+
+            } finally {
+                _isLoading.value = false
+            }
+
         }
     }
 
-    suspend fun addMedication(patientId: String, medication: Medication) {
-        patientRepository.addMedication(patientId, medication)
-    }
-
-    suspend fun addAllergy(patientId: String, allergy: Allergy) {
-        patientRepository.addAllergy(patientId, allergy)
-    }
-
-    suspend fun loadAllergies(patientId: String) {
-        viewModelScope.launch {
-            val allergiesData = patientRepository.setAllergies(patientId)
-            _allergies.value = allergiesData
+    //  function to load entries by type
+    fun loadEntries(patientId: String, type: MedicalHistoryType) {
+        launchCatching {
+            _isLoading.value = true
+            try {
+                val data = when (type) {
+                    MedicalHistoryType.MEDICATION -> patientRepository.getMedications(patientId)
+                    MedicalHistoryType.ALLERGY -> patientRepository.getAllergies(patientId)
+                    MedicalHistoryType.CONDITION -> patientRepository.getConditions(patientId)
+                    MedicalHistoryType.SURGERY -> patientRepository.getSurgeries(patientId)
+                    MedicalHistoryType.IMMUNIZATION -> patientRepository.getImmunizations(patientId)
+                }
+                _entries.value = data
+            } catch (e: Exception) {
+                Log.e("MedicalHistorySectionViewModel", "Error loading entries", e)
+                _entries.value = emptyList()
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    suspend fun addCondition(patientId: String, condition: Condition) {
-        patientRepository.addCondition(patientId, condition)
-    }
-
-    suspend fun loadConditions(patientId: String) {
-        viewModelScope.launch {
-            val conditionsData = patientRepository.setConditions(patientId)
-            _conditions.value = conditionsData
+    // Generic add function
+    suspend fun addEntry(patientId: String, entry: MedicalHistoryEntry): String? {
+        return try {
+            when (entry) {
+                is Medication -> patientRepository.addMedication(patientId, entry)
+                is Allergy -> patientRepository.addAllergy(patientId, entry)
+                is Condition -> patientRepository.addCondition(patientId, entry)
+                is Surgery -> patientRepository.addSurgery(patientId, entry)
+                is Immunization -> patientRepository.addImmunization(patientId, entry)
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 
-    suspend fun addSurgery(patientId: String, surgery: Surgery) {
-        patientRepository.addSurgery(patientId, surgery)
-    }
-
-    suspend fun loadSurgeries(patientId: String) {
-        viewModelScope.launch {
-            val surgeriesData = patientRepository.setSurgeries(patientId)
-            _surgeries.value = surgeriesData
+    // Generic update function
+    suspend fun updateEntry(patientId: String, entry: MedicalHistoryEntry): Boolean {
+        return try {
+            when (entry) {
+                is Medication -> patientRepository.updateMedication(patientId, entry)
+                is Allergy -> patientRepository.updateAllergy(patientId, entry)
+                is Condition -> patientRepository.updateCondition(patientId, entry)
+                is Surgery -> patientRepository.updateSurgery(patientId, entry)
+                is Immunization -> patientRepository.updateImmunization(patientId, entry)
+                else -> false
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 
-    suspend fun addImmunization(patientId: String, immunization: Immunization) {
-        patientRepository.addImmunization(patientId, immunization)
-    }
-
-    suspend fun loadImmunizations(patientId: String) {
-        viewModelScope.launch {
-            val immunizationsData = patientRepository.setImmunizations(patientId)
-            _immunizations.value = immunizationsData
+    // Generic delete function
+    suspend fun deleteEntry(patientId: String, entry: MedicalHistoryEntry): Boolean {
+        return try {
+            when (entry) {
+                is Medication -> patientRepository.deleteMedication(patientId, entry)
+                is Allergy -> patientRepository.deleteAllergy(patientId, entry)
+                is Condition -> patientRepository.deleteCondition(patientId, entry)
+                is Surgery -> patientRepository.deleteSurgery(patientId, entry)
+                is Immunization -> patientRepository.deleteImmunization(patientId, entry)
+                else -> false
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 
-    suspend fun updateCondition(patientId: String, condition: Condition) {
-        patientRepository.updateCondition(patientId, condition)
+    // Convenience function to refresh current entries
+    fun refreshEntries(patientId: String, type: MedicalHistoryType) {
+        loadEntries(patientId, type)
     }
 
-    suspend fun updateImmunization(patientId: String, immunization: Immunization) {
-        patientRepository.updateImmunization(patientId, immunization)
-    }
-
-    suspend fun updateSurgery(patientId: String, surgery: Surgery) {
-        patientRepository.updateSurgery(patientId, surgery)
-    }
-
-    suspend fun updateSurgery(patientId: String, medication: Medication) {
-        patientRepository.updateMedication(patientId, medication)
-    }
-
-    suspend fun updateAllergy(patientId: String, allergy: Allergy) {
-        patientRepository.updateAllergy(patientId, allergy)
-    }
-
-    suspend fun updateMedication(patientId: String, medication: Medication) {
-        patientRepository.updateMedication(patientId, medication)
-    }
-
-    suspend fun deleteMedication(patientId: String, medication: Medication) {
-        patientRepository.deleteMedication(patientId, medication)
-    }
-
-    suspend fun deleteAllergy(patientId: String, allergy: Allergy) {
-        patientRepository.deleteAllergy(patientId, allergy)
-    }
-
-    suspend fun deleteCondition(patientId: String, condition: Condition) {
-        patientRepository.deleteCondition(patientId, condition)
-    }
-
-    suspend fun deleteSurgery(patientId: String, surgery: Surgery) {
-        patientRepository.deleteSurgery(patientId, surgery)
-    }
-
-    suspend fun deleteImmunization(patientId: String, immunization: Immunization) {
-        patientRepository.deleteImmunization(patientId, immunization)
-    }
 }

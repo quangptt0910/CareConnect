@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Gender
-import com.example.careconnect.dataclass.MedicalHistory
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.patient.home.HomeUiState
@@ -69,7 +68,6 @@ fun PatientManageScreenContent(
                     gender = Gender.FEMALE,
                     height = 165.0, // Height in cm
                     weight = 50.0,  // Weight in kg
-                    medicalHistory = MedicalHistory() // Assuming MedicalHistory has a default constructor
                 )
             )
 

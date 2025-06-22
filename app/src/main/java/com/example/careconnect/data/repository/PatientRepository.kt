@@ -30,45 +30,6 @@ class PatientRepository @Inject constructor(
         return patientRemoteDataSource.createPrescription(patientId, prescription)
     }
 
-    suspend fun addMedication(patientId: String, medication: Medication) {
-        return patientRemoteDataSource.addMedication(patientId, medication)
-    }
-
-    suspend fun addAllergy(patientId: String, allergy: Allergy) {
-        return patientRemoteDataSource.addAllergy(patientId, allergy)
-    }
-
-    suspend fun setMedicines(patientId: String): MutableList<Medication> {
-        return patientRemoteDataSource.setMedicines(patientId)
-    }
-
-    suspend fun setAllergies(patientId: String): MutableList<Allergy> {
-        return patientRemoteDataSource.setAllergies(patientId)
-    }
-
-    suspend fun addCondition(patientId: String, condition: Condition) {
-        return patientRemoteDataSource.addConditions(patientId, condition)
-    }
-
-    suspend fun setConditions(patientId: String): MutableList<Condition> {
-        return patientRemoteDataSource.setConditions(patientId)
-    }
-
-    suspend fun addSurgery(patientId: String, surgery: Surgery) {
-        return patientRemoteDataSource.addSurgery(patientId, surgery)
-    }
-
-    suspend fun setSurgeries(patientId: String): MutableList<Surgery> {
-        return patientRemoteDataSource.setSurgeries(patientId)
-    }
-
-    suspend fun addImmunization(patientId: String, immunization: Immunization) {
-        return patientRemoteDataSource.addImmunization(patientId, immunization)
-    }
-
-    suspend fun setImmunizations(patientId: String): MutableList<Immunization> {
-        return patientRemoteDataSource.setImmunizations(patientId)
-    }
 
     suspend fun getPrescriptions(patientId: String): List<Prescription> {
         return patientRemoteDataSource.getPrescriptions(patientId)
@@ -78,44 +39,30 @@ class PatientRepository @Inject constructor(
         return patientRemoteDataSource.getMedicalReports(patientId)
     }
 
-    suspend fun updateCondition(patientId: String, condition: Condition) {
-        return patientRemoteDataSource.updateCondition(patientId, condition)
-    }
 
-    suspend fun updateImmunization(patientId: String, immunization: Immunization) {
-        return patientRemoteDataSource.updateImmunization(patientId, immunization)
-    }
+    suspend fun addMedication(patientId: String, medication: Medication): String = patientRemoteDataSource.addMedication(patientId, medication)
+    suspend fun addAllergy(patientId: String, allergy: Allergy): String = patientRemoteDataSource.addAllergy(patientId, allergy)
+    suspend fun addCondition(patientId: String, condition: Condition): String = patientRemoteDataSource.addCondition(patientId, condition)
+    suspend fun addSurgery(patientId: String, surgery: Surgery): String = patientRemoteDataSource.addSurgery(patientId, surgery)
+    suspend fun addImmunization(patientId: String, immunization: Immunization): String = patientRemoteDataSource.addImmunization(patientId, immunization)
 
-    suspend fun updateMedication(patientId: String, medication: Medication) {
-        return patientRemoteDataSource.updateMedication(patientId, medication)
-    }
+    suspend fun updateMedication(patientId: String, medication: Medication): Boolean = patientRemoteDataSource.updateMedication(patientId, medication)
+    suspend fun updateAllergy(patientId: String, allergy: Allergy): Boolean = patientRemoteDataSource.updateAllergy(patientId, allergy)
+    suspend fun updateCondition(patientId: String, condition: Condition): Boolean = patientRemoteDataSource.updateCondition(patientId, condition)
+    suspend fun updateSurgery(patientId: String, surgery: Surgery): Boolean = patientRemoteDataSource.updateSurgery(patientId, surgery)
+    suspend fun updateImmunization(patientId: String, immunization: Immunization): Boolean = patientRemoteDataSource.updateImmunization(patientId, immunization)
 
-    suspend fun updateSurgery(patientId: String, surgery: Surgery) {
-        return patientRemoteDataSource.updateSurgery(patientId, surgery)
-    }
+    suspend fun getMedications(patientId: String): List<Medication> = patientRemoteDataSource.getMedications(patientId)
+    suspend fun getAllergies(patientId: String): List<Allergy> = patientRemoteDataSource.getAllergies(patientId)
+    suspend fun getConditions(patientId: String): List<Condition> = patientRemoteDataSource.getConditions(patientId)
+    suspend fun getSurgeries(patientId: String): List<Surgery> = patientRemoteDataSource.getSurgeries(patientId)
+    suspend fun getImmunizations(patientId: String): List<Immunization> = patientRemoteDataSource.getImmunizations(patientId)
 
-    suspend fun updateAllergy(patientId: String, allergy: Allergy) {
-        return patientRemoteDataSource.updateAllergy(patientId, allergy)
-    }
+    suspend fun deleteMedication(patientId: String, medication: Medication): Boolean = patientRemoteDataSource.deleteMedication(patientId, medication)
+    suspend fun deleteAllergy(patientId: String, allergy: Allergy): Boolean = patientRemoteDataSource.deleteAllergy(patientId, allergy)
+    suspend fun deleteCondition(patientId: String, condition: Condition): Boolean = patientRemoteDataSource.deleteCondition(patientId, condition)
+    suspend fun deleteSurgery(patientId: String, surgery: Surgery): Boolean = patientRemoteDataSource.deleteSurgery(patientId, surgery)
+    suspend fun deleteImmunization(patientId: String, immunization: Immunization): Boolean = patientRemoteDataSource.deleteImmunization(patientId, immunization)
 
-    suspend fun deleteMedication(patientId: String, medication: Medication) {
-        return patientRemoteDataSource.deleteMedication(patientId, medication)
-    }
-
-    suspend fun deleteAllergy(patientId: String, allergy: Allergy) {
-        return patientRemoteDataSource.deleteAllergy(patientId, allergy)
-    }
-
-    suspend fun deleteCondition(patientId: String, condition: Condition) {
-        return patientRemoteDataSource.deleteCondition(patientId, condition)
-    }
-
-    suspend fun deleteSurgery(patientId: String, surgery: Surgery) {
-        return patientRemoteDataSource.deleteSurgery(patientId, surgery)
-    }
-
-    suspend fun deleteImmunization(patientId: String, immunization: Immunization) {
-        return patientRemoteDataSource.deleteImmunization(patientId, immunization)
-    }
 
 }

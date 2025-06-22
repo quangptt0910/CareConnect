@@ -38,7 +38,7 @@ class PatientsProfileViewModel @Inject constructor(
     }
 
 
-fun loadPatient(patientId: String) {
+    fun loadPatient(patientId: String) {
         viewModelScope.launch {
             val patientData = patientRepository.getPatientById(patientId)
             println("Loaded patient: $patientData")

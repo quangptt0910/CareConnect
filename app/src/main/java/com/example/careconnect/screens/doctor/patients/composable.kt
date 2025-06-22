@@ -178,7 +178,7 @@ fun MedicalCategoryCard(iconResId: Int, title: String, onClick: () -> Unit) {
             .clickable { onClick() }
     ) {
         Column(
-            modifier = Modifier.padding(10.dp).height(90.dp).width(95.dp),
+            modifier = Modifier.padding(8.dp).height(90.dp).width(95.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(

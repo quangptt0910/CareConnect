@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
+import com.example.careconnect.dataclass.MedicalHistoryType
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ fun PatientsProfileScreen(
     openPrescriptionsScreen: (patientId: String) -> Unit = {},
     onBack: () -> Unit = {},
     openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _, _ ->},
-    openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
+    openMedicalHistoryScreen: (patientId: String, sectionType: String) -> Unit = {_, _ ->}
 ){
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
@@ -52,7 +53,6 @@ fun PatientsProfileScreen(
     val doctorId = viewModel.loadDoctorId()
 
     PatientsProfileScreenContent(
-
         patientId = patientId,
         patient = patient,
         openMedicalReportsScreen = openMedicalReportsScreen,
@@ -78,7 +78,7 @@ fun PatientsProfileScreenContent(
     getChatId: suspend () -> String = {""},
     openChatScreen: (chatId: String) -> Unit = {},
     openPrescriptionsScreen: (patientId: String) -> Unit = {},
-    openMedicalHistoryScreen: (patientId: String, section: String) -> Unit = {_, _ ->}
+    openMedicalHistoryScreen: (patientId: String, sectionType: String) -> Unit = {_, _ ->}
 ){
     val coroutineScope = rememberCoroutineScope()
 
@@ -167,13 +167,16 @@ fun PatientsProfileScreenContent(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     MedicalCategoryCard(R.drawable.medicine, "Medications") {
-                        openMedicalHistoryScreen(patientId, "Medications")
+                        openMedicalHistoryScreen(patientId, MedicalHistoryType.MEDICATION.collectionName)
+                        println("DEBUG: medications clicked")
                     }
                     MedicalCategoryCard(R.drawable.allergies, "Allergies") {
-                        openMedicalHistoryScreen(patientId, "Allergies")
+                        openMedicalHistoryScreen(patientId, MedicalHistoryType.ALLERGY.collectionName)
+                        println("DEBUG: allergies clicked")
                     }
                     MedicalCategoryCard(R.drawable.conditions, "Conditions") {
-                        openMedicalHistoryScreen(patientId, "Conditions")
+                        openMedicalHistoryScreen(patientId, MedicalHistoryType.CONDITION.collectionName)
+                        println("DEBUG: conditions clicked")
                     }
                 }
             }
@@ -185,13 +188,16 @@ fun PatientsProfileScreenContent(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     MedicalCategoryCard(R.drawable.surgeries, "Surgeries") {
-                        openMedicalHistoryScreen(patientId, "Surgeries")
+                        openMedicalHistoryScreen(patientId, MedicalHistoryType.SURGERY.collectionName)
+                        println("DEBUG: surgeries clicked")
                     }
                     MedicalCategoryCard(R.drawable.immunizations, "Immunizations") {
-                        openMedicalHistoryScreen(patientId, "Immunizations")
+                        openMedicalHistoryScreen(patientId, MedicalHistoryType.IMMUNIZATION.collectionName)
+                        println("DEBUG: immunizations clicked")
                     }
                     MedicalCategoryCard(R.drawable.medical_report, "Medical Reports") {
                         openMedicalReportsScreen(patientId)
+                        println("DEBUG: medical reports clicked")
                     }
 
                 }

@@ -49,7 +49,7 @@ object Route {
     const val DOCTOR_CHAT_MENU_ROUTE = "doctor/chat/menu"
     const val DOCTOR_PATIENTS_ROUTE = "doctor/patients"
     const val DOCTOR_PATIENTS_PROFILE_ROUTE = "doctor/patients/profile/{patientId}"
-    const val DOCTOR_PATIENTS_MEDICAL_HISTORY_SECTION_ROUTE = "doctor/patients/medical_history/{patientId}/{section}"
+    const val DOCTOR_PATIENTS_MEDICAL_HISTORY_SECTION_ROUTE = "doctor/patients/medical_history/{patientId}/{sectionType}"
     const val DOCTOR_PATIENTS_MEDICAL_REPORT_ROUTE = "doctor/patients/medical_report/{patientId}"
     const val DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE = "doctor/patients/create_medical_report/{patientId}"
     const val DOCTOR_PATIENTS_PRESCRIPTIONS_ROUTE = "doctor/patients/prescriptions/{patientId}"
@@ -88,8 +88,8 @@ object Route {
     fun getDoctorChatRoute(chatId: String, patientId:String, doctorId: String) =
         "doctor/chat/$chatId/$patientId/$doctorId"
 
-    fun getDoctorPatientsMedicalHistorySectionRoute(patientId: String, section: String) =
-        "doctor/patients/medical_history/$patientId/$section"
+    fun getDoctorPatientsMedicalHistorySectionRoute(patientId: String, sectionType: String) =
+        "doctor/patients/medical_history/$patientId/$sectionType"
 
     fun getDoctorPatientsCreatePrescriptionsRoute(patientId: String) =
         "doctor/patients/create_prescriptions/$patientId"

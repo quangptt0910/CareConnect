@@ -3,9 +3,7 @@ package com.example.careconnect.screens.doctor.patients.medicalhistory
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,191 +34,98 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.dataclass.Allergy
 import com.example.careconnect.dataclass.Condition
 import com.example.careconnect.dataclass.Immunization
+import com.example.careconnect.dataclass.MedicalHistoryEntry
+import com.example.careconnect.dataclass.MedicalHistoryType
 import com.example.careconnect.dataclass.Medication
-import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Surgery
 import kotlinx.coroutines.launch
 
-sealed class MedicalHistorySection {
-    object Medications : MedicalHistorySection()
-    data class MedicationsEdit(val existing: Medication) : MedicalHistorySection()
 
-    object Allergies : MedicalHistorySection()
-    data class AllergiesEdit(val existing: Allergy) : MedicalHistorySection()
-
-    object Conditions : MedicalHistorySection()
-    data class ConditionsEdit(val existing: Condition) : MedicalHistorySection()
-
-    object Surgeries : MedicalHistorySection()
-    data class SurgeriesEdit(val existing: Surgery) : MedicalHistorySection()
-
-    object Immunizations : MedicalHistorySection()
-    data class ImmunizationsEdit(val existing: Immunization) : MedicalHistorySection()
-
+enum class DialogMode {
+    Add, Edit
 }
-
-val MedicalHistorySection.title: String
-    get() = when (this) {
-        is MedicalHistorySection.Medications,
-        is MedicalHistorySection.MedicationsEdit -> "Medications"
-        is MedicalHistorySection.Allergies,
-        is MedicalHistorySection.AllergiesEdit -> "Allergies"
-        is MedicalHistorySection.Conditions,
-        is MedicalHistorySection.ConditionsEdit -> "Conditions"
-        is MedicalHistorySection.Surgeries,
-        is MedicalHistorySection.SurgeriesEdit -> "Surgeries"
-        is MedicalHistorySection.Immunizations,
-        is MedicalHistorySection.ImmunizationsEdit -> "Immunizations"
-    }
 
 @Composable
 fun MedicalHistorySectionScreen(
     patientId: String,
-    section: String,
+    sectionType: String, // of type like 'medications', 'allergies'
     onBack: () -> Unit,
+    showSnackbar: (SnackBarMessage) -> Unit,
     viewModel: MedicalHistorySectionViewModel = hiltViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val medicalHistoryType = MedicalHistoryType.fromCollectionName(sectionType)
+        ?: MedicalHistoryType.MEDICATION
 
     LaunchedEffect(patientId) {
         viewModel.loadPatient(patientId)
-        when (section) {
-            "Medications" -> viewModel.loadMedications(patientId)
-            "Allergies" -> viewModel.loadAllergies(patientId)
-            "Conditions" -> viewModel.loadConditions(patientId)
-            "Surgeries" -> viewModel.loadSurgeries(patientId)
-            "Immunizations" -> viewModel.loadImmunizations(patientId)
-        }
+        viewModel.loadEntries(patientId, medicalHistoryType)
     }
 
-    val medications by viewModel.medications.collectAsState()
-    val allergies by viewModel.allergies.collectAsState()
-    val conditions by viewModel.conditions.collectAsState()
-    val surgeries by viewModel.surgeries.collectAsState()
-    val immunizations by viewModel.immunizations.collectAsState()
-
-    val entries: List<Any> = when (section) {
-        "Medications" -> medications
-        "Allergies" -> allergies
-        "Conditions" -> conditions
-        "Surgeries" -> surgeries
-        "Immunizations" -> immunizations
-        else -> listOf()
-    }
+    val entries by viewModel.entries.collectAsState()
+    val patient by viewModel.patient.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     MedicalHistorySectionScreenContent(
-        section = when (section) {
-            "Medications" -> MedicalHistorySection.Medications
-            "Allergies" -> MedicalHistorySection.Allergies
-            "Conditions" -> MedicalHistorySection.Conditions
-            "Surgeries" -> MedicalHistorySection.Surgeries
-            "Immunizations" -> MedicalHistorySection.Immunizations
-            else -> MedicalHistorySection.Medications
-        },
+        sectionType = medicalHistoryType,
         entries = entries,
-        patient = viewModel.patient.value ?: Patient(),
         onBack = onBack,
-        onAddEntry = { section, entry ->
+        onAddEntry = { entry ->
             coroutineScope.launch {
-                when (section) {
-                    is MedicalHistorySection.Medications -> if (entry is Medication) {
-                        viewModel.addMedication(patientId, entry)
-                        viewModel.loadMedications(patientId)
-                    }
-                    is MedicalHistorySection.MedicationsEdit -> if (entry is Medication) {
-                        viewModel.updateMedication(patientId, entry)
-                        viewModel.loadMedications(patientId)
-                    }
-
-                    is MedicalHistorySection.Allergies -> if (entry is Allergy) {
-                        viewModel.addAllergy(patientId, entry)
-                        viewModel.loadAllergies(patientId)
-                    }
-                    is MedicalHistorySection.AllergiesEdit -> if (entry is Allergy) {
-                        viewModel.updateAllergy(patientId, entry)
-                        viewModel.loadAllergies(patientId)
-                    }
-
-                    is MedicalHistorySection.Conditions -> if (entry is Condition) {
-                        viewModel.addCondition(patientId, entry)
-                        viewModel.loadConditions(patientId)
-                    }
-                    is MedicalHistorySection.ConditionsEdit -> if (entry is Condition) {
-                        viewModel.updateCondition(patientId, entry)
-                        viewModel.loadConditions(patientId)
-                    }
-
-                    is MedicalHistorySection.Surgeries -> if (entry is Surgery) {
-                        viewModel.addSurgery(patientId, entry)
-                        viewModel.loadSurgeries(patientId)
-                    }
-                    is MedicalHistorySection.SurgeriesEdit -> if (entry is Surgery) {
-                        viewModel.updateSurgery(patientId, entry)
-                        viewModel.loadSurgeries(patientId)
-                    }
-
-                    is MedicalHistorySection.Immunizations -> if (entry is Immunization) {
-                        viewModel.addImmunization(patientId, entry)
-                        viewModel.loadImmunizations(patientId)
-                    }
-                    is MedicalHistorySection.ImmunizationsEdit -> if (entry is Immunization) {
-                        viewModel.updateImmunization(patientId, entry)
-                        viewModel.loadImmunizations(patientId)
-                    }
+                val success = viewModel.addEntry(patientId, entry)
+                if (success != null) {
+                    viewModel.refreshEntries(patientId, medicalHistoryType)
                 }
+                // TODO: Show success/error message
+            }
+        },
+        onUpdateEntry = { entry ->
+            coroutineScope.launch {
+                val success = viewModel.updateEntry(patientId, entry)
+                if (success) {
+                    viewModel.refreshEntries(patientId, medicalHistoryType)
+                }
+                // TODO: Show success/error message
             }
         },
         onDeleteEntry = { entry ->
             coroutineScope.launch {
-                when (entry) {
-                    is Medication -> {
-                        viewModel.deleteMedication(patientId, entry)
-                        viewModel.loadMedications(patientId)
-                    }
-                    is Allergy -> {
-                        viewModel.deleteAllergy(patientId, entry)
-                        viewModel.loadAllergies(patientId)
-                    }
-                    is Condition -> {
-                        viewModel.deleteCondition(patientId, entry)
-                        viewModel.loadConditions(patientId)
-                    }
-                    is Surgery -> {
-                        viewModel.deleteSurgery(patientId, entry)
-                        viewModel.loadSurgeries(patientId)
-                    }
-                    is Immunization -> {
-                        viewModel.deleteImmunization(patientId, entry)
-                        viewModel.loadImmunizations(patientId)
-                    }
+                val success = viewModel.deleteEntry(patientId, entry)
+                if (success) {
+                    viewModel.refreshEntries(patientId, medicalHistoryType)
                 }
+                // TODO: Show success/error message
             }
-        }
+        },
+        showSnackbar = showSnackbar
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicalHistorySectionScreenContent(
-    section: MedicalHistorySection,
-    patient: Patient,
-    entries: List<Any>,
+    sectionType: MedicalHistoryType,
+    entries: List<MedicalHistoryEntry>,
+    isLoading: Boolean = false,
     onBack: () -> Unit,
-    onAddEntry: (MedicalHistorySection, Any) -> Unit,
-    onSectionChange: (MedicalHistorySection) -> Unit = {},
-    onDeleteEntry: (Any) -> Unit = {}
+    onAddEntry: (MedicalHistoryEntry) -> Unit,
+    onUpdateEntry: (MedicalHistoryEntry) -> Unit,
+    onDeleteEntry: (MedicalHistoryEntry) -> Unit,
+    showSnackbar: (SnackBarMessage) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
+    var dialogMode by remember { mutableStateOf<DialogMode>(DialogMode.Add) }
+    var selectedEntry by remember { mutableStateOf<MedicalHistoryEntry?>(null) }
+
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
-    var selectedEntry by remember { mutableStateOf<Any?>(null) }
 
     Scaffold(
         topBar = {
@@ -230,7 +135,7 @@ fun MedicalHistorySectionScreenContent(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 title = {
-                    Text(section.title, style = MaterialTheme.typography.titleLarge)
+                    Text(sectionType.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.titleLarge)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -240,7 +145,11 @@ fun MedicalHistorySectionScreenContent(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
+            FloatingActionButton(onClick = {
+                dialogMode = DialogMode.Add
+                selectedEntry = null
+                showDialog = true
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         }
@@ -250,179 +159,76 @@ fun MedicalHistorySectionScreenContent(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            when (section) {
-                is MedicalHistorySection.Medications -> items(entries.filterIsInstance<Medication>()) { medication ->
-                    MedicalHistoryCard(
-                        icon = Icons.Default.MedicalServices,
-                        title = medication.name,
-                        details = listOf(
-                            "Dosage: ${medication.dosage}",
-                            "Frequency: ${medication.frequency}",
-                            "From: ${medication.startDate} to ${medication.endDate}"
-                        ),
-                        onClick = {
-                            showBottomSheet = true
-                            selectedEntry = medication
-                        }
-                    )
-                }
-                is MedicalHistorySection.Allergies -> items(entries.filterIsInstance<Allergy>()) { allergy ->
-                    MedicalHistoryCard(
-                        icon = Icons.Default.MedicalServices,
-                        title = allergy.allergen,
-                        details = listOf(
-                            "Severity: ${allergy.severity}",
-                            "Reaction: ${allergy.reaction}"
-                        ),
-                        onClick = {
-                            showBottomSheet = true
-                            selectedEntry = allergy
-                        }
-                    )
-                }
-                is MedicalHistorySection.Conditions -> items(entries.filterIsInstance<Condition>()) { condition ->
-                    MedicalHistoryCard(
-                        icon = Icons.Default.MedicalServices,
-                        title = condition.name,
-                        details = listOf(
-                            "Status: ${condition.status}",
-                            "Diagnosed on: ${condition.diagnosedDate}"
-                        ),
-                        onClick = {
-                            showBottomSheet = true
-                            selectedEntry = condition
-                        }
-                    )
-                }
-                is MedicalHistorySection.Surgeries -> items(entries.filterIsInstance<Surgery>()) { surgery ->
-                    MedicalHistoryCard(
-                        icon = Icons.Default.MedicalServices,
-                        title = surgery.surgeryName,
-                        details = listOf(
-                            "Date: ${surgery.surgeryDate}",
-                            "Hospital: ${surgery.hospital}"
-                        ),
-                        onClick = {
-                            showBottomSheet = true
-                            selectedEntry = surgery
-                        }
-                    )
-                }
-                is MedicalHistorySection.Immunizations -> items(entries.filterIsInstance<Immunization>()) { immunization ->
-                    MedicalHistoryCard(
-                        icon = Icons.Default.MedicalServices,
-                        title = immunization.vaccineName,
-                        details = listOf(
-                            "Date: ${immunization.dateAdministered}",
-                            "Administered by: ${immunization.administeredBy}",
-                            "Next due date: ${immunization.nextDueDate}"
-                        ),
-                        onClick = {
-                            showBottomSheet = true
-                            selectedEntry = immunization
-                        }
-                    )
-                }
-                is MedicalHistorySection.AllergiesEdit,
-                is MedicalHistorySection.ConditionsEdit,
-                is MedicalHistorySection.ImmunizationsEdit,
-                is MedicalHistorySection.MedicationsEdit,
-                is MedicalHistorySection.SurgeriesEdit -> {
-                    item {
-                        Spacer(modifier = Modifier.height(0.dp)) // or nothing
+            items(entries) { entry ->
+                MedicalHistoryCard(
+                    entry = entry,
+                    onClick = {
+                        selectedEntry = entry
+                        showBottomSheet = true
                     }
-                }
+                )
             }
         }
     }
 
+    // Generic dialog based on section type
     if (showDialog) {
-        when (val sec = section) {
-            is MedicalHistorySection.Medications ->
-                MedicationDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
+        when (sectionType) {
+            MedicalHistoryType.MEDICATION -> MedicationDialog(
+                onDismiss = { showDialog = false },
+                onSave = { medication ->
+                    when (dialogMode) {
+                        DialogMode.Add -> onAddEntry(medication)
+                        DialogMode.Edit -> onUpdateEntry(medication)
                     }
-                )
-            is MedicalHistorySection.MedicationsEdit ->
-                MedicationDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
-                    },
-                    existing = sec.existing
-                )
-            is MedicalHistorySection.Allergies ->
-                AllergyDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
+                    showDialog = false
+                },
+                existing = if (dialogMode == DialogMode.Edit) selectedEntry as? Medication else null
+            )
+            MedicalHistoryType.ALLERGY -> AllergyDialog(
+                onDismiss = { showDialog = false },
+                onSave = { allergy ->
+                    when (dialogMode) {
+                        DialogMode.Add -> onAddEntry(allergy)
+                        DialogMode.Edit -> onUpdateEntry(allergy)
                     }
-                )
-            is MedicalHistorySection.AllergiesEdit ->
-                AllergyDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
-                    },
-                    existing = sec.existing
-                )
-            is MedicalHistorySection.Conditions ->
-                ConditionDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
+                    showDialog = false
+                },
+                existing = if (dialogMode == DialogMode.Edit) selectedEntry as? Allergy else null
+            )
+            MedicalHistoryType.CONDITION -> ConditionDialog(
+                onDismiss = { showDialog = false },
+                onSave = { condition ->
+                    when (dialogMode) {
+                        DialogMode.Add -> onAddEntry(condition)
+                        DialogMode.Edit -> onUpdateEntry(condition)
                     }
-                )
-            is MedicalHistorySection.ConditionsEdit ->
-                ConditionDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
-                    },
-                    existing = sec.existing
-                )
-            is MedicalHistorySection.Surgeries ->
-                SurgeryDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
+                    showDialog = false
+                },
+                existing = if (dialogMode == DialogMode.Edit) selectedEntry as? Condition else null
+            )
+            MedicalHistoryType.SURGERY -> SurgeryDialog(
+                onDismiss = { showDialog = false },
+                onSave = { surgery ->
+                    when (dialogMode) {
+                        DialogMode.Add -> onAddEntry(surgery)
+                        DialogMode.Edit -> onUpdateEntry(surgery)
                     }
-                )
-            is MedicalHistorySection.SurgeriesEdit ->
-                SurgeryDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
-                    },
-                    existing = sec.existing
-                )
-            is MedicalHistorySection.Immunizations ->
-                ImmunizationDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
+                    showDialog = false
+                },
+                existing = if (dialogMode == DialogMode.Edit) selectedEntry as? Surgery else null
+            )
+            MedicalHistoryType.IMMUNIZATION -> ImmunizationDialog(
+                onDismiss = { showDialog = false },
+                onSave = { immunization ->
+                    when (dialogMode) {
+                        DialogMode.Add -> onAddEntry(immunization)
+                        DialogMode.Edit -> onUpdateEntry(immunization)
                     }
-                )
-            is MedicalHistorySection.ImmunizationsEdit ->
-                ImmunizationDialog(
-                    onDismiss = { showDialog = false },
-                    onAdd = {
-                        onAddEntry(sec, it)
-                        showDialog = false
-                    },
-                    existing = sec.existing
-                )
+                    showDialog = false
+                },
+                existing = if (dialogMode == DialogMode.Edit) selectedEntry as? Immunization else null
+            )
         }
     }
 
@@ -434,18 +240,8 @@ fun MedicalHistorySectionScreenContent(
             BottomSheetContent(
                 onEdit = {
                     showBottomSheet = false
-                    selectedEntry?.let {
-                        val editSection = when (it) {
-                            is Medication -> MedicalHistorySection.MedicationsEdit(it)
-                            is Allergy -> MedicalHistorySection.AllergiesEdit(it)
-                            is Condition -> MedicalHistorySection.ConditionsEdit(it)
-                            is Surgery -> MedicalHistorySection.SurgeriesEdit(it)
-                            is Immunization -> MedicalHistorySection.ImmunizationsEdit(it)
-                            else -> section
-                        }
-                        onSectionChange(editSection)
-                        showDialog = true
-                    }
+                    dialogMode = DialogMode.Edit
+                    showDialog = true
                 },
                 onDelete = {
                     selectedEntry?.let { entry ->
@@ -472,14 +268,38 @@ fun BottomSheetContent(onEdit: () -> Unit, onDelete: () -> Unit) {
     }
 }
 
+
 @Composable
 fun MedicalHistoryCard(
-    icon: ImageVector,
-    title: String,
-    details: List<String>,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
+    entry: MedicalHistoryEntry,
     onClick: () -> Unit = {}
 ) {
+    val (title, details) = when (entry) {
+        is Medication -> entry.name to listOf(
+            "Dosage: ${entry.dosage}",
+            "Frequency: ${entry.frequency}",
+            "From: ${entry.startDate} to ${entry.endDate}"
+        )
+        is Allergy -> entry.allergen to listOf(
+            "Severity: ${entry.severity}",
+            "Reaction: ${entry.reaction}"
+        )
+        is Condition -> entry.name to listOf(
+            "Status: ${entry.status}",
+            "Diagnosed on: ${entry.diagnosedDate}"
+        )
+        is Surgery -> entry.surgeryName to listOf(
+            "Date: ${entry.surgeryDate}",
+            "Hospital: ${entry.hospital}"
+        )
+        is Immunization -> entry.vaccineName to listOf(
+            "Date: ${entry.dateAdministered}",
+            "Administered by: ${entry.administeredBy}",
+            "Next due date: ${entry.nextDueDate}"
+        )
+        else -> "Unknown" to listOf("No details available")
+    }
+
     ElevatedCard(
         modifier = Modifier
             .padding(vertical = 8.dp)
@@ -487,11 +307,15 @@ fun MedicalHistoryCard(
             .clickable { onClick() }
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            Icon(icon, contentDescription = null, tint = iconTint)
+            Icon(
+                Icons.Default.MedicalServices,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
             Column(modifier = Modifier.padding(start = 16.dp)) {
                 Text(text = title, style = MaterialTheme.typography.titleMedium)
-                details.forEach {
-                    Text(text = it, style = MaterialTheme.typography.bodySmall)
+                details.forEach { detail ->
+                    Text(text = detail, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
@@ -502,13 +326,15 @@ fun MedicalHistoryCard(
 @Composable
 fun MedicalHistorySectionScreenPreview() {
     MedicalHistorySectionScreenContent(
-        section = MedicalHistorySection.Medications,
-        patient = Patient(),
+        sectionType = MedicalHistoryType.ALLERGY,
         entries = listOf(
-            Medication("Paracetamol", "500mg", "2023-01-01", "2023-01-10", "Twice a day"),
-            Medication("Ibuprofen", "200mg", "2023-02-01", "2023-02-07", "Once a day")
+            Allergy("Paracetamol", "500mg", "2023-01-01", "2023-01-10", "Twice a day"),
+            Allergy("Ibuprofen", "200mg", "2023-02-01", "2023-02-07", "Once a day")
         ),
         onBack = {},
-        onAddEntry = { _, _ -> }
+        onAddEntry = {},
+        onUpdateEntry = {},
+        onDeleteEntry = {},
+        showSnackbar = {}
     )
 }
