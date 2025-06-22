@@ -132,7 +132,13 @@ class BookAppointmentViewModel @Inject constructor(
                     status = AppointmentStatus.PENDING
                 )
 
-                appointmentRepository.createAppointment(appointment)
+//                appointmentRepository.createAppointment(appointment)
+                appointmentRepository.createAppointmentWithSlotUpdate(
+                    appointment = appointment,
+                    doctorId = _doctorId.value ?: "",
+                    date = currentState.selectedDate.toDateString(),
+                    targetTimeSlot = selectedSlot
+                )
                 showSnackBar(SnackBarMessage.IdMessage(R.string.appointment_booked_success))
                 refreshSlots(showSnackBar)
             } catch (e: Exception) {
@@ -151,6 +157,8 @@ class BookAppointmentViewModel @Inject constructor(
                     doctorId = _doctorId.value ?: "",
                     date = _selectedDate.value
                 )
+
+                println("DEBUG: loadAvailableSlots ${_availableSlots.value}")
             } catch (e: Exception) {
                 showSnackBar(SnackBarMessage.StringMessage("Failed to load available slots"))
                 _availableSlots.value = emptyList()

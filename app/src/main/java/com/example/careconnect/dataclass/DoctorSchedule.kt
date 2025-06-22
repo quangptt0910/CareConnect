@@ -1,23 +1,22 @@
 package com.example.careconnect.dataclass
 
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.ServerTimestamp
 import java.time.LocalDate
+import java.util.Date
 
 
 /**
  * Represents a doctor's schedule for available days and time slots.
- * @property workingDays A map of day names to a list of available time slots.
- *  - Key: date string (yyyy-mm-dd), value: list of available time slots for that day.
- * @property defaultWorkingHours A list of default time slots for the doctor's schedule.
  */
 data class DoctorSchedule(
-    val workingDays: Map<String, List<TimeSlot>> = emptyMap(),  // Map of day names to a list of available time slots>
-    val defaultWorkingHours: List<TimeSlot> = listOf(
-        TimeSlot("09:00", "12:00", appointmentMinutes = 20),
-        TimeSlot("14:00", "18:00", appointmentMinutes = 30)
-    )
-) {
-
-}
+    @DocumentId val id: String = "",
+    val date: String = "",
+    val timeSlots: List<TimeSlot> = emptyList(),
+    val isWorkingDay: Boolean = true,
+    @ServerTimestamp val createdAt: Date? = null,
+    @ServerTimestamp val updatedAt: Date? = null
+)
 
 enum class SlotType { CONSULT, SURGERY }
 
@@ -29,28 +28,11 @@ data class TimeSlot(
     val endTime: String = "",    // End time HH:MM (e.g., "09:15")
     val appointmentMinutes: Int = 15,
     val slotType: SlotType = SlotType.CONSULT,
-    val isAvailable: Boolean = true  // Whether the time slot is available for booking
+    val available: Boolean = true  // Whether the time slot is available for booking
 ) {
-
+    constructor() : this("", "", 15, SlotType.CONSULT, true)
 }
-
-
 
 // Extension functions to help with date conversions
 fun LocalDate.toDateString(): String = this.toString() // Returns in ISO format (YYYY-MM-DD)
 fun String.toLocalDate(): LocalDate = LocalDate.parse(this) // Parses from ISO format (YYYY-MM-DD)
-
-/** Turn a TimeSlot into a JSON-friendly Map */
-fun TimeSlot.toMap(): Map<String, Any> = mapOf(
-    "startTime"   to startTime,
-    "endTime"     to endTime,
-    "isAvailable" to isAvailable
-)
-
-/** Turn a DoctorSchedule into a JSON-friendly Map */
-fun DoctorSchedule.toMap(): Map<String, Any> = mapOf(
-    "workingDays"         to workingDays.mapValues { (_, slots) ->
-        slots.map { it.toMap() }
-    },
-    "defaultWorkingHours" to defaultWorkingHours.map { it.toMap() }
-)

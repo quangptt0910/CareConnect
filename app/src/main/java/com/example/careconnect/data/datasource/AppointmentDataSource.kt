@@ -3,6 +3,8 @@ package com.example.careconnect.data.datasource
 import android.util.Log
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
+import com.example.careconnect.dataclass.DoctorSchedule
+import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.dataclass.toLocalDate
 import com.example.careconnect.notifications.NotificationManager
 import com.google.firebase.firestore.FirebaseFirestore
@@ -208,14 +210,92 @@ class AppointmentDataSource @Inject constructor(
         return firestore.collection("appointments").document(appointmentId).get().await().toObject(Appointment::class.java)
     }
 
+    /**
+     * Creates an appointment and updates the doctor's time slot availability in a single transaction
+     * This ensures data consistency and prevents double booking
+     */
+    suspend fun createAppointmentWithSlotUpdate(
+        appointment: Appointment,
+        doctorId: String,
+        date: String,
+        targetTimeSlot: TimeSlot
+    ): String {
+        return try {
+            val appointmentId = firestore.runTransaction { transaction ->
+                // References
+                val appointmentsRef = firestore.collection("appointments")
+                val scheduleRef = firestore
+                    .collection("doctors")
+                    .document(doctorId)
+                    .collection("schedules")
+                    .document(date)
+
+                // Read the schedule document to verify slot is still available
+                val scheduleSnapshot = transaction.get(scheduleRef)
+                if (!scheduleSnapshot.exists()) {
+                    throw Exception("No schedule found for date: $date")
+                }
+
+                val schedule = scheduleSnapshot.toObject(DoctorSchedule::class.java)
+                    ?: throw Exception("Failed to parse schedule data")
+
+                // Find and validate the time slot
+                val timeSlots = schedule.timeSlots.toMutableList()
+                var slotIndex = -1
+                var currentSlot: TimeSlot? = null
+
+                for (i in timeSlots.indices) {
+                    val slot = timeSlots[i]
+                    if (slot.startTime == targetTimeSlot.startTime &&
+                        slot.endTime == targetTimeSlot.endTime &&
+                        slot.appointmentMinutes == targetTimeSlot.appointmentMinutes &&
+                        slot.slotType == targetTimeSlot.slotType) {
+                        slotIndex = i
+                        currentSlot = slot
+                        break
+                    }
+                }
+
+                if (slotIndex == -1) {
+                    throw Exception("Time slot not found")
+                }
+
+                if (currentSlot?.available != true) {
+                    throw Exception("Time slot is no longer available")
+                }
+
+                // Create the appointment document
+                val appointmentForSave = appointment.copy(id = "", status = AppointmentStatus.PENDING)
+                val newAppointmentRef = appointmentsRef.document()
+                transaction.set(newAppointmentRef, appointmentForSave)
+
+                // Update the time slot availability
+                timeSlots[slotIndex] = currentSlot.copy(available = false)
+                val updatedSchedule = schedule.copy(timeSlots = timeSlots)
+                transaction.set(scheduleRef, updatedSchedule)
+
+                // Return the new appointment ID
+                newAppointmentRef.id
+            }.await()
+
+            // Trigger notification after successful transaction
+            val savedAppointment = appointment.copy(id = appointmentId)
+            notification.triggerAppointmentNotification(savedAppointment, "PENDING")
+
+            appointmentId
+
+        } catch (e: Exception) {
+            Log.e("AppointmentRepository", "Failed to create appointment with slot update", e)
+            throw e
+        }
+    }
+
+
     suspend fun createAppointment(appointment: Appointment): String {
        return try {
            val appointmentForSave = appointment.copy(id = "", status = AppointmentStatus.PENDING)
-
            val docRef = firestore.collection("appointments").add(appointmentForSave).await()
-
            val savedAppointment = appointment.copy(id = docRef.id)
-
            notification.triggerAppointmentNotification(savedAppointment, "PENDING")
 
            return docRef.id

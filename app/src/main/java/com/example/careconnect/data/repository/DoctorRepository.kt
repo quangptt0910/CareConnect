@@ -32,6 +32,9 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getDoctorById(doctorId)
     }
 
+    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> =
+        doctorRemoteDataSource.getScheduleForDate(doctorId, date)
+
     suspend fun saveWorkingDays(doctorId: String, selectedDate: Set<LocalDate>) {
         doctorRemoteDataSource.saveWorkingDays(doctorId, selectedDate)
     }
@@ -48,9 +51,11 @@ class DoctorRepository @Inject constructor(
         doctorRemoteDataSource.addPatient(doctorId, patientId)
     }
 
-    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
-        return doctorRemoteDataSource.getScheduleForDate(doctorId, date)
-    }
+    suspend fun updateTimeSlotAvailability(doctorId: String, date: String, targetTimeSlot: TimeSlot, newAvailability: Boolean): Boolean =
+        doctorRemoteDataSource.updateTimeSlotAvailability(doctorId, date, targetTimeSlot, newAvailability)
+
+    suspend fun addTimeSlots(doctorId: String, date: LocalDate, newTimeSlots: List<TimeSlot>): Boolean =
+        doctorRemoteDataSource.addTimeSlots(doctorId, date, newTimeSlots)
 
     suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         doctorRemoteDataSource.saveSlot(doctorId, date, slot)
@@ -66,6 +71,10 @@ class DoctorRepository @Inject constructor(
 
     suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {
         return doctorRemoteDataSource.getAvailableSlots(doctorId, date)
+    }
+
+    suspend fun getAvailableSlotsFlow(doctorId: String, date: LocalDate): Flow<List<TimeSlot>> {
+        return doctorRemoteDataSource.getAvailableSlotsFlow(doctorId, date)
     }
 
     fun clearCache(doctorId: String? = null) {

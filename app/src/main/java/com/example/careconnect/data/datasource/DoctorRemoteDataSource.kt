@@ -2,6 +2,7 @@ package com.example.careconnect.data.datasource
 
 import android.util.Log
 import com.example.careconnect.dataclass.Doctor
+import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.PatientRef
 import com.example.careconnect.dataclass.Task
@@ -11,6 +12,7 @@ import com.example.careconnect.dataclass.toLocalDate
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.dataObjects
 import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,25 +80,61 @@ class DoctorRemoteDataSource @Inject constructor(
         return firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await().toObject(Doctor::class.java)
     }
 
-    suspend fun saveWorkingDays(doctorId: String, selectedDate: Set<LocalDate>) {
-        val db = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
-        val workingDays = selectedDate.associate { date ->
-            date.toDateString() to listOf(
-                TimeSlot("09:00", "12:00"),
-                TimeSlot("14:00", "18:00")
-            )
+    /**
+     * Save working days for a doctor with default time slots
+     */
+    suspend fun saveWorkingDays(doctorId: String, selectedDates: Set<LocalDate>) {
+        try {
+            val batch = firestore.batch()
+            val doctorScheduleRef = firestore
+                .collection(DOCTORS_COLLECTION)
+                .document(doctorId)
+                .collection(SCHEDULES_COLLECTION)
+
+            selectedDates.forEach { date ->
+                val dateString = date.toDateString()
+                val scheduleRef = doctorScheduleRef.document(dateString)
+
+                val defaultTimeSlots = listOf(
+                    TimeSlot("09:00", "12:00", appointmentMinutes = 20),
+                    TimeSlot("14:00", "17:00", appointmentMinutes = 30)
+                )
+
+                val schedule = DoctorSchedule(
+                    id = dateString,
+                    date = dateString,
+                    timeSlots = defaultTimeSlots,
+                    isWorkingDay = true
+                )
+
+                batch.set(scheduleRef, schedule)
+            }
+
+            batch.commit().await()
+        } catch (e: Exception) {
+            Log.e("DoctorScheduleRepository", "Failed to save working days", e)
+            throw e
         }
+    }
 
-        val schedule = hashMapOf("workingDays" to workingDays)
-
-        db.update("schedule", schedule).await()
+    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
+        if (doctorId.isBlank()) return emptyList()
+        val dateKey = date.toDateString()      // e.g. "2025-06-22"
+        val docRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(SCHEDULES_COLLECTION).document(dateKey)
+        val snap = docRef.get().await()
+        val schedule = snap.toObject(DoctorSchedule::class.java)
+        return if (schedule != null && schedule.isWorkingDay) {
+            schedule.timeSlots
+        } else {
+            emptyList()
+        }
     }
 
     /**
      * https://firebase.google.com/docs/firestore/query-data/listen#kotlin
      */
     fun getWorkingDays(doctorId: String): Flow<Set<LocalDate>> = callbackFlow {
-        val db = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+        val db = firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(SCHEDULES_COLLECTION)
 
         val registration = db.addSnapshotListener { snapshot, e ->
             if (e != null) {
@@ -105,13 +143,18 @@ class DoctorRemoteDataSource @Inject constructor(
                 return@addSnapshotListener
             }
 
-            if (snapshot != null && snapshot.exists()) {
-                val doctor = snapshot.toObject(Doctor::class.java)
-                val workingDays = doctor?.schedule?.workingDays ?: emptyMap()
-                val dates = workingDays.keys.map { dateString ->
-                    dateString.toLocalDate()
+            if (snapshot != null) {
+                val dates = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        val schedule = doc.toObject(DoctorSchedule::class.java)
+                        if (schedule?.isWorkingDay == true) {
+                            schedule.date.toLocalDate()
+                        } else null
+                    } catch (e: Exception) {
+                        Log.e("DoctorScheduleRepository", "Error parsing schedule", e)
+                        null
+                    }
                 }.toSet()
-
                 trySend(dates)
             } else {
                 trySend(emptySet())
@@ -165,40 +208,121 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun updateTimeSlotAvailability(
+        doctorId: String,
+        date: String,
+        targetTimeSlot: TimeSlot,
+        newAvailability: Boolean
+    ): Boolean {
+        return try {
+            val scheduleRef = firestore
+                .collection(DOCTORS_COLLECTION)
+                .document(doctorId)
+                .collection(SCHEDULES_COLLECTION)
+                .document(date)
+
+            firestore.runTransaction { transaction ->
+                val scheduleSnapshot = transaction.get(scheduleRef)
+
+                if (!scheduleSnapshot.exists()) {
+                    throw Exception("Schedule not found for date: $date")
+                }
+
+                val schedule = scheduleSnapshot.toObject(DoctorSchedule::class.java)
+                    ?: throw Exception("Failed to parse schedule data")
+
+                val timeSlots = schedule.timeSlots.toMutableList()
+                var slotFound = false
+
+                for (i in timeSlots.indices) {
+                    val slot = timeSlots[i]
+                    if (slot.startTime == targetTimeSlot.startTime &&
+                        slot.endTime == targetTimeSlot.endTime &&
+                        slot.appointmentMinutes == targetTimeSlot.appointmentMinutes &&
+                        slot.slotType == targetTimeSlot.slotType) {
+
+                        timeSlots[i] = slot.copy(available = newAvailability)
+                        slotFound = true
+                        break
+                    }
+                }
+
+                if (!slotFound) {
+                    throw Exception("Time slot not found")
+                }
+
+                val updatedSchedule = schedule.copy(timeSlots = timeSlots)
+                transaction.set(scheduleRef, updatedSchedule)
+            }.await()
+
+            true
+        } catch (e: Exception) {
+            Log.e("DoctorScheduleRepository", "Failed to update time slot availability", e)
+            false
+        }
+    }
+
+
+
+    /**
+     * Add time slots to a specific date
+     */
+    suspend fun addTimeSlots(
+        doctorId: String,
+        date: LocalDate,
+        newTimeSlots: List<TimeSlot>
+    ): Boolean {
+        return try {
+            val dateString = date.toDateString()
+            val scheduleRef = firestore
+                .collection(DOCTORS_COLLECTION)
+                .document(doctorId)
+                .collection(SCHEDULES_COLLECTION)
+                .document(dateString)
+
+            firestore.runTransaction { transaction ->
+                val scheduleSnapshot = transaction.get(scheduleRef)
+
+                val schedule = if (scheduleSnapshot.exists()) {
+                    scheduleSnapshot.toObject(DoctorSchedule::class.java)
+                        ?: throw Exception("Failed to parse schedule data")
+                } else {
+                    // Create new schedule if it doesn't exist
+                    DoctorSchedule(
+                        id = dateString,
+                        date = dateString,
+                        timeSlots = emptyList(),
+                        isWorkingDay = true
+                    )
+                }
+
+                val updatedTimeSlots = schedule.timeSlots + newTimeSlots
+                val updatedSchedule = schedule.copy(timeSlots = updatedTimeSlots)
+
+                transaction.set(scheduleRef, updatedSchedule)
+            }.await()
+
+            true
+        } catch (e: Exception) {
+            Log.e("DoctorScheduleRepository", "Failed to add time slots", e)
+            false
+        }
+    }
+
     suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         if (doctorId.isEmpty()) return
 
         val dateKey = date.toDateString()
         val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+        val scheduleRef = doctorRef.collection(SCHEDULES_COLLECTION).document(dateKey)
 
         firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java) ?: throw IllegalStateException("Doctor not found")
+            val snapshot = transaction.get(scheduleRef)
+            val schedule = snapshot.toObject(DoctorSchedule::class.java) ?: return@runTransaction
 
-            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: return@runTransaction
-
-            // Find and remove the specific slot
-            val removedIndex = currentSlots.indexOfFirst {
-                it.startTime == slot.startTime && it.endTime == slot.endTime
-            }
-
-            if (removedIndex >= 0) {
-                currentSlots.removeAt(removedIndex)
-
-                // Update Firestore with the new list
-                transaction.update(doctorRef, "schedule.workingDays.$dateKey", currentSlots)
-
-                // Update cache
-                cachedSchedules[doctorId]?.let { doctorCache ->
-                    val cachedSlots = doctorCache[dateKey]?.toMutableList()
-                    cachedSlots?.let {
-                        it.removeAll { cachedSlot ->
-                            cachedSlot.startTime == slot.startTime && cachedSlot.endTime == slot.endTime
-                        }
-                        doctorCache[dateKey] = it
-                    }
-                }
-            }
+            val filtered = schedule.timeSlots.filterNot { it.startTime == slot.startTime && it.endTime == slot.endTime }
+            val updated = schedule.copy(timeSlots = filtered)
+            transaction.set(scheduleRef, updated, SetOptions.merge())
         }.await()
     }
 
@@ -207,106 +331,42 @@ class DoctorRemoteDataSource @Inject constructor(
 
         val dateKey = date.toDateString()
         val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
+        val scheduleRef = doctorRef.collection(SCHEDULES_COLLECTION).document(dateKey)
 
         firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java) ?: return@runTransaction
+            val snapshot = transaction.get(scheduleRef)
+            val schedule = snapshot.toObject(DoctorSchedule::class.java) ?: return@runTransaction
 
-            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: return@runTransaction
-
-            // Remove slots in the target range
-            val filteredSlots = currentSlots.filterNot { slot ->
-                slot.startTime >= startTime && slot.endTime <= endTime
-            }
-
-            transaction.update(doctorRef, "schedule.workingDays.$dateKey", filteredSlots)
-
-            // Update cache
-            cachedSchedules[doctorId]?.let { doctorCache ->
-                doctorCache[dateKey] = filteredSlots
-            }
+            val filtered = schedule.timeSlots.filterNot { it.startTime >= startTime && it.endTime <= endTime }
+            val updated = schedule.copy(timeSlots = filtered)
+            transaction.set(scheduleRef, updated, SetOptions.merge())
         }.await()
     }
 
     suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         if (doctorId.isEmpty()) return
-
         val dateKey = date.toDateString()
-        val doctorRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId)
-
+        val scheduleRef = firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(SCHEDULES_COLLECTION).document(dateKey)
         firestore.runTransaction { transaction ->
-            val snapshot = transaction.get(doctorRef)
-            val doctor = snapshot.toObject(Doctor::class.java) ?: throw IllegalStateException("Doctor not found")
+            val snapshot = transaction.get(scheduleRef)
+            val schedule = snapshot.toObject(DoctorSchedule::class.java) ?: DoctorSchedule(id = dateKey, date = dateKey, timeSlots = emptyList(), isWorkingDay = true)
+            val updatedTimeSlots = schedule.timeSlots.toMutableList()
 
-            val currentSlots = doctor.schedule.workingDays[dateKey]?.toMutableList() ?: mutableListOf()
+            val idx = updatedTimeSlots.indexOfFirst { it.startTime == slot.startTime && it.endTime == slot.endTime }
+            if (idx >= 0) updatedTimeSlots[idx] = slot
+            else updatedTimeSlots += slot
 
-            // Find existing slot with same time (more efficient than removeAll)
-            val existingIndex = currentSlots.indexOfFirst {
-                it.startTime == slot.startTime && it.endTime == slot.endTime
-            }
-
-            if (existingIndex >= 0) {
-                currentSlots[existingIndex] = slot // Replace existing
-            } else {
-                currentSlots.add(slot) // Add new
-            }
-
-            // Sort slots by start time for better UI experience
-            currentSlots.sortBy { it.startTime }
-
-            // Update Firestore
-            val updatedSchedule = doctor.schedule.workingDays.toMutableMap()
-            updatedSchedule[dateKey] = currentSlots
-
-            transaction.update(doctorRef, "schedule.workingDays.$dateKey", currentSlots)
+            updatedTimeSlots.sortBy { it.startTime }
+            val newSchedule = schedule.copy(
+                id = dateKey,
+                date = dateKey,
+                isWorkingDay = true,
+                timeSlots = updatedTimeSlots
+            )
+            transaction.set(scheduleRef, newSchedule, SetOptions.merge())
         }.await()
-
-        // Update cache
-        val doctorCache = cachedSchedules.getOrPut(doctorId) { mutableMapOf() }
-        val currentCachedSlots = doctorCache[dateKey]?.toMutableList() ?: mutableListOf()
-
-        val existingIndex = currentCachedSlots.indexOfFirst {
-            it.startTime == slot.startTime && it.endTime == slot.endTime
-        }
-
-        if (existingIndex >= 0) {
-            currentCachedSlots[existingIndex] = slot
-        } else {
-            currentCachedSlots.add(slot)
-        }
-
-        currentCachedSlots.sortBy { it.startTime }
-        doctorCache[dateKey] = currentCachedSlots
     }
 
-
-    suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
-        if (doctorId.isEmpty()) return emptyList()
-        val dateKey = date.toDateString()
-
-        // Use cache if available
-        cachedSchedules[doctorId]?.let { doctorCache ->
-            doctorCache[dateKey]?.let { slots ->
-                return slots
-            }
-        }
-
-        return try {
-            val snapshot = firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await()
-            val doctor = snapshot.toObject(Doctor::class.java)
-            val slots = doctor?.schedule?.workingDays?.get(dateKey)?.sortedBy { it.startTime }
-                    ?: emptyList()
-
-            // Update cache
-            val doctorCache = cachedSchedules.getOrPut(doctorId) { mutableMapOf() }
-            doctorCache[dateKey] = slots
-
-            slots
-        } catch (e: Exception) {
-            Log.e("DoctorRemoteDataSource", "Error getting doctor", e)
-            emptyList()
-        }
-    }
 
     private val cachedSchedules = mutableMapOf<String, MutableMap<String, List<TimeSlot>>>()
 
@@ -320,9 +380,59 @@ class DoctorRemoteDataSource @Inject constructor(
     }
 
     suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {
-        return getScheduleForDate(doctorId, date)
-            .filter { it.isAvailable }
-            .sortedBy { it.startTime }
+        return try {
+            val dateString = date.toDateString()
+            val scheduleDoc = firestore
+                .collection(DOCTORS_COLLECTION)
+                .document(doctorId)
+                .collection(SCHEDULES_COLLECTION)
+                .document(dateString)
+                .get()
+                .await()
+
+            if (scheduleDoc.exists()) {
+                val schedule = scheduleDoc.toObject(DoctorSchedule::class.java)
+                //schedule?.timeSlots?.filter { it.available } ?: emptyList()
+                schedule?.timeSlots ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("DoctorScheduleRepository", "Failed to get available slots", e)
+            emptyList()
+        }
+    }
+
+    fun getAvailableSlotsFlow(doctorId: String, date: LocalDate): Flow<List<TimeSlot>> = callbackFlow {
+        val dateString = date.toDateString()
+        val scheduleRef = firestore
+            .collection(DOCTORS_COLLECTION)
+            .document(doctorId)
+            .collection(SCHEDULES_COLLECTION)
+            .document(dateString)
+
+        val registration = scheduleRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.w("DoctorScheduleRepository", "Listen failed.", e)
+                trySend(emptyList())
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                try {
+                    val schedule = snapshot.toObject(DoctorSchedule::class.java)
+                    val availableSlots = schedule?.timeSlots?.filter { it.available } ?: emptyList()
+                    trySend(availableSlots)
+                } catch (e: Exception) {
+                    Log.e("DoctorScheduleRepository", "Error parsing schedule", e)
+                    trySend(emptyList())
+                }
+            } else {
+                trySend(emptyList())
+            }
+        }
+
+        awaitClose { registration.remove() }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -367,5 +477,6 @@ class DoctorRemoteDataSource @Inject constructor(
         private const val PATIENTS_LIST_COLLECTION = "patients_list"
         private const val PATIENTS_COLLECTION = "patients"
         private const val TASKS_COLLECTION = "tasks"
+        private const val SCHEDULES_COLLECTION = "schedules"
     }
 }

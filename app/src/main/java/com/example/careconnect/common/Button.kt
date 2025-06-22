@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -111,7 +111,7 @@ fun FilterSortResetRow(
         // Sort button
         ActionTextButton(
             text = "Sort",
-            icon = Icons.Default.Sort,
+            icon = Icons.AutoMirrored.Filled.Sort,
             onClick = onSortClick,
             enabled = sortEnabled
         )

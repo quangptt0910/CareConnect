@@ -31,6 +31,8 @@
     <string name="admin">Admin</string>
 
     <!-- SnackBarMessage -->
+    <string name="no_google_credentials">Cannot find any Google credentials. Add new Google account to your device or try again later</string>
+    <string name="google_sign_in_failed">Google sign in failed. Please try again</string>
     <string name="generic_error">Something went wrong. Please try again later.</string>
     <string name="incorrect_email_or_password">Incorrect email or password.</string>
     <string name="network_error">Network error. Please check your connection</string>
@@ -40,6 +42,8 @@
     <string name="doctor_deleted">Doctor deleted successfully.</string>
     <string name="appointment_booked_success">Appointment booked successfully!!</string>
     <string name="please_select_time">Please select a time.</string>
+
+
     <!-- LoginScreen -->
     <string name="login">Log In</string>
 
@@ -113,5 +117,6 @@
     <string name="task_without_name">Task without name</string>
 
     <string name="web_client_id">1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com</string>
+
 
 </resources>

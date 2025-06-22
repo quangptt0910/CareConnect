@@ -87,9 +87,7 @@ class ChatViewModel @Inject constructor(
     fun initializeCurrentUser() {
         Firebase.auth.currentUser?.let { user ->
             val name = if (user.uid == patientId) "Patient" else "Doctor"
-            if (name != null) {
-                setCurrentUser(user.uid, name)
-            }
+            setCurrentUser(user.uid, name)
         }
     }
 

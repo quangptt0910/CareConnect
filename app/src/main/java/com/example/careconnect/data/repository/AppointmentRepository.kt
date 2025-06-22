@@ -3,6 +3,7 @@ package com.example.careconnect.data.repository
 import com.example.careconnect.data.datasource.AppointmentDataSource
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
+import com.example.careconnect.dataclass.TimeSlot
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -60,6 +61,9 @@ class AppointmentRepository @Inject constructor(
 
     suspend fun getAppointmentById(appointmentId: String) =
         appointmentDataSource.getAppointmentById(appointmentId)
+
+    suspend fun createAppointmentWithSlotUpdate(appointment: Appointment, doctorId: String, date: String, targetTimeSlot: TimeSlot): String =
+        appointmentDataSource.createAppointmentWithSlotUpdate(appointment, doctorId, date, targetTimeSlot)
 
     suspend fun createAppointment(appointment: Appointment): String {
        return appointmentDataSource.createAppointment(appointment)

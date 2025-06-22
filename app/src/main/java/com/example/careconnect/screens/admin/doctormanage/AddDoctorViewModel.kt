@@ -4,11 +4,8 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
-import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.SnackBarMessage
-import com.example.careconnect.dataclass.TimeSlot
-import com.example.careconnect.dataclass.toMap
 import com.example.careconnect.screens.signup.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,28 +68,18 @@ class AddDoctorViewModel @Inject constructor(
             showSnackBar(SnackBarMessage.IdMessage(R.string.phone))
             return
         }
-        val schedule = DoctorSchedule(
-            workingDays = emptyMap(),
-            defaultWorkingHours = listOf(
-                TimeSlot("09:00", "12:00"),
-                TimeSlot("14:00", "18:00")
-            )
-        )
-
-        val scheduleMap: Map<String, Any> = schedule.toMap()
 
         launchCatching(showSnackBar) {
             val doctorDataMap = hashMapOf(
                 "name" to name,
                 "surname" to surname,
                 "email" to email,
-                "role" to Role.DOCTOR.name,  // Send as string; your cloud function can decide how to parse it
+                "role" to Role.DOCTOR.name,  // Send as string
                 "phone" to phone,
                 "address" to address,
                 "specialization" to specialization,
                 "experience" to experience.toInt(),
                 "profilePhoto" to "",
-                "schedule" to scheduleMap
             )
             val (message, doctorId) = doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             _newDoctorId.value = doctorId

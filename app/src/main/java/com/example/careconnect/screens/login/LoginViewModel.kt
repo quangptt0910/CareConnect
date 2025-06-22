@@ -2,6 +2,8 @@ package com.example.careconnect.screens.login
 
 import android.content.Context
 import android.util.Log
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
@@ -63,9 +65,16 @@ class LoginViewModel @Inject constructor(
                 } else {
                     _shouldRestartApp.value = true
                 }
-            } catch (e: androidx.credentials.exceptions.NoCredentialException) {
-                showSnackBar(SnackBarMessage.StringMessage("No Google accounts found. Please add a Google account to your device."))
-            } catch (e: Exception) {
+            } catch (e: NoCredentialException) {
+                Log.e("LoginViewModel", "No Google accounts found", e)
+                val errorMessage = getAuthErrorMessage(e)
+                showSnackBar(SnackBarMessage.IdMessage(errorMessage))
+            } catch (e: GetCredentialException) {
+                Log.e("LoginViewModel", "Google sign-in failed", e)
+                val errorMessage = getAuthErrorMessage(e)
+                showSnackBar(SnackBarMessage.IdMessage(errorMessage))
+            }
+            catch (e: Exception) {
                 Log.e("LoginViewModel", "Google sign-in failed", e)
                 val errorMessage = getAuthErrorMessage(e)
                 showSnackBar(SnackBarMessage.IdMessage(errorMessage))
@@ -83,6 +92,8 @@ class LoginViewModel @Inject constructor(
             is FirebaseAuthInvalidCredentialsException -> R.string.incorrect_email_or_password
             is FirebaseAuthInvalidUserException -> R.string.incorrect_email_or_password
             is FirebaseNetworkException -> R.string.network_error
+            is NoCredentialException -> R.string.no_google_credentials
+            is GetCredentialException -> R.string.google_sign_in_failed
             else -> R.string.generic_error
         }
     }

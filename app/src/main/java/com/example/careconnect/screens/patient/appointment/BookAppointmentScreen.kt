@@ -42,7 +42,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.common.LoadingIndicator
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -256,34 +255,40 @@ fun TimeSelectionChips(
         availableTimeSlots.forEach { slot ->
             val timeRange = "${slot.startTime} - ${slot.endTime}"
             val isSelected = selectedTimeSlot == slot
-            val isAvailable = slot.isAvailable
+            val isAvailable = slot.available
 
-            FilterChip(
-                selected = isSelected,
-                onClick = { if (isAvailable) onTimeSelected(slot) },
-                label = {
-                    Text(
-                        text = timeRange,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = when {
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+            ) {
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { if (isAvailable) onTimeSelected(slot) },
+                    enabled = isAvailable,
+                    label = {
+                        Text(
+                            text = timeRange,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = when {
+                                !isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
+                                isSelected -> MaterialTheme.colorScheme.onPrimary
+                                else -> MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        labelColor = when {
                             !isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
                             isSelected -> MaterialTheme.colorScheme.onPrimary
                             else -> MaterialTheme.colorScheme.onSurface
-                        }
-                    )
                         },
-                enabled = isAvailable,
-                colors = FilterChipDefaults.filterChipColors(
-                    labelColor = when {
-                        !isAvailable -> MaterialTheme.colorScheme.onSurfaceVariant
-                        isSelected -> MaterialTheme.colorScheme.onPrimary
-                        else -> MaterialTheme.colorScheme.onSurface
-                    },
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.width(80.dp)
-            )
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
         }
     }
 }
@@ -293,16 +298,31 @@ fun TimeSelectionChips(
 @Composable
 fun BookAppointmentScreenPreview() {
     CareConnectTheme {
-        val uiState = BookAppointmentUiState()
+        val uiState = BookAppointmentUiState(
+            availableSlots = listOf(
+                TimeSlot(
+                    startTime = "10:00",
+                    endTime = "11:00",
+                    available = true,
+                ),
+                TimeSlot(
+                    startTime = "11:00",
+                    endTime = "12:00",
+                    available = true,
+                    ),
+                TimeSlot(
+                    startTime = "12:00",
+                    endTime = "13:00",
+                    available = false,
+                )
+            )
+        )
         BookAppointmentScreenContent(
             doctor = Doctor(
                 name = "John",
                 surname = "Doe",
                 address = "123 Main St",
                 specialization = "Family Medicine",
-                schedule = DoctorSchedule(
-
-                )
             ),
             uiState = uiState,
             onDateSelected = {},

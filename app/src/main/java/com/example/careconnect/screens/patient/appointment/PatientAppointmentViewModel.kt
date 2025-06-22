@@ -125,8 +125,8 @@ class PatientAppointmentViewModel @Inject constructor(
                 list.filter { state.filterStatus.isEmpty() || it.status in state.filterStatus }
                     .let { filtered ->
                         when(state.sortOption) {
-                            PatientSortOption.TimeAsc -> filtered.sortedBy { it.startTime }
-                            PatientSortOption.TimeDesc -> filtered.sortedByDescending { it.startTime }
+                            PatientSortOption.TimeAsc -> filtered.sortedBy { it.appointmentDate }
+                            PatientSortOption.TimeDesc -> filtered.sortedByDescending { it.appointmentDate }
                             PatientSortOption.DoctorName -> filtered.sortedBy { it.doctorName }
                             PatientSortOption.Status -> filtered.sortedBy { it.status.value }
                         }

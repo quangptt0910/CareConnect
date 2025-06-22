@@ -31,9 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
-import com.example.careconnect.dataclass.DoctorSchedule
-import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.dataclass.Role
+import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable
@@ -126,7 +125,6 @@ fun DoctorManageScreenPreview() {
             address = "123 Medical St, Health City",
             specialization = "Cardiology",
             experience = 2015,
-            schedule = DoctorSchedule() // Assuming DoctorSchedule has a default constructor
         ),
         Doctor(
             id = "doctor456",
@@ -138,7 +136,6 @@ fun DoctorManageScreenPreview() {
             address = "456 Health Rd, Cityville",
             specialization = "Dermatology",
             experience = 2010,
-            schedule = DoctorSchedule()
         )
     )
     CareConnectTheme {

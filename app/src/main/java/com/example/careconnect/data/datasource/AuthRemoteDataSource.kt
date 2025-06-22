@@ -8,8 +8,6 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.ClearCredentialException
-import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.NoCredentialException
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Admin
 import com.example.careconnect.dataclass.Doctor
@@ -184,8 +182,7 @@ class AuthRemoteDataSource @Inject constructor(
                     context = context
                 )
             } catch (e: Exception) {
-                Log.d(TAG, "Couldn't get user for auth request credentials: ${e.localizedMessage}")
-
+                Log.e(TAG, "Couldn't get user for auth request credentials: ${e.localizedMessage}")
                 val notAuthRequest = createGoogleSignInRequest(serverClientId, false)
 
                 credentialManager.getCredential(
@@ -195,15 +192,8 @@ class AuthRemoteDataSource @Inject constructor(
             }
 
             handleGoogleLogin(result.credential)
-        } catch (e: NoCredentialException) {
-            Log.e(TAG, "No credentials available: ${e.localizedMessage}")
-            throw Exception("Cannot found google credentials/ sign in with Google. Please try again.")
-        } catch (e: GetCredentialException) {
-            Log.e(TAG, "Get credential failed: ${e.localizedMessage}")
-            throw Exception("Google Sign-In failed. Please try again.")
         } catch (e: Exception) {
             Log.e(TAG, "Google Sign-In error: ${e.localizedMessage}")
-            throw e
         }
     }
 
