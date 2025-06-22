@@ -30,7 +30,7 @@ enum class TimeRange { Day, Week, Month, All }
 enum class DoctorSortOption(val label: String) {
     TimeAsc("Time: Earliest"),
     TimeDesc("Time: Latest"),
-    PatientName("Doctor Name"),
+    PatientName("Patient Name"),
     Status("Status")
     //  TODO() implement to search for patients name
 }
@@ -134,9 +134,9 @@ class DoctorAppointmentViewModel @Inject constructor(
                 list.filter { state.filterStatus.isEmpty() || it.status in state.filterStatus }
                     .let { filtered ->
                         when(state.sortOption) {
-                            DoctorSortOption.TimeAsc -> filtered.sortedBy { it.startTime }
-                            DoctorSortOption.TimeDesc -> filtered.sortedByDescending { it.startTime }
-                            DoctorSortOption.PatientName -> filtered.sortedBy { it.doctorName }
+                            DoctorSortOption.TimeAsc -> filtered.sortedBy { it.appointmentDate }
+                            DoctorSortOption.TimeDesc -> filtered.sortedByDescending { it.appointmentDate}
+                            DoctorSortOption.PatientName -> filtered.sortedBy { it.patientName }
                             DoctorSortOption.Status -> filtered.sortedBy { it.status.value }
                         }
                     }

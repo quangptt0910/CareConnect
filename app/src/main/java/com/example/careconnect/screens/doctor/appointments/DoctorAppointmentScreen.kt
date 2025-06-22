@@ -1,5 +1,6 @@
 package com.example.careconnect.screens.doctor.appointments
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,9 @@ import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,12 +51,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.common.ActionTextButton
 import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 @Composable
 fun DoctorAppointmentScreen(
@@ -78,7 +88,17 @@ fun DoctorAppointmentScreenContent(
     onSortChange: (DoctorSortOption) -> Unit,
     onReset: () -> Unit
 ) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = uiState.currentDate
+            .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )
+
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+    val weekFields = WeekFields.of(Locale.getDefault())
+    val weekStart = uiState.currentDate.with(weekFields.dayOfWeek(), 1)
+    val weekEnd = weekStart.plusDays(6)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // Patient info header
@@ -106,42 +126,105 @@ fun DoctorAppointmentScreenContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Month navigation row - only shown for Month view
-        if (uiState.selectedRange == TimeRange.Month) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                // Left arrow
-                IconButton(onClick = {
-                    onDateChange(uiState.currentDate.minusMonths(1))
-                }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Previous Month",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+        // Arrow navigation row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            // Left arrow
+            IconButton(onClick = {
+                val newDate = when (uiState.selectedRange) {
+                    TimeRange.Day -> uiState.currentDate.minusDays(1)
+                    TimeRange.Week -> uiState.currentDate.minusWeeks(1)
+                    TimeRange.Month -> uiState.currentDate.minusMonths(1)
+                    TimeRange.All -> uiState.currentDate
                 }
-
-                // Month display
-                Text(
-                    text = uiState.currentDate.format(monthFormatter),
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.primary
+                onDateChange(newDate)
+            }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Previous",
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
 
-                // Right arrow
-                IconButton(onClick = {
-                    onDateChange(uiState.currentDate.plusMonths(1))
-                }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Next Month",
-                        tint = MaterialTheme.colorScheme.primary
+            // Date show
+            Text(
+                text = when (uiState.selectedRange) {
+                    TimeRange.Day -> uiState.currentDate.format(dateFormatter)
+                    TimeRange.Week -> "${weekStart.format(dateFormatter)} - ${
+                        weekEnd.format(
+                            dateFormatter
+                        )
+                    }"
+                    TimeRange.Month -> uiState.currentDate.format(monthFormatter)
+                    TimeRange.All -> "All"
+                },
+                modifier = Modifier.padding(horizontal = 16.dp).clickable { showDatePicker = true },
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            // Right arrow
+            IconButton(onClick = {
+                val newDate = when (uiState.selectedRange) {
+                    TimeRange.Day -> uiState.currentDate.plusDays(1)
+                    TimeRange.Week -> uiState.currentDate.plusWeeks(1)
+                    TimeRange.Month -> uiState.currentDate.plusMonths(1)
+                    TimeRange.All -> uiState.currentDate
+                }
+                onDateChange(newDate)
+            }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Next",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+        }
+
+        // DatePickerDialog
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val picked = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                            onDateChange(
+                                when (uiState.selectedRange) {
+                                    TimeRange.Day -> picked
+                                    TimeRange.Week -> picked.with(weekFields.dayOfWeek(), 1)
+                                    TimeRange.Month -> picked.withDayOfMonth(1)
+                                    TimeRange.All -> picked
+                                }
+                            )
+                        }
+                        showDatePicker = false
+                    }) {
+                        Text("OK")
+                    }
+                },
+                modifier = Modifier,
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                },
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 8.dp,
+                colors = DatePickerDefaults.colors(),
+                properties = DialogProperties(),
+                content = {
+                    DatePicker(
+                        state = datePickerState,
+                        title = { Text("Select Date") }
                     )
                 }
-            }
+            )
         }
 
         HorizontalDivider()
