@@ -44,6 +44,7 @@ import com.example.careconnect.ui.navigation.Route.getPatientBookingAppointments
 import com.example.careconnect.ui.navigation.Route.getPatientChatRoute
 import com.example.careconnect.ui.navigation.Route.getPatientDoctorsOverviewRoute
 import com.example.careconnect.ui.navigation.Route.getPatientDoctorsProfileRoute
+import com.example.careconnect.ui.navigation.Route.getPatientProfileMedicalHistoryRoute
 import kotlinx.coroutines.flow.first
 
 @Composable
@@ -106,7 +107,10 @@ fun PatientApp(
                     openDoctorsOverviewScreen = { specialty ->
                         navController.navigate(getPatientDoctorsOverviewRoute(specialty)) },
                     openDoctorProfileScreen = { doctorId ->
-                        navController.navigate(getPatientDoctorsProfileRoute(doctorId)) }
+                        navController.navigate(getPatientDoctorsProfileRoute(doctorId)) },
+                    openMedicalHistoryScreen = { type ->
+                        navController.navigate(getPatientProfileMedicalHistoryRoute(type))
+                    }
                 )
             }
             composable(BarRoutes.CHAT.route) {
@@ -121,7 +125,9 @@ fun PatientApp(
                 PatientProfileScreen(
                     openPrescriptionsScreen = { navController.navigate(PATIENT_PROFILE_PRESCRIPTION_ROUTE) },
                     openMedicalReportsScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) },
-                    openMedicalHistoryScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE) }
+                    openMedicalHistoryScreen = { type ->
+                        navController.navigate(getPatientProfileMedicalHistoryRoute(type))
+                    }
                 )
             }
             composable(BarRoutes.APPOINTMENTS.route) {
@@ -199,9 +205,10 @@ fun PatientApp(
                 )
             }
 
-            composable(PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE) {
+            composable(PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE) { backStackEntry ->
                 PatientMedicalHistoryScreen(
-                    goBack = { navController.popBackStack() }
+                    goBack = { navController.popBackStack() },
+                    type = backStackEntry.arguments?.getString("type") ?: "",
                 )
             }
         }

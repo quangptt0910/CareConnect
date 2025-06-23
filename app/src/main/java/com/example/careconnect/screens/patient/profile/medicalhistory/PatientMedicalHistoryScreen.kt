@@ -29,13 +29,19 @@ val tabItems = listOf(
 @Composable
 fun PatientMedicalHistoryScreen(
     viewModel: PatientMedicalHistoryViewModel = hiltViewModel(),
+    type: String,
     goBack: () -> Unit
 ){
     val entries by viewModel.entries.collectAsState()
     val patientId by viewModel.patientId.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    val initialTabIndex = remember(type) {
+        tabItems.indexOfFirst { it.name.equals(type, ignoreCase = true) }
+            .coerceAtLeast(0) // fall back to 0 if type is invalid
+    }
+
+    var selectedTabIndex by remember { mutableStateOf(initialTabIndex) }
 
     // Load entries whenever patientId or tabIndex changes
     LaunchedEffect(patientId, selectedTabIndex) {

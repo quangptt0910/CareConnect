@@ -33,7 +33,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun PatientProfileScreen(
     openPrescriptionsScreen: () -> Unit = {},
     openMedicalReportsScreen: () -> Unit = {},
-    openMedicalHistoryScreen: () -> Unit = {}
+    openMedicalHistoryScreen: (type: String) -> Unit = {}
 ){
     PatientProfileScreenContent(
         openPrescriptionScreen = openPrescriptionsScreen,
@@ -46,7 +46,7 @@ fun PatientProfileScreen(
 fun PatientProfileScreenContent(
     openPrescriptionScreen: () -> Unit = {},
     openMedicalReportsScreen: () -> Unit = {},
-    openMedicalHistoryScreen: () -> Unit = {}
+    openMedicalHistoryScreen: (type: String) -> Unit = {}
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -151,7 +151,7 @@ fun PatientProfileScreenContent(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 ),
                 modifier = Modifier
-                    .width(350.dp).height(50.dp).clickable{ openMedicalHistoryScreen() },
+                    .width(350.dp).height(50.dp).clickable{ openMedicalHistoryScreen("MEDICATION") },
             ) {
                 Row(
                     modifier = Modifier

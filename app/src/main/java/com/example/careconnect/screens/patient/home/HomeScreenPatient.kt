@@ -63,12 +63,19 @@ data class DoctorCarouselItem(
     val specialization: String
 )
 
+data class MedicalHistoryQuickActionItem(
+    val type: String,
+    val label: String,
+    val iconRes: Int
+)
+
 @Composable
 fun HomeScreenPatient(
     openSettingsScreen: () -> Unit,
     openDoctorsOverviewScreen: (specialty: String) -> Unit,
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    openMedicalHistoryScreen: (type: String) -> Unit = {}
 ) {
 
     val doctorList by viewModel.doctorList.collectAsState()
@@ -82,7 +89,8 @@ fun HomeScreenPatient(
         openDoctorsOverviewScreen = openDoctorsOverviewScreen,
         openDoctorProfileScreen = openDoctorProfileScreen,
         doctorList = doctorList,
-        upcomingAppointments = upcomingAppointments
+        upcomingAppointments = upcomingAppointments,
+        openMedicalHistoryScreen = openMedicalHistoryScreen
     )
 }
 
@@ -97,7 +105,8 @@ fun HomeScreenPatientContent(
     openDoctorsOverviewScreen: (specialty: String) -> Unit = {},
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     doctorList: List<Doctor>,
-    upcomingAppointments: List<Appointment> = emptyList()
+    upcomingAppointments: List<Appointment> = emptyList(),
+    openMedicalHistoryScreen: (type: String) -> Unit = {}
 
 ) {
     val randomDoctors = remember(doctorList) {
@@ -268,11 +277,83 @@ fun HomeScreenPatientContent(
                         )
                     }
                 }
+
+                val quickActions = listOf(
+                    MedicalHistoryQuickActionItem("MEDICATION", "Medication", R.drawable.medicine),
+                    MedicalHistoryQuickActionItem("ALLERGY", "Allergy", R.drawable.allergies),
+                    MedicalHistoryQuickActionItem("CONDITION", "Condition", R.drawable.conditions),
+                    MedicalHistoryQuickActionItem("SURGERY", "Surgery", R.drawable.surgeries),
+                    MedicalHistoryQuickActionItem("IMMUNIZATION", "Immunization", R.drawable.immunizations)
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Text(
+                    text = "Your Medical History",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                MedicalHistoryQuickActionsCarousel(
+                    actions = quickActions,
+                    onActionClick = { type ->
+                        openMedicalHistoryScreen(type)
+                    }
+                )
+
+            }
         }
     }
 }
-    }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MedicalHistoryQuickActionsCarousel(
+    actions: List<MedicalHistoryQuickActionItem>,
+    onActionClick: (String) -> Unit
+) {
+    HorizontalMultiBrowseCarousel(
+        state = rememberCarouselState { actions.size },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        preferredItemWidth = 160.dp,
+        itemSpacing = 12.dp,
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) { index ->
+        val item = actions[index]
+        Surface(
+            color = MaterialTheme.colorScheme.primary,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { onActionClick(item.type) }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(item.iconRes),
+                    contentDescription = item.label,
+                    modifier = Modifier
+                        .width(36.dp)
+                        .height(36.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = item.label,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            }
+        }
+    }
+}
 
 
 @Preview
