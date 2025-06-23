@@ -96,8 +96,13 @@ class DoctorRemoteDataSource @Inject constructor(
                 val scheduleRef = doctorScheduleRef.document(dateString)
 
                 val defaultTimeSlots = listOf(
-                    TimeSlot("09:00", "12:00", appointmentMinutes = 20),
-                    TimeSlot("14:00", "17:00", appointmentMinutes = 30)
+                    TimeSlot("09:00", "09:30", appointmentMinutes = 30),
+                    TimeSlot("10:00", "10:30", appointmentMinutes = 30),
+                    TimeSlot("11:00", "11:30", appointmentMinutes = 30),
+                    TimeSlot("12:00", "12:30", appointmentMinutes = 30),
+                    TimeSlot("14:00", "14:30", appointmentMinutes = 30),
+                    TimeSlot("15:00", "15:30", appointmentMinutes = 30),
+                    TimeSlot("16:00", "16:30", appointmentMinutes = 30)
                 )
 
                 val schedule = DoctorSchedule(
@@ -165,9 +170,9 @@ class DoctorRemoteDataSource @Inject constructor(
     }
 
     fun addPatient(doctorId: String, patientId: String) {
-        Log.d("DoctorRemoteDataSource", "Adding patient with ID $patientId to doctor with ID $doctorId")
+        Log.d("DoctorRemoteDataSource", "DEBUG Adding patient with ID $patientId to doctor with ID $doctorId")
         val patientRef = mapOf("addedAt" to FieldValue.serverTimestamp())
-        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(PATIENTS_LIST_COLLECTION).document(patientId).set(patientRef)
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(PATIENTS_LIST_COLLECTION).document(patientId).set(patientRef, SetOptions.merge())
     }
 
     // Get full patient details for a doctor

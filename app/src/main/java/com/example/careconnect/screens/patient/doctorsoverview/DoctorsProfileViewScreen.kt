@@ -66,13 +66,14 @@ fun DoctorsProfileViewScreen(
 
             openChatScreen = { chatId ->
                 coroutineScope.launch {
-                    viewModel.getCurrentPatient().let { patient ->
-                        openChatScreen(chatId, patient.id, doctorId)
-                    }
+                    openChatScreen(chatId, viewModel.getCurrentPatient().id, doctorId)
                 }
             },
             openBookingScreen = {
                 openBookingScreen(doctorId)
+            },
+            addPatient = {
+                viewModel.addPatient(doctorId)
             },
             goBack = goBack
         )
@@ -87,6 +88,7 @@ fun DoctorsProfileViewScreenContent(
     getChatId: suspend () -> String,
     openBookingScreen: (doctorId: String) -> Unit = {},
     openChatScreen: (chatId: String) -> Unit = {},
+    addPatient: () -> Unit,
     goBack: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -176,8 +178,10 @@ fun DoctorsProfileViewScreenContent(
                     text = "Chat with me",
                     icon = Icons.Outlined.ChatBubbleOutline,
                     onClick = {
+                        addPatient()
                         coroutineScope.launch {
                             val chatId = getChatId()
+
                             openChatScreen(chatId)
                         }
                     }
@@ -187,6 +191,7 @@ fun DoctorsProfileViewScreenContent(
                     text = "Book Appointment",
                     icon = Icons.Outlined.CalendarMonth,
                     onClick = {
+                        addPatient()
                         openBookingScreen(doctorId)
                     }
                 )
@@ -217,6 +222,8 @@ fun DoctorsProfileViewScreenPreview() {
                 profilePhoto = "https://example.com/images/doctor1.jpg"
             ),
             getChatId = { "123" },
+            openBookingScreen = {},
+            addPatient = {},
             openChatScreen = {}
         )
     }

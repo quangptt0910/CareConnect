@@ -29,6 +29,15 @@ class DoctorsProfileViewModel @Inject constructor(
         }
     }
 
+    fun addPatient(doctorId: String) {
+        launchCatching {
+            val patientId = authRepository.currentUser?.uid
+                ?: throw IllegalStateException("No logged-in user")
+            println("DEBUG: addPatient: patientId=$patientId, doctorId=$doctorId")
+            doctorRepository.addPatient(doctorId, patientId)
+        }
+    }
+
     fun setDoctorId(doctorId: String) {
         launchCatching {
             _doctor.value = doctorRepository.getDoctorById(doctorId)
