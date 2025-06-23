@@ -32,18 +32,21 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 @Composable
 fun PatientProfileScreen(
     openPrescriptionsScreen: () -> Unit = {},
-    openMedicalReportsScreen: () -> Unit = {}
+    openMedicalReportsScreen: () -> Unit = {},
+    openMedicalHistoryScreen: () -> Unit = {}
 ){
     PatientProfileScreenContent(
         openPrescriptionScreen = openPrescriptionsScreen,
-        openMedicalReportsScreen = openMedicalReportsScreen
+        openMedicalReportsScreen = openMedicalReportsScreen,
+        openMedicalHistoryScreen = openMedicalHistoryScreen
     )
 }
 
 @Composable
 fun PatientProfileScreenContent(
     openPrescriptionScreen: () -> Unit = {},
-    openMedicalReportsScreen: () -> Unit = {}
+    openMedicalReportsScreen: () -> Unit = {},
+    openMedicalHistoryScreen: () -> Unit = {}
 ){
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -133,6 +136,35 @@ fun PatientProfileScreenContent(
                     )
                     Text(
                         text = "View Medical Reports",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowForwardIos,
+                        contentDescription = "Go",
+                        modifier = Modifier.size(15.dp).align(Alignment.CenterVertically)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+                modifier = Modifier
+                    .width(350.dp).height(50.dp).clickable{ openMedicalHistoryScreen() },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CalendarMonth,
+                        contentDescription = "View Medical History"
+                    )
+                    Text(
+                        text = "View Medical History",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Icon(

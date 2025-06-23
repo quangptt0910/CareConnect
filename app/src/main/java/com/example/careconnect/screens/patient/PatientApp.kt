@@ -29,12 +29,14 @@ import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
 import com.example.careconnect.screens.patient.profile.PatientProfileScreen
+import com.example.careconnect.screens.patient.profile.medicalhistory.PatientMedicalHistoryScreen
 import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportScreen
 import com.example.careconnect.screens.patient.profile.prescription.PrescriptionScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_MEDICAL_REPORT_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_PRESCRIPTION_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
@@ -118,7 +120,8 @@ fun PatientApp(
             composable(BarRoutes.PROFILE.route) {
                 PatientProfileScreen(
                     openPrescriptionsScreen = { navController.navigate(PATIENT_PROFILE_PRESCRIPTION_ROUTE) },
-                    openMedicalReportsScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) }
+                    openMedicalReportsScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) },
+                    openMedicalHistoryScreen = { navController.navigate(PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE) }
                 )
             }
             composable(BarRoutes.APPOINTMENTS.route) {
@@ -192,6 +195,12 @@ fun PatientApp(
 
             composable(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) {
                 MedicalReportScreen(
+                    goBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE) {
+                PatientMedicalHistoryScreen(
                     goBack = { navController.popBackStack() }
                 )
             }
