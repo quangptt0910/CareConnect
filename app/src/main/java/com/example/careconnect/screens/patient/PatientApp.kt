@@ -28,9 +28,9 @@ import com.example.careconnect.screens.patient.doctorsoverview.DoctorsProfileVie
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
 import com.example.careconnect.screens.patient.navigation.BarRoutes
 import com.example.careconnect.screens.patient.navigation.BottomBar
-import com.example.careconnect.screens.patient.profile.MedicalReportScreen
 import com.example.careconnect.screens.patient.profile.PatientProfileScreen
-import com.example.careconnect.screens.patient.profile.PrescriptionScreen
+import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportScreen
+import com.example.careconnect.screens.patient.profile.prescription.PrescriptionScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
@@ -170,7 +170,8 @@ fun PatientApp(
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId)) },
                     doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
-                    openBookingScreen = { doctorId -> navController.navigate(getPatientBookingAppointmentsBookRoute(doctorId)) }
+                    openBookingScreen = { doctorId -> navController.navigate(getPatientBookingAppointmentsBookRoute(doctorId)) },
+                    goBack = { navController.popBackStack() }
                 )
             }
 
@@ -184,11 +185,15 @@ fun PatientApp(
             }
 
             composable(PATIENT_PROFILE_PRESCRIPTION_ROUTE) {
-                PrescriptionScreen()
+                PrescriptionScreen(
+                    goBack = { navController.popBackStack() }
+                )
             }
 
             composable(PATIENT_PROFILE_MEDICAL_REPORT_ROUTE) {
-                MedicalReportScreen()
+                MedicalReportScreen(
+                    goBack = { navController.popBackStack() }
+                )
             }
         }
 

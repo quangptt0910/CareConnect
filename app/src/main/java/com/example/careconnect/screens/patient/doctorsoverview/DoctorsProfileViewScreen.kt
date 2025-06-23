@@ -42,7 +42,8 @@ fun DoctorsProfileViewScreen(
     doctorId: String,
     viewModel: DoctorsProfileViewModel = hiltViewModel(),
     openChatScreen: (chatId: String, patientId: String, doctorId: String) -> Unit = {_, _ , _->},
-    openBookingScreen: (doctorId: String) -> Unit = {}
+    openBookingScreen: (doctorId: String) -> Unit = {},
+    goBack: () -> Unit = {}
 ){
     LaunchedEffect(doctorId) {
         viewModel.setDoctorId(doctorId)
@@ -72,7 +73,8 @@ fun DoctorsProfileViewScreen(
             },
             openBookingScreen = {
                 openBookingScreen(doctorId)
-            }
+            },
+            goBack = goBack
         )
     }
 }
@@ -84,7 +86,8 @@ fun DoctorsProfileViewScreenContent(
     doctorId: String,
     getChatId: suspend () -> String,
     openBookingScreen: (doctorId: String) -> Unit = {},
-    openChatScreen: (chatId: String) -> Unit = {}
+    openChatScreen: (chatId: String) -> Unit = {},
+    goBack: () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -96,7 +99,9 @@ fun DoctorsProfileViewScreenContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            DoctorsOverviewTopBar()
+            DoctorsOverviewTopBar(
+                goBack = goBack
+            )
         }
 
         Box(

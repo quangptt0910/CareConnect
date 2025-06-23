@@ -245,7 +245,7 @@ fun HomeScreenPatientContent(
                 Text(
                     text = "Upcoming appointments",
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.align(Alignment.Start)
+                    modifier = Modifier.align(Alignment.Start).padding(16.dp)
                 )
 
                 println("DEBUG: upcomingAppointments = ${upcomingAppointments}")
