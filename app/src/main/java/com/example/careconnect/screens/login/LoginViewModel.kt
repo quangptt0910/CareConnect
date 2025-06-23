@@ -73,8 +73,7 @@ class LoginViewModel @Inject constructor(
                 Log.e("LoginViewModel", "Google sign-in failed", e)
                 val errorMessage = getAuthErrorMessage(e)
                 showSnackBar(SnackBarMessage.IdMessage(errorMessage))
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.e("LoginViewModel", "Google sign-in failed", e)
                 val errorMessage = getAuthErrorMessage(e)
                 showSnackBar(SnackBarMessage.IdMessage(errorMessage))
@@ -94,6 +93,7 @@ class LoginViewModel @Inject constructor(
             is FirebaseNetworkException -> R.string.network_error
             is NoCredentialException -> R.string.no_google_credentials
             is GetCredentialException -> R.string.google_sign_in_failed
+            is NullPointerException -> R.string.no_google_credentials
             else -> R.string.generic_error
         }
     }

@@ -29,7 +29,7 @@ object FirebaseHiltModule {
 
     @Provides
     fun firebaseFunctions(): FirebaseFunctions {
-        return FirebaseFunctions.getInstance()
+        return FirebaseFunctions.getInstance("europe-central2")
     }
 
     @Provides
