@@ -1,15 +1,14 @@
 package com.example.careconnect.screens.patient.doctorsoverview
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +29,7 @@ fun DoctorsOverviewScreen(
     specialty: String,
     openBookingScreen: (doctorId: String) -> Unit = {},
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
+    goBack: () -> Unit,
     viewModel: DoctorsOverviewViewModel = hiltViewModel()
 ){
     LaunchedEffect(specialty) {
@@ -41,6 +41,7 @@ fun DoctorsOverviewScreen(
     DoctorsOverviewScreenContent(
         doctors = doctors,
         specialty = specialty,
+        goBack = goBack,
         openBookingScreen = openBookingScreen,
         openDoctorProfileScreen = openDoctorProfileScreen
     )
@@ -51,43 +52,48 @@ fun DoctorsOverviewScreen(
 fun DoctorsOverviewScreenContent(
     doctors: List<Doctor> = emptyList(),
     specialty: String,
+    goBack: () -> Unit = {},
     openBookingScreen: (doctorId: String) -> Unit = {},
     openDoctorProfileScreen: (doctorId: String) -> Unit = {}
 ) {
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SmallTopAppBarExample2()
+    Scaffold(
+        topBar = {
+            DoctorsOverviewTopBar(goBack = goBack)
         }
-
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(top = 70.dp)
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), // this prevents overlap with topBar
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                text = "$specialty Doctors",
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
-            )
-            if (doctors.isEmpty()) {
-                // Handle no matches found
-               Text(
-                    text = "No doctors found for \"$specialty\"",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleMedium
+            item {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 10.dp, end = 10.dp, bottom = 10.dp),
+                    text = "$specialty Doctors",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center
                 )
+            }
+
+            if (doctors.isEmpty()) {
+                item {
+                    Text(
+                        text = "No doctors found for \"$specialty\"",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center
+                    )
+                }
             } else {
-                doctors.forEach { doctor ->
+                items(doctors) { doctor ->
                     FilledCardExample(
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
                         name = doctor.name,
                         speciality = doctor.specialization,
                         address = doctor.address,
@@ -103,6 +109,7 @@ fun DoctorsOverviewScreenContent(
         }
     }
 }
+
 
 
 @Preview

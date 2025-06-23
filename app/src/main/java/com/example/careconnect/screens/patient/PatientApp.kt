@@ -102,7 +102,9 @@ fun PatientApp(
                 HomeScreenPatient(
                     openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
                     openDoctorsOverviewScreen = { specialty ->
-                        navController.navigate(getPatientDoctorsOverviewRoute(specialty)) }
+                        navController.navigate(getPatientDoctorsOverviewRoute(specialty)) },
+                    openDoctorProfileScreen = { doctorId ->
+                        navController.navigate(getPatientDoctorsProfileRoute(doctorId)) }
                 )
             }
             composable(BarRoutes.CHAT.route) {
@@ -158,7 +160,8 @@ fun PatientApp(
                 DoctorsOverviewScreen(
                     openBookingScreen = { doctorId -> navController.navigate(getPatientBookingAppointmentsBookRoute(doctorId)) },
                     openDoctorProfileScreen = { doctorId -> navController.navigate(getPatientDoctorsProfileRoute(doctorId)) },
-                    specialty = backStackEntry.arguments?.getString("specialty") ?: ""
+                    specialty = backStackEntry.arguments?.getString("specialty") ?: "",
+                    goBack = { navController.popBackStack() }
                 )
             }
 
@@ -166,7 +169,8 @@ fun PatientApp(
                 DoctorsProfileViewScreen(
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId)) },
-                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
+                    openBookingScreen = { doctorId -> navController.navigate(getPatientBookingAppointmentsBookRoute(doctorId)) }
                 )
             }
 
