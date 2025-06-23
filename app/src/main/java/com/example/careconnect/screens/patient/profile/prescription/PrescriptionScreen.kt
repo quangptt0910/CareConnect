@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.patient.profile
+package com.example.careconnect.screens.patient.profile.prescription
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -12,13 +12,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,7 +55,8 @@ data class PrescriptionUiModel(
 
 @Composable
 fun PrescriptionScreen(
-    viewModel: PrescriptionScreenViewModel = hiltViewModel()
+    viewModel: PrescriptionScreenViewModel = hiltViewModel(),
+    goBack: () -> Unit = {}
 ){
 
     val patientId by viewModel.patientId.collectAsState()
@@ -60,27 +68,38 @@ fun PrescriptionScreen(
     }
 
     PrescriptionScreenContent(
-        prescriptions = prescriptions
+        prescriptions = prescriptions,
+        goBack = goBack
     )
 }
 
 @Composable
 fun PrescriptionScreenContent(
-    prescriptions: List<PrescriptionUiModel>
+    prescriptions: List<PrescriptionUiModel>,
+    goBack: () -> Unit = {}
 ){
     var qrData by remember { mutableStateOf<String?>(null) }
-
-    LazyColumn {
-        items(prescriptions) { prescription ->
-            PrescriptionCard(
-                prescription,
-                generateQRCode = { qrData = it }
+    Scaffold(
+        topBar = {
+            PrescriptionTopBar(
+                goBack = goBack
             )
         }
-    }
-
-    qrData?.let { data ->
-        QrCodeDialog(data = data, onDismiss = { qrData = null })
+    ){ paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
+            items(prescriptions) { prescription ->
+                PrescriptionCard(
+                    prescription,
+                    generateQRCode = { qrData = it }
+                )
+            }
+        }
+        qrData?.let { data ->
+            QrCodeDialog(data = data, onDismiss = { qrData = null })
+        }
     }
 }
 
@@ -173,6 +192,35 @@ fun QrCodeDialog(data: String, onDismiss: () -> Unit) {
             }
         },
         shape = RoundedCornerShape(16.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PrescriptionTopBar(
+    goBack: () -> Unit = {}
+) {
+    TopAppBar(
+        modifier = Modifier,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
+        title = {
+            Text(
+                "View Prescriptions",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = { goBack() }) {
+                Icon(
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Localized description"
+                )
+            }
+        }
     )
 }
 

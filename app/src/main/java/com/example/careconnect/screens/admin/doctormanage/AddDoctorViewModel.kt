@@ -77,8 +77,10 @@ class AddDoctorViewModel @Inject constructor(
                 "experience" to experience.toInt(),
                 "profilePhoto" to "",
             )
+            println("DEBUG:: Doctor data map: $doctorDataMap")
             val (message, doctorId) = doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             _newDoctorId.value = doctorId
+            println("DEBUG:: message $message")
             showSnackBar(SnackBarMessage.StringMessage(message))
             println("DEBUG:: PROFILE Doctor created successfully with Id: $doctorId")
             _navigateToDoctorSchedule.value = true

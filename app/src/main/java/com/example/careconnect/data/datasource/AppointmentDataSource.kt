@@ -195,6 +195,27 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
+    suspend fun getPatientAppointmentsUpcoming(patientId: String, date: String): List<Appointment> {
+        println("DEBUG: Querying appointments for patientId: $patientId, date >= $date")
+
+        return try {
+            val result = firestore
+                .collection("appointments")
+                .whereEqualTo("patientId", patientId)
+                .whereGreaterThanOrEqualTo("appointmentDate", date)
+                .get()
+                .await()
+                .toObjects(Appointment::class.java)
+
+            println("DEBUG: Successfully retrieved ${result.size} appointments")
+            result
+        } catch (e: Exception) {
+            println("ERROR: Failed to retrieve appointments: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
+    }
+
     suspend fun getPatientAppointmentsByStatus(patientId: String?, status: AppointmentStatus): List<Appointment> {
         return firestore
                 .collection("appointments")

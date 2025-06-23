@@ -76,4 +76,8 @@ class AppointmentRepository @Inject constructor(
     suspend fun deleteAppointment(appointmentId: String) {
         appointmentDataSource.deleteAppointment(appointmentId)
     }
+
+    suspend fun getPatientAppointmentsUpcoming(patientId: String, date: String) =
+        appointmentDataSource.getPatientAppointmentsUpcoming(patientId, date)
+
 }

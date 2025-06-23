@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.careconnect.screens.patient.profile.MedicalReportCard
-import com.example.careconnect.screens.patient.profile.MedicalReportUiModel
+import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportCard
+import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportUiModel
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.careconnect.screens.patient.profile
+package com.example.careconnect.screens.patient.profile.prescription
 
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class MedicalReportViewModel @Inject constructor(
+class PrescriptionScreenViewModel @Inject constructor(
     private val patientRepository: PatientRepository
 ): MainViewModel() {
-    private val _medicalReport = MutableStateFlow<List<MedicalReportUiModel>>(emptyList())
-    val medicalReport: StateFlow<List<MedicalReportUiModel>> = _medicalReport
+    private val _prescriptions = MutableStateFlow<List<PrescriptionUiModel>>(emptyList())
+    val prescriptions: StateFlow<List<PrescriptionUiModel>> = _prescriptions
 
     private val _patientId = MutableStateFlow("")
     val patientId: StateFlow<String> = _patientId
@@ -25,18 +25,18 @@ class MedicalReportViewModel @Inject constructor(
         }
     }
 
-    fun fetchMedicalReports(patientId: String) {
+    fun fetchPrescriptions(patientId: String) {
         viewModelScope.launch {
-            val list = patientRepository.getMedicalReports(patientId)
+            val list = patientRepository.getPrescriptions(patientId)
                 .map {
-                    MedicalReportUiModel(
+                    PrescriptionUiModel(
                         id = it.id ?: "",
-                        pdfUrl = it.reportPdfUrl ?: "",
-                        diagnosis = it.diagnosis ?: "Unnamed Medical Diagnosis",
-                        reportDate = (it.reportDate ?: "").toString(),
+                        pdfUrl = it.prescriptionPdfUrl ?: "",
+                        medicationName = it.medicationName ?: "Unnamed Prescription",
+                        issueDate = (it.issueDate ?: "").toString(),
                     )
                 }
-            _medicalReport.value = list
+            _prescriptions.value = list
         }
     }
 }

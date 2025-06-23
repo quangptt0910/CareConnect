@@ -3,7 +3,7 @@ package com.example.careconnect.screens.doctor.patients.prescriptions
 import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.PatientRepository
-import com.example.careconnect.screens.patient.profile.PrescriptionUiModel
+import com.example.careconnect.screens.patient.profile.prescription.PrescriptionUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

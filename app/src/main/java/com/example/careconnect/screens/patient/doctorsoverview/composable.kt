@@ -2,12 +2,14 @@ package com.example.careconnect.screens.patient.doctorsoverview
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -19,13 +21,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -88,12 +92,40 @@ fun FilledCardExample(
     }
 }
 
+@Composable
+fun ActionButton(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .width(150.dp)
+            .height(60.dp),
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 4.dp,
+        shadowElevation = 4.dp,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = text, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = text, style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample2() {
-    Scaffold(
-        topBar = {
+fun DoctorsOverviewTopBar(
+    goBack: () -> Unit = {}
+) {
             TopAppBar(
                 modifier = Modifier,
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -107,7 +139,7 @@ fun SmallTopAppBarExample2() {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { goBack() }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -116,8 +148,4 @@ fun SmallTopAppBarExample2() {
                     }
                 }
             )
-        },
-    ){
-        Box(modifier = Modifier.padding(it))
-    }
 }

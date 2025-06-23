@@ -1,8 +1,6 @@
 package com.example.careconnect.screens.patient.home
 
 import android.annotation.SuppressLint
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +33,9 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,8 +45,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.R
+import com.example.careconnect.common.AppointmentCard
+import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Specialization
 import com.example.careconnect.ui.theme.CareConnectTheme
@@ -53,23 +57,32 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 
-data class CarouselItem(
-    val id: Int,
-    @DrawableRes val imageResId: Int,
-    @StringRes val contentDescriptionResId: Int
+data class DoctorCarouselItem(
+    val doctor: Doctor,
+    val imageUrl: String,
+    val specialization: String
 )
 
 @Composable
 fun HomeScreenPatient(
     openSettingsScreen: () -> Unit,
-    openDoctorsOverviewScreen: (specialty: String) -> Unit
+    openDoctorsOverviewScreen: (specialty: String) -> Unit,
+    openDoctorProfileScreen: (doctorId: String) -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
+
+    val doctorList by viewModel.doctorList.collectAsState()
+    val upcomingAppointments by viewModel.upcomingAppointments.collectAsState()
+
     HomeScreenPatientContent(
         uiState = HomeUiState(),
         openSettingsScreen = openSettingsScreen,
         onDoctorSelected = { _, _ -> },
         onSearchQueryChange = {},
         openDoctorsOverviewScreen = openDoctorsOverviewScreen,
+        openDoctorProfileScreen = openDoctorProfileScreen,
+        doctorList = doctorList,
+        upcomingAppointments = upcomingAppointments
     )
 }
 
@@ -81,9 +94,28 @@ fun HomeScreenPatientContent(
     openSettingsScreen: () -> Unit,
     onDoctorSelected: (Doctor, Boolean) -> Unit = { _, _ -> },
     onSearchQueryChange: (String) -> Unit = {},
-    openDoctorsOverviewScreen: (specialty: String) -> Unit = {}
+    openDoctorsOverviewScreen: (specialty: String) -> Unit = {},
+    openDoctorProfileScreen: (doctorId: String) -> Unit = {},
+    doctorList: List<Doctor>,
+    upcomingAppointments: List<Appointment> = emptyList()
 
 ) {
+    val randomDoctors = remember(doctorList) {
+        doctorList.shuffled().take(5)
+    }
+
+    val doctorCarouselItems = remember(doctorList) {
+        doctorList.shuffled().take(5).map {
+            DoctorCarouselItem(
+                doctor = it,
+                imageUrl = if (it.profilePhoto.isNotBlank()) it.profilePhoto else "drawable://${R.drawable.carousel_image_1}",
+                specialization = it.specialization
+            )
+        }
+    }
+
+
+    println("DEBUG$randomDoctors")
 
     val sheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded, // Starts in collapsed mode
@@ -91,15 +123,6 @@ fun HomeScreenPatientContent(
     )
     val scope = rememberCoroutineScope()
     val date = LocalDate.now()
-
-    val items =
-        listOf(
-            CarouselItem(0, R.drawable.carousel_image_1, R.string.carousel_image_1_description),
-            CarouselItem(1, R.drawable.carousel_image_2, R.string.carousel_image_2_description),
-            CarouselItem(2, R.drawable.carousel_image_3, R.string.carousel_image_3_description),
-            CarouselItem(3, R.drawable.carousel_image_4, R.string.carousel_image_4_description),
-            CarouselItem(4, R.drawable.carousel_image_5, R.string.carousel_image_5_description),
-        )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -141,10 +164,10 @@ fun HomeScreenPatientContent(
                     }
                 }
             },
-            sheetPeekHeight = 150.dp, // The visible height when collapsed
+            sheetPeekHeight = 100.dp, // The visible height when collapsed
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.padding(paddingValues)) {
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -185,49 +208,70 @@ fun HomeScreenPatientContent(
                         .align(Alignment.CenterHorizontally)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                SearchSection(
-                    uiState = uiState,
-                    onDoctorSelected = onDoctorSelected,
-                    onSearchQueryChange = onSearchQueryChange
+
+
+                println("DEBUG: doctorCarouselItems.size = ${doctorCarouselItems.size}")
+
+                println("DEBUG: ${randomDoctors.size}")
+                if (doctorCarouselItems.isNotEmpty()) {
+                    HorizontalMultiBrowseCarousel(
+                        state = rememberCarouselState { doctorCarouselItems.size },
+                        modifier = Modifier.width(412.dp).height(280.dp),
+                        preferredItemWidth = 186.dp,
+                        itemSpacing = 8.dp,
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) { index ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { openDoctorProfileScreen(doctorCarouselItems[index].doctor.id) }
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .height(200.dp)
+                                    .maskClip(MaterialTheme.shapes.extraLarge),
+                                painter = rememberAsyncImagePainter(model = doctorCarouselItems[index].imageUrl),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                } else {
+                    Text("Loading doctors...")
+                }
+
+                Text(
+                    text = "Upcoming appointments",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.align(Alignment.Start).padding(16.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-
-                HorizontalMultiBrowseCarousel(
-                    state = rememberCarouselState { items.count() },
-                    modifier = Modifier.width(412.dp).height(221.dp),
-                    preferredItemWidth = 186.dp,
-                    itemSpacing = 8.dp,
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) { i ->
-                    val item = items[i]
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-
-                    ){
-                        Image(
-                            modifier = Modifier.height(205.dp)
-                                .maskClip(MaterialTheme.shapes.extraLarge),
-                            painter = rememberAsyncImagePainter(model = item.imageResId),
-                            contentDescription = stringResource(item.contentDescriptionResId),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        Text(
-                            text = stringResource(item.contentDescriptionResId),
-                            modifier = Modifier.padding(16.dp)
+                println("DEBUG: upcomingAppointments = ${upcomingAppointments}")
+                if (upcomingAppointments.isEmpty()) {
+                    Text(
+                        text = "No upcoming appointments",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                } else {
+                    upcomingAppointments.forEach { appointment ->
+                        AppointmentCard(
+                            appt = appointment,
+                            displayFields = listOf(
+                                "Doctor" to { it.doctorName },
+                                "Type" to { it.type },
+                                "Address" to { it.address }
+                            ),
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
-
                 }
-            }
         }
     }
 }
+    }
 
 
 
@@ -238,7 +282,12 @@ fun HomeScreenPatientPreview() {
         val uiState = HomeUiState()
         HomeScreenPatientContent(
             uiState = uiState,
-            openSettingsScreen = {}
+            openSettingsScreen = {},
+            onDoctorSelected = { _, _ -> },
+            onSearchQueryChange = {},
+            openDoctorsOverviewScreen = {},
+            openDoctorProfileScreen = {},
+            doctorList = listOf()
         )
     }
 }
