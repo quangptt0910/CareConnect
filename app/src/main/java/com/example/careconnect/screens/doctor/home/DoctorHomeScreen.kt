@@ -251,11 +251,6 @@ fun DoctorHomeScreenContent(
                                 Modifier
                                     .fillMaxWidth()
                                     .height(56.dp)
-//                                    .toggleable(
-//                                        value = task.isChecked,
-//                                        onValueChange = { task.isChecked = !task.isChecked },
-//                                        role = androidx.compose.ui.semantics.Role.Checkbox
-//                                    )
                                     .padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

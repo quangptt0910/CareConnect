@@ -4,7 +4,6 @@ import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.DoctorRepository
-import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.screens.signup.isValidEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,7 +53,6 @@ class AddDoctorViewModel @Inject constructor(
         }
 
         if (!email.isValidEmail()) {
-            println("DEBUG:: Invalid email")
             showSnackBar(SnackBarMessage.IdMessage(R.string.invalid_email))
             return
         }
@@ -73,8 +71,6 @@ class AddDoctorViewModel @Inject constructor(
             val doctorDataMap = hashMapOf(
                 "name" to name,
                 "surname" to surname,
-                "email" to email,
-                "role" to Role.DOCTOR.name,  // Send as string
                 "phone" to phone,
                 "address" to address,
                 "specialization" to specialization,
@@ -84,8 +80,7 @@ class AddDoctorViewModel @Inject constructor(
             val (message, doctorId) = doctorRepository.createDoctor(email = email, password = password, doctorData = doctorDataMap)
             _newDoctorId.value = doctorId
             showSnackBar(SnackBarMessage.StringMessage(message))
-            println("DEBUG:: PROFILE Doctor created successfully!!")
-            println("DEBUG:: Doctor created successfully!!")
+            println("DEBUG:: PROFILE Doctor created successfully with Id: $doctorId")
             _navigateToDoctorSchedule.value = true
         }
     }
