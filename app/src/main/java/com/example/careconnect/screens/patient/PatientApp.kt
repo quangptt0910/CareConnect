@@ -164,7 +164,8 @@ fun PatientApp(
                     doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
-                    }
+                    },
+                    goBack = { navController.popBackStack() }
                 )
             }
 

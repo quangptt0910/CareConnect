@@ -90,6 +90,26 @@ fun ReferralMessageItem(
 }
 
 @Composable
+fun ReferralIntroMessageItem(
+    message: Message
+) {
+    val doctorName = message.metadata?.get("referrerDoctorName") ?: "a doctor"
+    val specialization = message.metadata?.get("referrerSpecialization") ?: "Specialist"
+
+    Card(
+        modifier = Modifier.padding(8.dp)
+        // Not clickable
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                "Hi, I've been referred to you by Dr. $doctorName ($specialization).",
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
 fun ChatListItem(
     name: String,
     message: String,

@@ -232,7 +232,7 @@ class ChatViewModel @Inject constructor(
             author = Author(patient.id, "Patient"),
             timestamp = System.currentTimeMillis(),
             metadata = mapOf(
-                "type" to "referral",
+                "type" to "referral_intro",
                 "referralDoctorId" to doctorId,
                 "referralDoctorName" to getDoctor(doctorId)?.name.orEmpty(),
                 "referralSpecialization" to getDoctor(doctorId)?.specialization.orEmpty()

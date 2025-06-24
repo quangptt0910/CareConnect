@@ -86,7 +86,8 @@ fun ChatScreen(
     chatId: String,
     patientId: String,
     doctorId: String,
-    openChatScreen: (String, String, String) -> Unit
+    openChatScreen: (String, String, String) -> Unit,
+    goBack: () -> Unit = {}
 ){
     val context = LocalContext.current
 
@@ -117,7 +118,8 @@ fun ChatScreen(
             chatRoom = chatRoom,
             patient = patient!!,
             doctor = doctor!!,
-            openChatScreen = openChatScreen
+            openChatScreen = openChatScreen,
+            goBack = goBack
         )
     } else {
         println("ChatScreen: doctor=$doctor, patient=$patient, chatRoom=$chatRoom")
@@ -130,7 +132,8 @@ fun ChatScreenContent(
     chatRoom: ChatRoom,
     doctor: Doctor,
     patient: Patient,
-    openChatScreen: (String, String, String) -> Unit
+    openChatScreen: (String, String, String) -> Unit,
+    goBack: () -> Unit = {}
 ) {
 
     val listState = rememberLazyListState()
@@ -165,7 +168,8 @@ fun ChatScreenContent(
 
         if (chatName != null) {
             SmallTopAppBarExample(
-                name = chatName
+                name = chatName,
+                goBack = goBack
             )
         }
 
@@ -266,24 +270,33 @@ fun ChatItem(
                 .padding(12.dp)
         ) {
             // Display text if it's not null or empty
-            if (message.metadata?.containsKey("referralDoctorId") == true) {
-                ReferralMessageItem(
-                    message = message,
-                    onReferralClick = { referralDoctorId ->
-                        coroutineScope.launch {
-                            val result = handleReferralClick(referralDoctorId)
-                            result?.let { (chatId, referredDoctorId) ->
-                                openNewChat(chatId, referredDoctorId)
+            when (message.metadata?.get("messageType")) {
+                "referral" -> {
+                    // Original chat - clickable referral message
+                    ReferralMessageItem(
+                        message = message,
+                        onReferralClick = { referralDoctorId ->
+                            coroutineScope.launch {
+                                val result = handleReferralClick(referralDoctorId)
+                                result?.let { (chatId, referredDoctorId) ->
+                                    openNewChat(chatId, referredDoctorId)
+                                }
                             }
                         }
-                    }
-                )
-            } else {
-                message.text.let {
-                    Text(
-                        text = it,
-                        color = if (message.isFromMe) Color.White else Color.Black
                     )
+                }
+                "referral_intro" -> {
+                    // New chat - non-clickable intro message
+                    ReferralIntroMessageItem(message = message)
+                }
+                else -> {
+                    // Regular text message
+                    if (message.text.isNotEmpty()) {
+                        Text(
+                            text = message.text,
+                            color = if (message.isFromMe) Color.White else Color.Black
+                        )
+                    }
                 }
             }
 
@@ -396,7 +409,8 @@ fun formatTimestamp(timestamp: Long): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmallTopAppBarExample(
-    name: String = "Chat"
+    name: String = "Chat",
+    goBack: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -413,7 +427,7 @@ fun SmallTopAppBarExample(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { goBack() }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
