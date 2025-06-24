@@ -5,6 +5,7 @@ import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.AppointmentStatus
 import com.example.careconnect.dataclass.DoctorSchedule
 import com.example.careconnect.dataclass.TimeSlot
+import com.example.careconnect.dataclass.toDateString
 import com.example.careconnect.dataclass.toLocalDate
 import com.example.careconnect.notifications.NotificationManager
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import javax.inject.Inject
 
@@ -214,6 +217,45 @@ class AppointmentDataSource @Inject constructor(
             e.printStackTrace()
             throw e
         }
+    }
+
+    suspend fun getTodayAppointments(): List<Appointment> {
+        val today = LocalDate.now().toDateString()
+        val snapshot = firestore.collection("appointments")
+            .whereEqualTo("appointmentDate", today)
+            .whereIn("status", listOf(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED
+            ))
+            .get()
+            .await()
+
+        return snapshot.toObjects(Appointment::class.java)
+    }
+
+    suspend fun getCanceledAppointmentsToday(): List<Appointment> {
+        val today = LocalDate.now().toDateString()
+        val snapshot = firestore.collection("appointments")
+            .whereEqualTo("appointmentDate", today)
+            .whereEqualTo("status", AppointmentStatus.CANCELED)
+            .get()
+            .await()
+
+        return snapshot.toObjects(Appointment::class.java)
+    }
+
+    suspend fun getUpcomingAppointmentsToday(): List<Appointment> {
+        val today = LocalDate.now().toDateString()
+        val nowTime = LocalTime.now().toString() // e.g., "14:35"
+
+        val snapshot = firestore.collection("appointments")
+            .whereEqualTo("appointmentDate", today)
+            .whereIn("status", listOf(AppointmentStatus.PENDING, AppointmentStatus.CONFIRMED))
+            .get()
+            .await()
+
+        return snapshot.toObjects(Appointment::class.java)
+            .filter { it.startTime > nowTime }
     }
 
     suspend fun getPatientAppointmentsByStatus(patientId: String?, status: AppointmentStatus): List<Appointment> {

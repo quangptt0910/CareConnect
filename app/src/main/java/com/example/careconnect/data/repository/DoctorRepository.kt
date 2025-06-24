@@ -102,5 +102,12 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getTasks(doctorId)
     }
 
+    suspend fun getRecentlyAddedDoctors(daysAgo: Long = 7): List<Doctor> {
+        return doctorRemoteDataSource.getRecentlyAddedDoctors(daysAgo)
+    }
+
+    suspend fun getDoctorsWorkingToday(): List<Doctor> {
+        return doctorRemoteDataSource.getDoctorsWorkingToday()
+    }
 
 }

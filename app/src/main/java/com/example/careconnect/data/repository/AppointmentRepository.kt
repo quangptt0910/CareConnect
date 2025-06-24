@@ -80,4 +80,12 @@ class AppointmentRepository @Inject constructor(
     suspend fun getPatientAppointmentsUpcoming(patientId: String, date: String) =
         appointmentDataSource.getPatientAppointmentsUpcoming(patientId, date)
 
+    suspend fun getTodayAppointments() =
+        appointmentDataSource.getTodayAppointments()
+
+    suspend fun getCanceledAppointmentsToday() =
+        appointmentDataSource.getCanceledAppointmentsToday()
+
+    suspend fun getUpcomingAppointmentsToday() =
+        appointmentDataSource.getUpcomingAppointmentsToday()
 }

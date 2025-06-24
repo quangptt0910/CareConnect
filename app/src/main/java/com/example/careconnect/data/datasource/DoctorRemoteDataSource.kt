@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
+import java.util.Calendar
+import java.util.Date
 import javax.inject.Inject
 
 class DoctorRemoteDataSource @Inject constructor(
@@ -49,6 +51,45 @@ class DoctorRemoteDataSource @Inject constructor(
         val doctorId = success["doctorId"] as String
 
         return message to doctorId
+    }
+
+    suspend fun getDoctorsWorkingToday(): List<Doctor> {
+        val todayString = LocalDate.now().toDateString()
+        val allDoctors = getAllDoctors()
+        val availableDoctors = mutableListOf<Doctor>()
+
+        for (doctor in allDoctors) {
+            val scheduleSnap = firestore
+                .collection("doctors")
+                .document(doctor.id)
+                .collection("schedules")
+                .document(todayString)
+                .get()
+                .await()
+
+            val schedule = scheduleSnap.toObject(DoctorSchedule::class.java)
+            if (schedule != null && schedule.isWorkingDay) {
+                availableDoctors.add(doctor)
+            }
+        }
+
+        return availableDoctors
+    }
+
+    suspend fun getRecentlyAddedDoctors(daysAgo: Long = 7): List<Doctor> {
+        val now = Date()
+        val calendar = Calendar.getInstance()
+        calendar.time = now
+        calendar.add(Calendar.DAY_OF_YEAR, (-daysAgo).toInt())
+        val startDate = calendar.time
+
+        val snapshot = firestore.collection("doctors")
+            .whereGreaterThanOrEqualTo("createdAt", startDate)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .get()
+            .await()
+
+        return snapshot.toObjects(Doctor::class.java)
     }
 
     suspend fun updateDoctor(doctor: Doctor) {

@@ -107,7 +107,6 @@ fun HomeScreenPatientContent(
     doctorList: List<Doctor>,
     upcomingAppointments: List<Appointment> = emptyList(),
     openMedicalHistoryScreen: (type: String) -> Unit = {}
-
 ) {
     val randomDoctors = remember(doctorList) {
         doctorList.shuffled().take(5)
@@ -123,12 +122,9 @@ fun HomeScreenPatientContent(
         }
     }
 
-
-    println("DEBUG$randomDoctors")
-
     val sheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.PartiallyExpanded, // Starts in collapsed mode
-        skipHiddenState = true // Prevents dismissal
+        initialValue = SheetValue.PartiallyExpanded,
+        skipHiddenState = true
     )
     val scope = rememberCoroutineScope()
     val date = LocalDate.now()
@@ -137,14 +133,12 @@ fun HomeScreenPatientContent(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-
         BottomSheetScaffold(
             sheetContent = {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-
                 ) {
                     Text(
                         text = stringResource(R.string.specialization),
@@ -154,7 +148,7 @@ fun HomeScreenPatientContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     LazyColumn(
-                        modifier = Modifier.fillMaxHeight(0.5f) // Expandable up to 50% screen height
+                        modifier = Modifier.fillMaxHeight(0.5f)
                     ) {
                         items(Specialization.all()) { specialty ->
                             val displayName = specialty.displayName().toString()
@@ -164,7 +158,7 @@ fun HomeScreenPatientContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(12.dp)
-                                    .clickable{
+                                    .clickable {
                                         openDoctorsOverviewScreen(displayName)
                                     }
                             )
@@ -173,99 +167,110 @@ fun HomeScreenPatientContent(
                     }
                 }
             },
-            sheetPeekHeight = 100.dp, // The visible height when collapsed
+            sheetPeekHeight = 100.dp,
             scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues)) {
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Welcome back!",
-                        style = MaterialTheme.typography.headlineLarge,
+            LazyColumn(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 100.dp)
+            ) {
+                item {
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Go to notifications screen
-                    IconButton(
-                        onClick = { scope.launch { sheetState.expand() } },
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    ){
-                        Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
-                    }
-
-                    // Go to settings screen
-                    IconButton(
-                        onClick = { openSettingsScreen() },
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                    }
-                }
+                        Text(
+                            text = "Welcome back!",
+                            style = MaterialTheme.typography.headlineLarge,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
 
-                Text(
-                    text = "$date",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                )
+                        Row {
+                            IconButton(
+                                onClick = { scope.launch { sheetState.expand() } },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
+                                Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
+                            }
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-
-
-                println("DEBUG: doctorCarouselItems.size = ${doctorCarouselItems.size}")
-
-                println("DEBUG: ${randomDoctors.size}")
-                if (doctorCarouselItems.isNotEmpty()) {
-                    HorizontalMultiBrowseCarousel(
-                        state = rememberCarouselState { doctorCarouselItems.size },
-                        modifier = Modifier.width(412.dp).height(280.dp),
-                        preferredItemWidth = 186.dp,
-                        itemSpacing = 8.dp,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) { index ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { openDoctorProfileScreen(doctorCarouselItems[index].doctor.id) }
-                        ) {
-                            Image(
-                                modifier = Modifier
-                                    .height(200.dp)
-                                    .maskClip(MaterialTheme.shapes.extraLarge),
-                                painter = rememberAsyncImagePainter(model = doctorCarouselItems[index].imageUrl),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop
-                            )
+                            IconButton(
+                                onClick = { openSettingsScreen() },
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            ) {
+                                Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            }
                         }
                     }
-                } else {
-                    Text("Loading doctors...")
+
+                    Text(
+                        text = "$date",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                Text(
-                    text = "Upcoming appointments",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.align(Alignment.Start).padding(16.dp)
-                )
+                item {
+                    if (doctorCarouselItems.isNotEmpty()) {
+                        HorizontalMultiBrowseCarousel(
+                            state = rememberCarouselState { doctorCarouselItems.size },
+                            modifier = Modifier
+                                .width(412.dp)
+                                .height(280.dp),
+                            preferredItemWidth = 186.dp,
+                            itemSpacing = 8.dp,
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) { index ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        openDoctorProfileScreen(doctorCarouselItems[index].doctor.id)
+                                    }
+                            ) {
+                                Image(
+                                    modifier = Modifier
+                                        .height(200.dp)
+                                        .maskClip(MaterialTheme.shapes.extraLarge),
+                                    painter = rememberAsyncImagePainter(model = doctorCarouselItems[index].imageUrl),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    } else {
+                        Text("Loading doctors...")
+                    }
+                }
 
-                println("DEBUG: upcomingAppointments = ${upcomingAppointments}")
-                if (upcomingAppointments.isEmpty()) {
+                item {
                     Text(
-                        text = "No upcoming appointments",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        text = "Upcoming appointments",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     )
+                }
+
+                if (upcomingAppointments.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No upcoming appointments",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                        )
+                    }
                 } else {
-                    upcomingAppointments.forEach { appointment ->
+                    items(upcomingAppointments) { appointment ->
                         AppointmentCard(
                             appt = appointment,
                             displayFields = listOf(
@@ -273,40 +278,41 @@ fun HomeScreenPatientContent(
                                 "Type" to { it.type },
                                 "Address" to { it.address }
                             ),
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
                         )
                     }
                 }
 
-                val quickActions = listOf(
-                    MedicalHistoryQuickActionItem("MEDICATION", "Medication", R.drawable.medicine),
-                    MedicalHistoryQuickActionItem("ALLERGY", "Allergy", R.drawable.allergies),
-                    MedicalHistoryQuickActionItem("CONDITION", "Condition", R.drawable.conditions),
-                    MedicalHistoryQuickActionItem("SURGERY", "Surgery", R.drawable.surgeries),
-                    MedicalHistoryQuickActionItem("IMMUNIZATION", "Immunization", R.drawable.immunizations)
-                )
+                item {
+                    Spacer(modifier = Modifier.height(30.dp))
 
-                Spacer(modifier = Modifier.height(30.dp))
+                    Text(
+                        text = "Your Medical History",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                    )
 
-                Text(
-                    text = "Your Medical History",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                )
+                    Spacer(modifier = Modifier.height(15.dp))
+                }
 
-                Spacer(modifier = Modifier.height(15.dp))
-
-                MedicalHistoryQuickActionsCarousel(
-                    actions = quickActions,
-                    onActionClick = { type ->
-                        openMedicalHistoryScreen(type)
-                    }
-                )
-
+                item {
+                    MedicalHistoryQuickActionsCarousel(
+                        actions = listOf(
+                            MedicalHistoryQuickActionItem("MEDICATION", "Medication", R.drawable.medicine),
+                            MedicalHistoryQuickActionItem("ALLERGY", "Allergy", R.drawable.allergies),
+                            MedicalHistoryQuickActionItem("CONDITION", "Condition", R.drawable.conditions),
+                            MedicalHistoryQuickActionItem("SURGERY", "Surgery", R.drawable.surgeries),
+                            MedicalHistoryQuickActionItem("IMMUNIZATION", "Immunization", R.drawable.immunizations)
+                        ),
+                        onActionClick = openMedicalHistoryScreen
+                    )
+                }
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
