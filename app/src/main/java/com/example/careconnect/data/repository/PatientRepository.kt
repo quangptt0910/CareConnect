@@ -39,6 +39,10 @@ class PatientRepository @Inject constructor(
         return patientRemoteDataSource.getMedicalReports(patientId)
     }
 
+    suspend fun getAllPatients(): List<Patient> {
+        return patientRemoteDataSource.getAllPatients()
+    }
+
 
     suspend fun addMedication(patientId: String, medication: Medication): String = patientRemoteDataSource.addMedication(patientId, medication)
     suspend fun addAllergy(patientId: String, allergy: Allergy): String = patientRemoteDataSource.addAllergy(patientId, allergy)

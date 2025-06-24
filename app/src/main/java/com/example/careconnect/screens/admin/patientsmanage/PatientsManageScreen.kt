@@ -12,27 +12,33 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.careconnect.dataclass.Gender
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.dataclass.Patient
-import com.example.careconnect.dataclass.Role
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 @Composable
 fun PatientManageScreen(
-
+    viewModel: PatientsManageViewModel = hiltViewModel()
 ){
-    PatientManageScreenContent()
+    val patients by viewModel.patients.collectAsState()
+
+    PatientManageScreenContent(
+        patients = patients
+    )
 }
 
 
 @Composable
 fun PatientManageScreenContent(
+    patients: List<Patient> = emptyList()
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -55,31 +61,12 @@ fun PatientManageScreenContent(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            val patients = listOf(
-                Patient(
-                    id = "patient456",
-                    name = "Jane",
-                    surname = "Smith",
-                    email = "jane.smith@example.com",
-                    role = Role.PATIENT,
-                    phone = "987-654-3210",
-                    address = "456 Wellness Ave, Care Town",
-                    dateOfBirth = "1990-05-15",
-                    gender = Gender.FEMALE,
-                    height = 165.0, // Height in cm
-                    weight = 50.0,  // Weight in kg
-                )
-            )
-
             FilledCardPatients(
                 title = "Patients",
                 patients = patients,
                 onDeleteProduct = { /* Handle product deletion */ }
             )
-
         }
-
-
     }
 }
 

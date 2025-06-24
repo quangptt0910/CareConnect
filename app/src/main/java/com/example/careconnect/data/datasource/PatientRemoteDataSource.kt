@@ -250,6 +250,18 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun getAllPatients(): List<Patient> {
+        return try {
+            firestore.collection("patients")
+                .get()
+                .await()
+                .toObjects(Patient::class.java)
+            } catch (e: Exception) {
+            Log.e("Firestore", "Failed to fetch patients", e)
+            emptyList()
+        }
+    }
+
     /*
      * GET medical history entries
      */
