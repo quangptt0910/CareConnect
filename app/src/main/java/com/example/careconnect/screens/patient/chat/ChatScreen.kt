@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -39,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -48,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,10 +70,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -80,6 +86,7 @@ fun ChatScreen(
     chatId: String,
     patientId: String,
     doctorId: String,
+    openChatScreen: (String, String, String) -> Unit
 ){
     val context = LocalContext.current
 
@@ -109,7 +116,8 @@ fun ChatScreen(
             model = viewModel,
             chatRoom = chatRoom,
             patient = patient!!,
-            doctor = doctor!!
+            doctor = doctor!!,
+            openChatScreen = openChatScreen
         )
     } else {
         println("ChatScreen: doctor=$doctor, patient=$patient, chatRoom=$chatRoom")
@@ -122,6 +130,7 @@ fun ChatScreenContent(
     chatRoom: ChatRoom,
     doctor: Doctor,
     patient: Patient,
+    openChatScreen: (String, String, String) -> Unit
 ) {
 
     val listState = rememberLazyListState()
@@ -163,6 +172,19 @@ fun ChatScreenContent(
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (messageListRef, chatBox) = createRefs()
 
+            if (model.showReferralDialog) {
+                DoctorReferralDialog(
+                    onDismiss = { model.showReferralDialog = false },
+                    onDoctorSelected = { selectedDoctor ->
+
+                        model.sendReferralMessage(selectedDoctor)
+
+                        model.showReferralDialog = false
+                    },
+                    viewModel = model
+                )
+            }
+
             // Message List
             LazyColumn(
                 modifier = Modifier
@@ -179,7 +201,13 @@ fun ChatScreenContent(
                 //reverseLayout = true // Makes chat scroll from bottom up
             ) {
                 items(messages) { message ->
-                    ChatItem(message)
+                    ChatItem(
+                        message = message,
+                        openNewChat = { newChatId, doctorId ->
+                             openChatScreen(newChatId, patient.id, doctorId)
+                        },
+                        handleReferralClick = { referredDoctorId -> model.handleReferralClick(referredDoctorId) }
+                    )
                 }
             }
 
@@ -199,7 +227,14 @@ fun ChatScreenContent(
 }
 
 @Composable
-fun ChatItem(message: Message) {
+fun ChatItem(
+    message: Message,
+    openNewChat: (String, String) -> Unit,
+    handleReferralClick: suspend (String) -> Pair<String, String>?,
+) {
+
+    val coroutineScope = rememberCoroutineScope()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,11 +266,25 @@ fun ChatItem(message: Message) {
                 .padding(12.dp)
         ) {
             // Display text if it's not null or empty
-            message.text.let {
-                Text(
-                    text = it,
-                    color = if (message.isFromMe) Color.White else Color.Black
+            if (message.metadata?.containsKey("referralDoctorId") == true) {
+                ReferralMessageItem(
+                    message = message,
+                    onReferralClick = { referralDoctorId ->
+                        coroutineScope.launch {
+                            val result = handleReferralClick(referralDoctorId)
+                            result?.let { (chatId, referredDoctorId) ->
+                                openNewChat(chatId, referredDoctorId)
+                            }
+                        }
+                    }
                 )
+            } else {
+                message.text.let {
+                    Text(
+                        text = it,
+                        color = if (message.isFromMe) Color.White else Color.Black
+                    )
+                }
             }
 
             // Display image if the message contains an image URI
@@ -439,11 +488,16 @@ fun ChatBox(
                 Icon(Icons.Filled.Add, contentDescription = "Attachments")
             }
 
+
+
             MinimalDropdownMenu(
                 expanded,
                 onDismissRequest = { expanded = false },
                 onImageSend = { launcher.launch("image/*") },
-                onDocumentSend = { launcher2.launch("application/*") }
+                onDocumentSend = { launcher2.launch("application/*") },
+                onReferralSend = if (viewModel.me.role == Role.DOCTOR) {
+                    { viewModel.showReferralDialog = true }
+                } else null
             )
         }
 
@@ -473,7 +527,46 @@ fun ChatBox(
 }
 
 @Composable
-fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImageSend: () -> Unit, onDocumentSend: () -> Unit) {
+fun DoctorReferralDialog(
+    onDismiss: () -> Unit,
+    onDoctorSelected: (Doctor) -> Unit,
+    viewModel: ChatViewModel
+) {
+    var doctorList by remember { mutableStateOf<List<Doctor>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        doctorList = viewModel.getAllDoctors()
+            .filter { it.id != viewModel.doctorId }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Refer to Another Doctor") },
+        text = {
+            Column {
+                doctorList.forEach { doctor ->
+                    TextButton(onClick = { onDoctorSelected(doctor) }) {
+                        Text("${doctor.name} - ${doctor.specialization}")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+
+@Composable
+fun MinimalDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onImageSend: () -> Unit,
+    onDocumentSend: () -> Unit,
+    onReferralSend: (() -> Unit)? = null
+    ) {
     //var expanded by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -491,6 +584,12 @@ fun MinimalDropdownMenu(expanded: Boolean, onDismissRequest: () -> Unit, onImage
                 text = { Text("Send document") },
                 onClick = {  onDocumentSend() }
             )
+            onReferralSend?.let {
+                DropdownMenuItem(
+                    text = { Text("Send referral") },
+                    onClick = { it() }
+                )
+            }
         }
     }
 }
@@ -505,7 +604,11 @@ fun ChatScreenPreview() {
             model = viewModel(),
             chatRoom = ChatRoom(),
             doctor = Doctor(),
-            patient = Patient()
+            patient = Patient(),
+            openChatScreen = {
+                doctorId, patientId, chatId ->
+                println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
+            }
         )
 
     }

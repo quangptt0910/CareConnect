@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,9 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.example.careconnect.dataclass.chat.Message
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,7 +71,23 @@ fun SearchSectionMenu(
 }
 
 
+@Composable
+fun ReferralMessageItem(
+    message: Message,
+    onReferralClick: (String) -> Unit
+) {
+    val doctorName = message.metadata?.get("referralDoctorName") ?: "a doctor"
+    val specialization = message.metadata?.get("referralSpecialization") ?: "Specialist"
 
+    Card(
+        modifier = Modifier.padding(8.dp).clickable { message.metadata?.get("referralDoctorId")?.let { onReferralClick(it) } },
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text("You've been referred to Dr. $doctorName ($specialization).", fontWeight = FontWeight.Bold)
+            Text("Tap here to start the consultation.")
+        }
+    }
+}
 
 @Composable
 fun ChatListItem(
