@@ -11,6 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for retrieving and managing medical reports for a patient.
+ *
+ * @property patientRepository Repository to fetch patient-related data.
+ */
 @HiltViewModel
 class MedicalReportsViewModel @Inject constructor(
     private val patientRepository: PatientRepository
@@ -18,6 +23,12 @@ class MedicalReportsViewModel @Inject constructor(
     private val _medicalReport = MutableStateFlow<List<MedicalReportUiModel>>(emptyList())
     val medicalReport: StateFlow<List<MedicalReportUiModel>> = _medicalReport
 
+    /**
+     * Fetches all medical reports for the given [patientId], maps them to UI models,
+     * and updates the state.
+     *
+     * @param patientId The ID of the patient whose reports are being fetched.
+     */
     fun fetchMedicalReports(patientId: String) {
         viewModelScope.launch {
             val list = patientRepository.getMedicalReports(patientId)

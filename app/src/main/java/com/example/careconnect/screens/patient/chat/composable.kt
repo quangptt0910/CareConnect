@@ -34,6 +34,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.careconnect.dataclass.chat.Message
 
+
+/**
+ * A composable that renders a search bar to search through chat messages.
+ *
+ * @param query The current search query string.
+ * @param onSearchQueryChange Lambda to handle changes in the search query input.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchSectionMenu(
@@ -70,7 +77,14 @@ fun SearchSectionMenu(
     ) {}
 }
 
-
+/**
+ * A card composable representing a referral message in the chat,
+ * showing which doctor the patient has been referred to.
+ *
+ * @param message The referral message containing metadata about the referral.
+ * @param onReferralClick Callback when the referral card is clicked,
+ *                      passing the referred doctor's ID.
+ */
 @Composable
 fun ReferralMessageItem(
     message: Message,
@@ -89,6 +103,12 @@ fun ReferralMessageItem(
     }
 }
 
+/**
+ * A card composable representing an introductory referral message,
+ * typically sent when a referral chat starts.
+ *
+ * @param message The referral intro message containing metadata about the referrer doctor.
+ */
 @Composable
 fun ReferralIntroMessageItem(
     message: Message
@@ -109,6 +129,16 @@ fun ReferralIntroMessageItem(
     }
 }
 
+/**
+ * A composable that represents a single chat item in the chat list,
+ * showing the contact's name, last message, time, and profile image.
+ *
+ * @param name The display name of the chat contact.
+ * @param message The preview text of the last message.
+ * @param time The timestamp string for the last message.
+ * @param imageRes The URL or resource identifier of the contact's profile image.
+ * @param onChatClicked Callback triggered when the chat item is clicked.
+ */
 @Composable
 fun ChatListItem(
     name: String,

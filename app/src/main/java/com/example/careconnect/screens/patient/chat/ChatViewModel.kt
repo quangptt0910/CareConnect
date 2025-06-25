@@ -32,7 +32,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
-
+/**
+ * ViewModel for managing chat interactions between patients and doctors.
+ *
+ * This ViewModel handles loading chat messages, sending text, images, and documents,
+ * managing current user information, and handling chat referrals.
+ *
+ * It observes real-time chat updates via Firebase and manages notifications for new messages.
+ *
+ * @property savedStateHandle Used for saving and restoring UI-related data.
+ * @property notificationManager Handles triggering notifications for new chat messages.
+ * @property chatMessagesRepository Repository for managing chat messages and chat rooms.
+ * @property doctorRepository Repository for accessing doctor data.
+ * @property patientRepository Repository for accessing patient data.
+ * @property addChatRoomRepository Repository for creating or fetching chat rooms.
+ * @property authRepository Repository to handle authentication and user information.
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -68,6 +83,13 @@ class ChatViewModel @Inject constructor(
         loadChat(chatId)
     }
 
+    /**
+     * Initializes the ViewModel with chat, patient, and doctor IDs and loads the chat.
+     *
+     * @param chatId The unique chat room ID.
+     * @param patientId The patient’s user ID.
+     * @param doctorId The doctor’s user ID.
+     */
     fun initialize(chatId: String, patientId: String, doctorId: String) {
         _chatId.value = chatId
         _patientId.value = patientId
@@ -77,6 +99,12 @@ class ChatViewModel @Inject constructor(
         initializeCurrentUser()
     }
 
+    /**
+     * Starts observing real-time messages for the specified chat ID.
+     * Removes any existing listeners before adding a new one.
+     *
+     * @param chatId The chat room ID to listen for messages.
+     */
     fun observeMessages(chatId: String) {
         messageListenerRegistration?.remove() // Clean up any existing listener
 
@@ -86,16 +114,26 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Cleans up any Firebase listener when ViewModel is cleared.
+     */
     override fun onCleared() {
         super.onCleared()
         messageListenerRegistration?.remove()
     }
 
+    /**
+     * Retrieves a list of all doctors.
+     *
+     * @return List of [Doctor].
+     */
     suspend fun getAllDoctors(): List<Doctor> {
         return doctorRepository.getAllDoctors()
     }
 
-
+    /**
+     * Initializes the current user based on Firebase Authentication and chat participants.
+     */
     fun initializeCurrentUser() {
         Firebase.auth.currentUser?.let { user ->
             val name = if (user.uid == patientId) "Patient" else "Doctor"
@@ -108,6 +146,13 @@ class ChatViewModel @Inject constructor(
     var chatRoom by mutableStateOf<ChatRoom?>(null)
         private set
 
+    /**
+     * Sets the current user of the chat.
+     *
+     * @param id User ID.
+     * @param name User display name.
+     * @param role User role ([Role.PATIENT] or [Role.DOCTOR]).
+     */
     fun setCurrentUser(id: String, name: String, role: Role) {
         _currentUser.value = Author(id = id, name = name, role = role)
     }
@@ -120,6 +165,11 @@ class ChatViewModel @Inject constructor(
         return patientRepository.getPatientById(patientId)
     }
 
+    /**
+     * Loads the chat room data by its ID and starts observing messages.
+     *
+     * @param chatId The chat room ID.
+     */
     fun loadChat(chatId: String) {
         println("ChatViewModel: Loading chat with ID: $chatId")
         launchCatching {
@@ -130,6 +180,12 @@ class ChatViewModel @Inject constructor(
     }
 
     // Function to send a new message
+    /**
+     * Sends a text message to the chat and triggers a notification.
+     *
+     * @param text Message text content.
+     * @param chatId The chat room ID.
+     */
     fun sendMessage(text: String, chatId: String) {
         val newMessage = Message(
             text = text,
@@ -157,6 +213,14 @@ class ChatViewModel @Inject constructor(
     }
 
     // Function to send an image
+    /**
+     * Sends an image message to the chat by uploading the image to Firebase Storage,
+     * then sending a message with the image URL and triggering a notification.
+     *
+     * @param uri The URI of the image to send.
+     * @param message The base [Message] object.
+     * @param chatId The chat room ID.
+     */
     fun sendImage(uri: Uri, message: Message, chatId: String) {
         if (chatId.isEmpty()) return
         val storageRef = FirebaseStorage.getInstance().reference
@@ -189,6 +253,14 @@ class ChatViewModel @Inject constructor(
     }
 
     // Function to send a document
+    /**
+     * Sends a document message to the chat by uploading the document to Firebase Storage,
+     * then sending a message with the document URL and triggering a notification.
+     *
+     * @param uri The URI of the document to send.
+     * @param message The base [Message] object.
+     * @param chatId The chat room ID.
+     */
     fun sendDocument(uri: Uri, message: Message, chatId: String) {
         val storageRef = FirebaseStorage.getInstance().reference
         val fileName = "chat_documents/${UUID.randomUUID()}.pdf"
@@ -218,6 +290,14 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles the referral process by creating or retrieving a chat room between
+     * the patient and a referred doctor, sending an introductory referral message,
+     * and updating the referrer doctor ID in the chat room document.
+     *
+     * @param referredDoctorId The ID of the doctor to whom the patient is referred.
+     * @return A Pair of the new chat room ID and referred doctor ID, or null if patient or doctor not found.
+     */
     suspend fun handleReferralClick(referredDoctorId: String): Pair<String, String>? {
         val patient = getPatient(patientId) ?: return null
         val referredDoctor = getDoctor(referredDoctorId) ?: return null

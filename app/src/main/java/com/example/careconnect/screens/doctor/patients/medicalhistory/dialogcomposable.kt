@@ -17,6 +17,14 @@ import com.example.careconnect.dataclass.Immunization
 import com.example.careconnect.dataclass.Medication
 import com.example.careconnect.dataclass.Surgery
 
+
+/**
+ * A composable function that displays a dialog for adding or editing a medication.
+ *
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param onSave Callback function to be invoked when the save button is clicked, passing the [Medication] object.
+ * @param existing An optional [Medication] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing medication's data. Otherwise, it will be in "add" mode.
+ */
 @Composable
 fun MedicationDialog(
     onDismiss: () -> Unit,
@@ -48,11 +56,13 @@ fun MedicationDialog(
         confirmButton = {
             Button(onClick = {
                 val medication = if (isEditing) {
-                    existing.copy(id = existing.id,name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
+                    existing?.copy(id = existing.id,name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
                 } else {
                     Medication(name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
                 }
-                onSave(medication)
+                if (medication != null) {
+                    onSave(medication)
+                }
             }) {
                 Text(saveButtonText)
             }
@@ -61,6 +71,14 @@ fun MedicationDialog(
     )
 }
 
+
+/**
+ * A composable function that displays a dialog for adding or editing an allergy.
+ *
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param onSave Callback function to be invoked when the save button is clicked, passing the [Allergy] object.
+ * @param existing An optional [Allergy] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing allergy's data. Otherwise, it will be in "add" mode.
+ */
 @Composable
 fun AllergyDialog(
     onDismiss: () -> Unit,
@@ -90,11 +108,13 @@ fun AllergyDialog(
         confirmButton = {
             Button(onClick = {
                 val allergy = if (isEditing) {
-                    existing.copy(id = existing.id, allergen = allergen.trim(), reaction = reaction.trim(), severity = severity.trim(), diagnosedDate = diagnosedDate.trim())
+                    existing?.copy(id = existing.id, allergen = allergen.trim(), reaction = reaction.trim(), severity = severity.trim(), diagnosedDate = diagnosedDate.trim())
                 } else {
                     Allergy(allergen = allergen.trim(), reaction = reaction.trim(), severity = severity.trim(), diagnosedDate = diagnosedDate.trim())
                 }
-                onSave(allergy)
+                if (allergy != null) {
+                    onSave(allergy)
+                }
             }) {
                 Text(saveButtonText)
             }
@@ -103,6 +123,14 @@ fun AllergyDialog(
     )
 }
 
+
+/**
+ * A composable function that displays a dialog for adding or editing a medical condition.
+ *
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param onSave Callback function to be invoked when the save button is clicked, passing the [Condition] object.
+ * @param existing An optional [Condition] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing condition's data. Otherwise, it will be in "add" mode.
+ */
 @Composable
 fun ConditionDialog(onDismiss: () -> Unit, onSave: (Condition) -> Unit, existing: Condition? = null) {
     var name by remember { mutableStateOf(existing?.name ?: "") }
@@ -126,11 +154,13 @@ fun ConditionDialog(onDismiss: () -> Unit, onSave: (Condition) -> Unit, existing
         confirmButton = {
             Button(onClick = {
                 val condition = if (isEditing) {
-                    existing.copy(name = name.trim(), diagnosedDate = diagnosedDate.trim(), status = status.trim())
+                    existing?.copy(name = name.trim(), diagnosedDate = diagnosedDate.trim(), status = status.trim())
                 } else {
                     Condition(name = name.trim(), diagnosedDate = diagnosedDate.trim(), status = status.trim())
                 }
-                onSave(condition)
+                if (condition != null) {
+                    onSave(condition)
+                }
             }) {
                 Text(saveButtonText)
             }
@@ -139,6 +169,14 @@ fun ConditionDialog(onDismiss: () -> Unit, onSave: (Condition) -> Unit, existing
     )
 }
 
+
+/**
+ * A composable function that displays a dialog for adding or editing a surgery.
+ *
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param onSave Callback function to be invoked when the save button is clicked, passing the [Surgery] object.
+ * @param existing An optional [Surgery] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing surgery's data. Otherwise, it will be in "add" mode.
+ */
 @Composable
 fun SurgeryDialog(onDismiss: () -> Unit, onSave: (Surgery) -> Unit, existing: Surgery? = null) {
     var surgeryName by remember { mutableStateOf(existing?.surgeryName ?: "") }
@@ -164,11 +202,13 @@ fun SurgeryDialog(onDismiss: () -> Unit, onSave: (Surgery) -> Unit, existing: Su
         confirmButton = {
             Button(onClick = {
                 val surgery = if (isEditing) {
-                    existing.copy(surgeryName = surgeryName.trim(), surgeryDate = surgeryDate.trim(), hospital = hospital.trim(), notes = notes.trim())
+                    existing?.copy(surgeryName = surgeryName.trim(), surgeryDate = surgeryDate.trim(), hospital = hospital.trim(), notes = notes.trim())
                 } else {
                     Surgery(surgeryName = surgeryName.trim(), surgeryDate = surgeryDate.trim(), hospital = hospital.trim(), notes = notes.trim())
                 }
-                onSave(surgery)
+                if (surgery != null) {
+                    onSave(surgery)
+                }
             }) {
                 Text(saveButtonText)
             }
@@ -177,6 +217,14 @@ fun SurgeryDialog(onDismiss: () -> Unit, onSave: (Surgery) -> Unit, existing: Su
     )
 }
 
+
+/**
+ * A composable function that displays a dialog for adding or editing an immunization record.
+ *
+ * @param onDismiss Callback function to be invoked when the dialog is dismissed.
+ * @param onSave Callback function to be invoked when the save button is clicked, passing the [Immunization] object.
+ * @param existing An optional [Immunization] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing immunization's data. Otherwise, it will be in "add" mode.
+ */
 @Composable
 fun ImmunizationDialog(onDismiss: () -> Unit, onSave: (Immunization) -> Unit, existing: Immunization? = null) {
     var vaccineName by remember { mutableStateOf(existing?.vaccineName ?: "") }
@@ -202,11 +250,13 @@ fun ImmunizationDialog(onDismiss: () -> Unit, onSave: (Immunization) -> Unit, ex
         confirmButton = {
             Button(onClick = {
                 val immunization = if (isEditing) {
-                    existing.copy(vaccineName = vaccineName.trim(), dateAdministered = dateAdministered.trim(), administeredBy = administeredBy.trim(), nextDueDate = nextDueDate.trim())
+                    existing?.copy(vaccineName = vaccineName.trim(), dateAdministered = dateAdministered.trim(), administeredBy = administeredBy.trim(), nextDueDate = nextDueDate.trim())
                 } else {
                     Immunization(vaccineName = vaccineName.trim(), dateAdministered = dateAdministered.trim(), administeredBy = administeredBy.trim(), nextDueDate = nextDueDate.trim())
                 }
-                onSave(immunization)
+                if (immunization != null) {
+                    onSave(immunization)
+                }
             }) {
                 Text(saveButtonText)
             }

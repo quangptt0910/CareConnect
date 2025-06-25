@@ -24,7 +24,15 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-
+/**
+ * UI state data class for managing the book appointment screen.
+ *
+ * @property selectedDate Currently selected date for the appointment. Defaults to today.
+ * @property selectedTimeSlot Currently selected time slot for the appointment, or null if none selected.
+ * @property availableSlots List of available time slots for the selected date.
+ * @property isLoading Flag indicating whether data is currently loading (e.g., slots or doctor info).
+ * @property isBooking Flag indicating whether an appointment booking process is ongoing.
+ */
 data class BookAppointmentUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val selectedTimeSlot: TimeSlot? = null,
@@ -33,6 +41,22 @@ data class BookAppointmentUiState(
     val isBooking: Boolean = false
 )
 
+/**
+ * ViewModel responsible for managing the state and business logic of the book appointment screen.
+ *
+ * This ViewModel handles:
+ * - Fetching doctor information by ID
+ * - Loading and filtering available appointment time slots by selected date
+ * - Managing selected date and time slot state
+ * - Validating user selections (e.g., no past dates or times)
+ * - Booking appointments with backend repositories
+ * - Providing UI state via a StateFlow for reactive UI updates
+ *
+ * @property appointmentRepository Repository for creating and managing appointments.
+ * @property doctorRepository Repository for fetching doctor data and available slots.
+ * @property authRepository Repository to get current authenticated user.
+ * @property patientRepository Repository to fetch patient details.
+ */
 @HiltViewModel
 class BookAppointmentViewModel @Inject constructor(
     private val appointmentRepository: AppointmentRepository,
@@ -51,6 +75,11 @@ class BookAppointmentViewModel @Inject constructor(
     private val _doctor = MutableStateFlow<Doctor?>(null)
     val doctor: StateFlow<Doctor?> = _doctor
 
+    /**
+     * Sets the current doctor ID and triggers loading of doctor info and available slots.
+     *
+     * @param doctorId The unique ID of the doctor to load data for.
+     */
     fun setDoctorId(doctorId: String) {
         if (_doctorId.value != doctorId) {
             _doctorId.value = doctorId
@@ -59,6 +88,9 @@ class BookAppointmentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads detailed information of the currently selected doctor from repository.
+     */
     private fun loadDoctorInfo() {
         val doctorId = _doctorId.value ?: return
         launchCatching {
@@ -92,6 +124,12 @@ class BookAppointmentViewModel @Inject constructor(
         initialValue = BookAppointmentUiState()
     )
 
+    /**
+     * Handles user date selection with validation to prevent past dates.
+     *
+     * @param date The date selected by the user.
+     * @param showSnackBar Function to display error messages to the user.
+     */
     fun onDateSelected(date: LocalDate, showSnackBar: (SnackBarMessage) -> Unit) {
         // Validate that the selected date is not in the past
         if (date.isBefore(LocalDate.now())) {
@@ -103,6 +141,11 @@ class BookAppointmentViewModel @Inject constructor(
         loadAvailableSlots(showSnackBar)
     }
 
+    /**
+     * Handles user time slot selection with validation to prevent past time slots on the current day.
+     *
+     * @param timeSlot The time slot selected by the user.
+     */
     fun onTimeSelected(timeSlot: TimeSlot) {
         // Additional validation to ensure the time slot is not in the past
         val currentDate = LocalDate.now()
@@ -125,6 +168,12 @@ class BookAppointmentViewModel @Inject constructor(
         _selectedTimeSlot.value = timeSlot
     }
 
+    /**
+     * Parses a time string into a LocalTime object, supporting multiple formats.
+     *
+     * @param timeString Time string to parse (e.g., "09:00" or "9:00").
+     * @return Parsed LocalTime object, or null if parsing failed.
+     */
     private fun parseTimeString(timeString: String): LocalTime? {
         return try {
             // First try with HH:mm format (e.g., "09:00")
@@ -140,7 +189,11 @@ class BookAppointmentViewModel @Inject constructor(
         }
     }
 
-
+    /**
+     * Initiates the booking process for the selected appointment slot with validations.
+     *
+     * @param showSnackBar Function to display success or error messages to the user.
+     */
     fun bookAppointment(showSnackBar: (SnackBarMessage) -> Unit) {
         launchCatching(showSnackBar) {
             try {
@@ -207,6 +260,12 @@ class BookAppointmentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads the available time slots for the currently selected doctor and date,
+     * filtering out past slots for the current day.
+     *
+     * @param showSnackBar Function to display error messages if loading fails.
+     */
     private fun loadAvailableSlots(showSnackBar: (SnackBarMessage) -> Unit) {
         launchCatching(showSnackBar) {
             _isLoading.value = true
@@ -244,6 +303,11 @@ class BookAppointmentViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Refreshes the available slots, typically after a booking is completed.
+     *
+     * @param showSnackBar Function to display error messages if refresh fails.
+     */
     private fun refreshSlots(showSnackBar: (SnackBarMessage) -> Unit) {
         launchCatching(showSnackBar){
             try {

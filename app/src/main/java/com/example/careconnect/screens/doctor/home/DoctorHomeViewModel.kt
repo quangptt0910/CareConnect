@@ -19,6 +19,17 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 
+/**
+ * ViewModel for the Doctor's Home screen.
+ *
+ * This ViewModel is responsible for managing and providing data related to the doctor's
+ * home screen, including patient lists, pending appointments, upcoming appointments, and tasks.
+ * It interacts with various repositories to fetch and update data.
+ *
+ * @property appointmentRepository Repository for accessing appointment data.
+ * @property authRepository Repository for accessing authentication and user data.
+ * @property doctorRepository Repository for accessing doctor-specific data.
+ */
 @HiltViewModel
 class DoctorHomeViewModel @Inject constructor(
     private val appointmentRepository: AppointmentRepository,
@@ -54,6 +65,15 @@ class DoctorHomeViewModel @Inject constructor(
     }
 
 
+    /**
+     * Adds a new task or updates an existing task for the current doctor.
+     *
+     * If the [Task.id] is blank, a new task is added. Otherwise, the existing task is updated.
+     * Shows a snackbar message if the doctor is not authenticated or if the task name is blank.
+     *
+     * @param task The [Task] object to be added or updated.
+     * @param showSnackBar A lambda function to display a [SnackBarMessage].
+     */
     fun addTask(task: Task, showSnackBar: (SnackBarMessage) -> Unit) {
         if (doctorId.isNullOrBlank()) {
             showSnackBar(SnackBarMessage.IdMessage(R.string.generic_error))
@@ -76,12 +96,26 @@ class DoctorHomeViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Deletes a task for the current doctor.
+     *
+     * The task is only deleted if its ID is not blank.
+     *
+     * @param task The [Task] to be deleted.
+     */
     fun deleteTask(task: Task) {
         launchCatching {
             if (task.id.isNotBlank()) doctorRepository.deleteTask(doctorId.toString(), task)
         }
     }
 
+
+    /**
+     * Updates an existing task for the current doctor.
+     *
+     * @param task The [Task] to be updated.
+     */
     fun updateTask(task: Task) {
         launchCatching {
             doctorRepository.updateTask(doctorId.toString(), task)
@@ -89,6 +123,11 @@ class DoctorHomeViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Loads the list of pending appointments for the current doctor.
+     * Updates the [_pendingAppointments] StateFlow with the fetched data.
+     */
     fun loadPendingAppointments() {
         launchCatching {
             println("DEBUG: getting pending appointments for doctor")
@@ -100,6 +139,13 @@ class DoctorHomeViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Loads the list of upcoming appointments for the current doctor.
+     * Fetches appointments from today onwards, filters for 'CONFIRMED' status,
+     * sorts them by date and start time, and limits the list to the first 3.
+     * Updates the [_appointments] StateFlow with the processed data.
+     */
     fun loadUpcomingAppointments() {
         launchCatching {
             val userId = authRepository.currentUser?.uid
@@ -128,6 +174,15 @@ class DoctorHomeViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * Updates the status of an appointment.
+     * After updating the appointment, it reloads both pending and upcoming appointments
+     * to reflect the changes.
+     *
+     * @param appointment The [Appointment] to be updated.
+     * @param newStatus The new [AppointmentStatus] for the appointment.
+     */
     fun updateAppointmentStatus(appointment: Appointment, newStatus: AppointmentStatus) {
         launchCatching {
             val updatedAppointment = appointment.copy(status = newStatus)

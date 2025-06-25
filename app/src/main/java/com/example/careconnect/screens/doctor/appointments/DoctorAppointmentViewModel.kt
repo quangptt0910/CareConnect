@@ -26,7 +26,16 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
 
+
+/**
+ * Enum representing the time range options for filtering appointments.
+ */
 enum class TimeRange { Day, Week, Month, All }
+
+/**
+ * Enum representing the sorting options for doctor appointments.
+ * @property label The display label for the sort option.
+ */
 enum class DoctorSortOption(val label: String) {
     TimeAsc("Time: Earliest"),
     TimeDesc("Time: Latest"),
@@ -36,6 +45,18 @@ enum class DoctorSortOption(val label: String) {
 }
 
 
+/**
+ * Data class representing the UI state for the Doctor Appointment screen.
+ *
+ * @property doctor The current doctor's details.
+ * @property selectedRange The currently selected time range for filtering appointments.
+ * @property appointments The list of appointments to display.
+ * @property isLoading True if data is currently being loaded, false otherwise.
+ * @property error An error message if an error occurred, null otherwise.
+ * @property currentDate The currently selected date for filtering.
+ * @property filterStatus The set of appointment statuses to filter by.
+ * @property sortOption The currently selected sorting option for appointments.
+ */
 data class DoctorAppointmentUiState(
     val doctor: Doctor? = null,
 
@@ -49,6 +70,17 @@ data class DoctorAppointmentUiState(
     val sortOption: DoctorSortOption = DoctorSortOption.TimeDesc
 )
 
+
+/**
+ * ViewModel for the Doctor Appointment screen.
+ *
+ * This ViewModel is responsible for fetching and managing the data related to a doctor's appointments.
+ * It provides a [StateFlow] of [DoctorAppointmentUiState] that the UI can observe to react to data changes.
+ *
+ * @param appointmentRepository Repository for accessing appointment data.
+ * @param doctorRepository Repository for accessing doctor data.
+ * @param authRepository Repository for accessing authentication data.
+ */
 @HiltViewModel
 class DoctorAppointmentViewModel @Inject constructor(
     private val appointmentRepository: AppointmentRepository,
@@ -80,6 +112,20 @@ class DoctorAppointmentViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * A [StateFlow] representing the current UI state of the Doctor Appointment screen.
+     *
+     * It combines various internal state flows ([_doctor], [_selectedRange], [_currentDate], [_filterStatus], [_sortOption])
+     * to produce a comprehensive [DoctorAppointmentUiState].
+     *
+     * The flow starts by emitting an initial loading state.
+     * It then flatMaps to a flow that fetches raw appointments based on the selected range and doctor ID.
+     * This raw list is then filtered and sorted based on the current filter and sort options.
+     * Finally, it maps the sorted list to a new [DoctorAppointmentUiState] with `isLoading` set to false.
+     *
+     * The resulting flow is shared in the [viewModelScope] and starts lazily.
+     */
     // Combined UI state
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<DoctorAppointmentUiState> = combine(
@@ -156,10 +202,16 @@ class DoctorAppointmentViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, DoctorAppointmentUiState())
 
     // UI event handlers
+    /** Sets the time range for filtering appointments. */
     fun setRange(range: TimeRange) { _selectedRange.value = range }
+    /** Sets the date for filtering appointments. */
     fun setDate(date: LocalDate) { _currentDate.value = date }
+    /** Sets the status filter for appointments. */
     fun setFilter(status: Set<AppointmentStatus?>) { _filterStatus.value = status }
+    /** Sets the sorting option for appointments. */
     fun setSort(option: DoctorSortOption) { _sortOption.value = option }
+/**
+ * Resets all filters and sorting options to their default values.*/
     fun resetAll() {
         _selectedRange.value = TimeRange.All
         _filterStatus.value = emptySet()

@@ -12,7 +12,16 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
+/**
+ * Generates a PDF document for the given [medicalReport] containing relevant
+ * patient and doctor details, symptoms, diagnosis, and treatment information.
+ *
+ * @param context The application context used for accessing file storage.
+ * @param patient The patient for whom the medical report is being generated.
+ * @param doctor The doctor who authored the medical report.
+ * @param medicalReport The medical report data to include in the PDF.
+ * @return A [File] object pointing to the generated PDF document.
+ */
 fun CreateMedicalReportPdf(
     context: Context,
     patient: Patient,

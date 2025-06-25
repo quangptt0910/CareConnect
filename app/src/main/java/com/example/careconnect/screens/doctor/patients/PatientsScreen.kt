@@ -24,6 +24,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+
+/**
+ * Composable screen displaying a list of patients assigned to the current doctor.
+ *
+ * This screen observes the [PatientsViewModel] for the list of patients and
+ * allows navigation to individual patient profiles.
+ *
+ * @param viewModel ViewModel to provide patient data and business logic, injected by Hilt by default.
+ * @param onBack Callback invoked when the back button is pressed.
+ * @param openPatientsProfile Callback to navigate to a patient's detailed profile screen. Receives the patient's ID.
+ */
 @Composable
 fun PatientsScreen(
     viewModel: PatientsViewModel = hiltViewModel(),
@@ -38,6 +49,15 @@ fun PatientsScreen(
     )
 }
 
+/**
+ * Composable that renders the UI content of the patients list screen.
+ *
+ * Displays a list of patients inside a [LazyColumn] with a top app bar.
+ *
+ * @param patientList List of patients to display.
+ * @param onBack Callback invoked when the back button is pressed.
+ * @param openPatientsProfile Callback to navigate to a patient's profile. Receives the patient's ID.
+ */
 @Composable
 fun PatientsScreenContent(
     patientList: List<Patient> = emptyList(),
@@ -75,6 +95,13 @@ fun PatientsScreenContent(
    }
 }
 
+/**
+ * Top app bar for the patients list screen.
+ *
+ * Displays the screen title and a back navigation button.
+ *
+ * @param onBack Callback invoked when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientsListTopBar(

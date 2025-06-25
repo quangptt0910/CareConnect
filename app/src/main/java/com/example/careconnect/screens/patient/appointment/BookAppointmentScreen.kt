@@ -50,6 +50,14 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 
+/**
+ * Main Composable to display the Book Appointment screen.
+ *
+ * @param doctorId The unique identifier of the doctor for whom the appointment is being booked.
+ * @param viewModel The ViewModel managing appointment data and UI state.
+ * @param showSnackBar A lambda callback to display snack bar messages.
+ * @param goBack A lambda callback to navigate back from the screen.
+ */
 @Composable
 fun BookAppointmentScreen(
     doctorId: String,
@@ -81,7 +89,17 @@ fun BookAppointmentScreen(
     )
 }
 
-
+/**
+ * The UI content of the Book Appointment screen, displaying doctor info,
+ * date picker, available time slots, and booking button.
+ *
+ * @param doctor The [Doctor] object whose appointment is being booked.
+ * @param uiState The current UI state of the booking screen.
+ * @param onDateSelected Callback when a new date is selected.
+ * @param onTimeSelected Callback when a time slot is selected.
+ * @param onBookAppointment Callback to trigger booking action.
+ * @param goBack Callback to navigate back.
+ */
 @Composable
 fun BookAppointmentScreenContent(
     doctor: Doctor? = Doctor(),
@@ -163,6 +181,14 @@ fun BookAppointmentScreenContent(
     }
 }
 
+/**
+ * Displays a section with selectable time slots as chips.
+ *
+ * @param slots List of available [TimeSlot]s.
+ * @param selectedTimeSlot Currently selected time slot.
+ * @param selectedDate The selected date.
+ * @param onTimeSelected Callback triggered when a time slot is selected.
+ */
 @Composable
 private fun TimeSelectionSection(
     slots: List<TimeSlot>,
@@ -178,6 +204,9 @@ private fun TimeSelectionSection(
     )
 }
 
+/**
+ * Shows a message when there are no available time slots.
+ */
 @Composable
 private fun NoSlotsMessage() {
     Box(
@@ -194,6 +223,11 @@ private fun NoSlotsMessage() {
     }
 }
 
+/**
+ * Top app bar for the Book Appointment screen, includes a back button and title.
+ *
+ * @param goBack Callback triggered when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookAppointmentTopBar(
@@ -223,6 +257,12 @@ fun BookAppointmentTopBar(
             )
 }
 
+/**
+ * Inline date picker Composable to select appointment dates.
+ * Restricts selection to today and future dates, within 2 years.
+ *
+ * @param onDateSelected Callback returning the selected date in milliseconds.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InlineDatePicker(onDateSelected: (Long) -> Unit) {
@@ -265,6 +305,16 @@ fun InlineDatePicker(onDateSelected: (Long) -> Unit) {
     }
 }
 
+/**
+ * Displays a list of selectable chips representing available time slots.
+ *
+ * Disabled if the slot is in the past or unavailable.
+ *
+ * @param availableTimeSlots List of time slots.
+ * @param selectedTimeSlot Currently selected time slot.
+ * @param selectedDate The date for which slots are shown.
+ * @param onTimeSelected Callback when a time slot is selected.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TimeSelectionChips(
@@ -326,7 +376,9 @@ fun TimeSelectionChips(
     }
 }
 
-
+/**
+ * Preview of the Book Appointment screen content for design and testing purposes.
+ */
 @Preview
 @Composable
 fun BookAppointmentScreenPreview() {

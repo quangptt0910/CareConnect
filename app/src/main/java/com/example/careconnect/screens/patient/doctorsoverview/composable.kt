@@ -34,7 +34,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 
-
+/**
+ * A card UI component that displays a doctor's profile summary including
+ * their name, speciality, address, and profile image. It also provides buttons
+ * to view the doctor's full profile or request an appointment.
+ *
+ * @param modifier Modifier to be applied to the card.
+ * @param name The full name of the doctor.
+ * @param speciality The doctor's medical speciality.
+ * @param address The doctor's address or clinic location.
+ * @param doctorId Unique identifier for the doctor.
+ * @param imageRes URL or resource string for the doctor's profile image.
+ * @param openDoctorProfileScreen Lambda to invoke when the "View Profile" button is clicked.
+ * @param openBookingScreen Lambda to invoke when the "Request Appointment" button is clicked.
+ */
 @Composable
 fun FilledCardExample(
     modifier: Modifier = Modifier,
@@ -92,6 +105,14 @@ fun FilledCardExample(
     }
 }
 
+/**
+ * A custom action button with an icon and text label, styled with
+ * elevation and rounded corners.
+ *
+ * @param text The label text displayed on the button.
+ * @param icon The icon displayed alongside the text.
+ * @param onClick Callback triggered when the button is clicked.
+ */
 @Composable
 fun ActionButton(
     text: String,
@@ -121,6 +142,12 @@ fun ActionButton(
     }
 }
 
+/**
+ * A top app bar specifically for the Doctors Overview screen,
+ * providing a title and a back navigation icon.
+ *
+ * @param goBack Lambda invoked when the back button is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorsOverviewTopBar(

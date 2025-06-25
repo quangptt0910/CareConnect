@@ -50,6 +50,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.careconnect.dataclass.Patient
 
+/**
+ * Displays a filled card view containing a list of patients.
+ *
+ * @param title The title of the card (currently unused).
+ * @param modifier Modifier to be applied to the card.
+ * @param patients List of [Patient] objects to display.
+ * @param onEditClick Callback when the edit icon is clicked, passing the patient ID.
+ * @param onDeleteProduct Callback for patient deletion (currently not triggered in UI).
+ */
 @Composable
 fun FilledCardPatientsView(
     title : String,
@@ -114,6 +123,14 @@ fun FilledCardPatientsView(
     }
 }
 
+/**
+ * A styled multiline [OutlinedTextField] for doctors to input information.
+ *
+ * @param value Current text value.
+ * @param onValueChange Callback triggered when the text changes.
+ * @param modifier Modifier to be applied to the text field.
+ * @param label Label text displayed inside the field.
+ */
 @Composable
 fun TextFieldDoctor(
     value: String,
@@ -170,6 +187,13 @@ fun TextFieldDoctor(
     }
 }
 
+/**
+ * Displays a clickable medical category card with an icon and label.
+ *
+ * @param iconResId Resource ID for the icon.
+ * @param title Title or label of the category.
+ * @param onClick Callback triggered when the card is clicked.
+ */
 @Composable
 fun MedicalCategoryCard(iconResId: Int, title: String, onClick: () -> Unit) {
     ElevatedCard(
@@ -196,6 +220,11 @@ fun MedicalCategoryCard(iconResId: Int, title: String, onClick: () -> Unit) {
     }
 }
 
+/**
+ * Displays a horizontal row of medical category cards.
+ *
+ * @param items List of pairs containing icon resource IDs and corresponding labels.
+ */
 @Composable
 fun CategoryRow(items: List<Pair<Int, String>>) {
     Row(
@@ -212,6 +241,17 @@ fun CategoryRow(items: List<Pair<Int, String>>) {
     }
 }
 
+/**
+ * Section to manage patient symptoms input and selection.
+ *
+ * Allows typing symptoms, selecting from suggestions, or adding custom entries.
+ *
+ * @param symptomsList Current list of selected symptoms.
+ * @param symptoms Current input text.
+ * @param onSymptomChange Callback when the symptom input changes.
+ * @param onAddSymptom Callback to add a new symptom to the list.
+ * @param onRemoveSymptom Callback to remove an existing symptom from the list.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SymptomsSection(
@@ -331,7 +371,15 @@ fun SymptomsSection(
 }
 
 
-
+/**
+ * Allows manual input and tagging of symptoms with display and removal support.
+ *
+ * @param value Current text input value.
+ * @param onValueChange Callback triggered when the input text changes.
+ * @param onAdd Callback to add a new tag.
+ * @param tags List of current tags.
+ * @param onRemove Callback to remove an existing tag.
+ */
 @Composable
 fun TagInputField(
     value: String,

@@ -12,6 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+/**
+ * Composable that displays the bottom navigation bar for the Patient section.
+ *
+ * @param tabs An array of [BarRoutes] defining the navigation items to display.
+ * @param navController The [NavController] responsible for navigation actions.
+ * @param navigateToRoute A lambda to trigger navigation to a specific route.
+ * @param modifier Optional [Modifier] for styling the navigation bar.
+ */
 @Composable
 fun BottomBar(
     tabs: Array<BarRoutes>,

@@ -55,19 +55,44 @@ import com.example.careconnect.dataclass.Specialization
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
 
-
+/**
+ * Data class representing an item in the doctor carousel.
+ *
+ * @property doctor The doctor represented by this carousel item.
+ * @property imageUrl URL or resource path for the doctor's image.
+ * @property specialization The doctor's specialization as a string.
+ */
 data class DoctorCarouselItem(
     val doctor: Doctor,
     val imageUrl: String,
     val specialization: String
 )
 
+/**
+ * Data class representing a quick action item for medical history.
+ *
+ * @property type The type identifier of the medical history item (e.g., "MEDICATION").
+ * @property label The display label for the action.
+ * @property iconRes The resource ID of the icon representing the action.
+ */
 data class MedicalHistoryQuickActionItem(
     val type: String,
     val label: String,
     val iconRes: Int
 )
 
+/**
+ * The main home screen composable for patients.
+ *
+ * Displays welcome message, doctor carousel, upcoming appointments, and medical history quick actions.
+ *
+ * @param openSettingsScreen Lambda to navigate to the settings screen.
+ * @param openDoctorsOverviewScreen Lambda to open the doctors overview filtered by specialty.
+ * @param openDoctorProfileScreen Lambda to open an individual doctor's profile by ID.
+ * @param viewModel The ViewModel providing doctors and appointments data.
+ * @param openMedicalHistoryScreen Lambda to open medical history details by type.
+ * @param openNotificationsScreen Lambda to open the notifications screen.
+ */
 @Composable
 fun HomeScreenPatient(
     openSettingsScreen: () -> Unit,
@@ -95,6 +120,23 @@ fun HomeScreenPatient(
     )
 }
 
+/**
+ * The content composable for the patient home screen.
+ *
+ * Displays UI elements such as welcome text, doctor carousel, upcoming appointments, medical history quick actions,
+ * and a bottom sheet with a list of specializations.
+ *
+ * @param uiState UI state for search and selection (currently unused in this implementation).
+ * @param openSettingsScreen Lambda to open settings.
+ * @param onDoctorSelected Lambda invoked when a doctor is selected or deselected.
+ * @param onSearchQueryChange Lambda invoked when search query changes.
+ * @param openDoctorsOverviewScreen Lambda to open doctors overview filtered by specialty.
+ * @param openDoctorProfileScreen Lambda to open individual doctor profile.
+ * @param doctorList List of doctors to display.
+ * @param upcomingAppointments List of upcoming appointments to display.
+ * @param openMedicalHistoryScreen Lambda to open medical history by type.
+ * @param openNotificationsScreen Lambda to open notifications.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -315,7 +357,12 @@ fun HomeScreenPatientContent(
     }
 }
 
-
+/**
+ * Displays a horizontal carousel of quick action items related to medical history.
+ *
+ * @param actions List of medical history quick action items to display.
+ * @param onActionClick Lambda invoked when a quick action is clicked, passing the type of action.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicalHistoryQuickActionsCarousel(
@@ -363,7 +410,9 @@ fun MedicalHistoryQuickActionsCarousel(
     }
 }
 
-
+/**
+ * Preview composable for the HomeScreenPatientContent.
+ */
 @Preview
 @Composable
 fun HomeScreenPatientPreview() {

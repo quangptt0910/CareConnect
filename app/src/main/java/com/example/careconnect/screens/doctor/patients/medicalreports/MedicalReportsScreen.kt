@@ -25,6 +25,15 @@ import com.example.careconnect.screens.patient.profile.medicalreport.MedicalRepo
 import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportUiModel
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+/**
+ * Composable screen displaying a list of medical reports for a given patient.
+ * Automatically loads reports and provides a button to add a new report.
+ *
+ * @param viewModel ViewModel used to manage and fetch medical reports.
+ * @param patientId ID of the patient whose reports are displayed.
+ * @param openCreateMedicalReportScreen Callback to navigate to the report creation screen.
+ * @param goBack Callback to navigate back.
+ */
 @Composable
 fun MedicalReportsScreen(
     viewModel: MedicalReportsViewModel = hiltViewModel(),
@@ -47,6 +56,15 @@ fun MedicalReportsScreen(
     )
 }
 
+/**
+ * Composable content for the [MedicalReportsScreen], showing the list of reports
+ * and a Floating Action Button to create a new one.
+ *
+ * @param patientId ID of the patient.
+ * @param openCreateMedicalReportScreen Function to navigate to report creation.
+ * @param medicalReports List of medical reports to display.
+ * @param goBack Callback to navigate back.
+ */
 @Composable
 fun MedicalReportsScreenContent(
     patientId: String,
@@ -88,6 +106,9 @@ fun MedicalReportsScreenContent(
     }
 }
 
+/**
+ * Preview for the [MedicalReportsScreenContent] composable.
+ */
 @Preview
 @Composable
 fun MedicalReportsScreenPreview(){

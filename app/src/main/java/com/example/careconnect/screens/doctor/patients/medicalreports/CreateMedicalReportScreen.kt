@@ -40,6 +40,15 @@ import com.example.careconnect.screens.doctor.patients.SymptomsSection
 import com.example.careconnect.screens.doctor.patients.TextFieldDoctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+/**
+ * Composable screen for creating a new medical report.
+ * Displays patient details, symptom input, and other report fields.
+ * Handles submission and navigation upon success.
+ *
+ * @param patientId The ID of the patient for whom the report is being created.
+ * @param viewModel ViewModel responsible for managing medical report creation logic.
+ * @param navController Navigation controller used to navigate back on successful submission.
+ */
 @Composable
 fun CreateMedicalReportScreen(
     patientId: String,
@@ -69,6 +78,14 @@ fun CreateMedicalReportScreen(
     )
 }
 
+/**
+ * Composable content for the medical report creation screen.
+ * Allows input for symptoms, diagnosis, prognosis, treatment, and care plan.
+ *
+ * @param patientId The ID of the patient being viewed.
+ * @param patient Optional patient object to display personal details.
+ * @param onCreateMedicalReport Callback invoked upon submitting the report.
+ */
 @Composable
 fun CreateMedicalReportScreenContent(
     patientId: String,
@@ -210,6 +227,16 @@ fun CreateMedicalReportScreenContent(
     }
 }
 
+/**
+ * Composable function that displays a confirmation dialog with title, text, and icon.
+ * Includes confirm and dismiss actions.
+ *
+ * @param onDismissRequest Callback invoked when the dialog is dismissed.
+ * @param onConfirmation Callback invoked when the confirm button is pressed.
+ * @param dialogTitle The title text of the dialog.
+ * @param dialogText The message content shown in the dialog.
+ * @param icon The icon displayed in the dialog header.
+ */
 @Composable
 fun AlertDialogExample(
     onDismissRequest: () -> Unit,
@@ -252,7 +279,10 @@ fun AlertDialogExample(
     )
 }
 
-
+/**
+ * Preview function for the [CreateMedicalReportScreenContent] composable.
+ * Used in Android Studio to render a UI preview during design time.
+ */
 @Preview
 @Composable
 fun CreateMedicalReportScreenPreview(){
