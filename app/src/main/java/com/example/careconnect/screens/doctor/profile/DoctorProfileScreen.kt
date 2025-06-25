@@ -53,6 +53,16 @@ import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
+/**
+ * Screen composable that displays the doctor's profile information.
+ *
+ * Observes [DoctorProfileViewModel] for doctor data and handles photo updates,
+ * profile editing, and navigation to the schedule screen.
+ *
+ * @param viewModel ViewModel to provide and manage doctor data, injected by Hilt by default.
+ * @param openScheduleScreen Callback to navigate to the doctor's schedule screen.
+ * @param goBack Callback to navigate back from this screen.
+ */
 @Composable
 fun DoctorProfileScreen(
     viewModel: DoctorProfileViewModel = hiltViewModel(),
@@ -70,6 +80,18 @@ fun DoctorProfileScreen(
     )
 }
 
+/**
+ * Content composable for the doctor's profile screen.
+ *
+ * Shows the doctor's profile photo, basic info, and options to edit profile
+ * or change schedule. Provides dialogs for editing profile details.
+ *
+ * @param doctor Current doctor data to display.
+ * @param onPhotoSelected Callback when a new profile photo is selected.
+ * @param openScheduleScreen Callback to open the schedule screen.
+ * @param goBack Callback to navigate back.
+ * @param onSaveDoctor Callback invoked to save the updated doctor information.
+ */
 @Composable
 fun DoctorProfileScreenContent(
     doctor: Doctor? = null,
@@ -176,7 +198,16 @@ fun DoctorProfileScreenContent(
     }
 }
 
-
+/**
+ * Dialog composable to edit doctor's profile fields.
+ *
+ * Displays editable fields for name, surname, specialization, address, and phone.
+ * Shows a confirmation dialog before saving changes.
+ *
+ * @param doctor The current doctor data to pre-fill the fields.
+ * @param onDismiss Callback to dismiss the dialog without saving.
+ * @param onSave Callback invoked with the updated doctor data upon saving.
+ */
 @Composable
 fun EditDoctorDialog(
     doctor: Doctor,
@@ -254,7 +285,13 @@ fun EditDoctorDialog(
     )
 }
 
-
+/**
+ * Top app bar composable for the doctor's profile screen.
+ *
+ * Displays the screen title and a back navigation icon.
+ *
+ * @param goBack Callback invoked when the back button is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorProfileTopBar(
@@ -290,6 +327,14 @@ fun DoctorProfileTopBar(
     }
 }
 
+/**
+ * Composable layout showing the doctor's profile photo and basic info.
+ *
+ * Clicking on the photo opens an image picker to update the photo.
+ *
+ * @param doctor The doctor data to display.
+ * @param onPhotoSelected Callback invoked when a new photo URI is selected.
+ */
 @Composable
 fun TopProfileLayout(
     doctor: Doctor,

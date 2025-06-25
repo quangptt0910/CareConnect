@@ -14,6 +14,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * ViewModel responsible for handling the doctor's profile data.
+ *
+ * - Retrieves current doctor data from repository.
+ * - Updates doctor's profile photo by uploading to Firebase Storage.
+ * - Persists updated doctor info in the repository.
+ *
+ * @property addChatRoomRepository Repository for chat room and current doctor info.
+ * @property doctorRepository Repository for updating doctor information.
+ */
 @HiltViewModel
 class DoctorProfileViewModel @Inject constructor(
     private val addChatRoomRepository: AddChatRoomRepository,
@@ -26,12 +36,20 @@ class DoctorProfileViewModel @Inject constructor(
         getDoctor()
     }
 
+    /**
+     * Loads the current doctor data from the repository and updates [_doctor].
+     */
     fun getDoctor(){
         viewModelScope.launch {
             _doctor.value = addChatRoomRepository.getCurrentDoctor()
         }
     }
 
+    /**
+     * Uploads a new profile photo to Firebase Storage and updates the doctor profile.
+     *
+     * @param uri The URI of the selected image to upload.
+     */
     fun updateDoctorPhoto(uri: Uri) {
         val storageRef = FirebaseStorage.getInstance().reference
         val fileName = "doctor_profilePhoto/${_doctor.value?.id}.jpg"
@@ -46,6 +64,11 @@ class DoctorProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the doctor data both locally and in the repository.
+     *
+     * @param updateDoctor The updated doctor information to save.
+     */
     fun updateDoctor(updateDoctor: Doctor) {
         _doctor.value = updateDoctor
         viewModelScope.launch {

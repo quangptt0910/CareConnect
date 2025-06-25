@@ -53,6 +53,22 @@ import com.example.careconnect.ui.navigation.Route.getDoctorPatientsPrescription
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsProfileRoute
 import kotlinx.coroutines.flow.first
 
+
+
+/**
+ * The main composable function that sets up the navigation and UI scaffold for the Doctor section of the app.
+ *
+ * This screen manages the bottom navigation bar and handles navigation between various doctor-related
+ * sub-screens such as home, chat, appointments, patients, profile, schedules, medical reports, prescriptions,
+ * settings, and notifications.
+ *
+ * It also listens for incoming notifications and performs navigation based on notification type (e.g., chat or appointment).
+ *
+ * @param openSplashScreen Lambda called to open the splash screen, usually for logout or app restart.
+ * @param showSnackBar Lambda function to display snackbar messages.
+ * @param notificationData Optional notification data that triggers navigation when present.
+ * @param viewModel ViewModel providing data and authentication repository.
+ */
 @Composable
 fun DoctorApp(
     openSplashScreen: () -> Unit = {},

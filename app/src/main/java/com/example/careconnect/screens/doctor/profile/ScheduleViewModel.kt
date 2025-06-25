@@ -19,7 +19,14 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-
+/**
+ * Represents the UI state for the schedule screen.
+ *
+ * @property selectedDate The currently selected date.
+ * @property slots The list of time slots for the selected date.
+ * @property isLoading Indicates whether the slots data is currently loading.
+ * @property dialogState State of the slot editing dialog (open/closed and the slot being edited).
+ */
 data class ScheduleUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val slots: List<TimeSlot> = emptyList(),
@@ -27,11 +34,28 @@ data class ScheduleUiState(
     val dialogState: DialogState = DialogState(),
 )
 
+/**
+ * Represents the state of the slot editing dialog.
+ *
+ * @property isOpen Whether the dialog is currently open.
+ * @property editingSlot The [TimeSlot] being edited or null if adding a new slot.
+ */
 data class DialogState(
     val isOpen: Boolean = false,
     val editingSlot: TimeSlot? = null
 )
 
+/**
+ * ViewModel responsible for managing doctor's schedule data.
+ *
+ * - Loads, adds, updates, and deletes time slots for the selected date.
+ * - Manages dialog visibility and slot generation logic.
+ * - Integrates with the [DoctorRepository] for data persistence.
+ * - Handles error reporting via snack bar messages.
+ *
+ * @property repo The repository to fetch and manipulate schedule data.
+ * @property authRepository Provides the current authenticated user ID.
+ */
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
     private val repo: DoctorRepository,

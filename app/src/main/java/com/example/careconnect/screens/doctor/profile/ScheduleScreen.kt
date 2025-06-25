@@ -51,6 +51,16 @@ import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.screens.admin.doctormanage.MultiDatePicker
 import java.time.LocalDate
 
+
+/**
+ * Composable that displays the doctor's schedule screen.
+ *
+ * It shows the available time slots for the selected date and allows adding,
+ * editing, and deleting time slots.
+ *
+ * @param showSnackBar Lambda function to display snack bar messages.
+ * @param viewModel The [ScheduleViewModel] instance injected via Hilt.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleScreen(
@@ -70,6 +80,21 @@ fun ScheduleScreen(
     )
 }
 
+/**
+ * Content composable for the schedule screen.
+ *
+ * Displays a multi-date picker, a list of time slots for the selected date,
+ * and a floating action button to add new time slots.
+ * Also manages the display of the slot editing dialog.
+ *
+ * @param uiState The current UI state holding selected date, slots, loading status, and dialog state.
+ * @param onDateSelected Called when the user selects a different date.
+ * @param onAddClick Called when the add button is clicked to add a new slot.
+ * @param onEdit Called when an existing slot is edited.
+ * @param onDelete Called when an existing slot is deleted.
+ * @param onDialogSave Called when a slot is saved via the dialog.
+ * @param onDialogDismiss Called when the slot editing dialog is dismissed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleScreenContent(
@@ -150,6 +175,13 @@ fun ScheduleScreenContent(
     }
 }
 
+/**
+ * Displays a single row representing a time slot with edit and delete actions.
+ *
+ * @param slot The [TimeSlot] data to display.
+ * @param onEdit Lambda to invoke when the edit button is clicked.
+ * @param onDelete Lambda to invoke when the delete button is clicked.
+ */
 @Composable
 fun SlotRow(slot: TimeSlot, onEdit: () -> Unit, onDelete: () -> Unit) {
     Row(
@@ -174,7 +206,16 @@ fun SlotRow(slot: TimeSlot, onEdit: () -> Unit, onDelete: () -> Unit) {
     }
 }
 
-
+/**
+ * Dialog composable for adding or editing a time slot.
+ *
+ * Contains input fields for start time, end time, appointment length, and slot type,
+ * with validation and dropdown selection for slot type.
+ *
+ * @param initialSlot The slot to edit or null to add a new one.
+ * @param onDismiss Called when the dialog is dismissed without saving.
+ * @param onSave Called with the new or updated [TimeSlot] when the user confirms.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SlotEditDialog(
@@ -264,7 +305,15 @@ fun SlotEditDialog(
 }
 
 
-
+/**
+ * Custom outlined text field for entering time values.
+ *
+ * Validates input to ensure it conforms to "HH:mm" format and only allows valid hours and minutes.
+ *
+ * @param label Label text shown above the text field.
+ * @param value The current text value.
+ * @param onValueChange Lambda called when the text changes.
+ */
 @Composable
 fun TimeTextField(
     label: String,
