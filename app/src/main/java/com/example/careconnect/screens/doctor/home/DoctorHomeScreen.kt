@@ -58,6 +58,23 @@ import com.example.careconnect.dataclass.Task
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
 
+
+/**
+ * Composable function for the Doctor's Home Screen.
+ *
+ * This screen displays an overview for the doctor, including:
+ * - Welcome message and current date.
+ * - Statistics for total appointments, patients, and tasks.
+ * - Lists of pending and upcoming appointments.
+ * - A list of the doctor's patients.
+ * - A list of tasks with options to add, edit, and delete tasks.
+ *
+ * It uses a [DoctorHomeViewModel] to fetch and manage data.
+ *
+ * @param openSettingsScreen Lambda function to navigate to the settings screen.
+ * @param openNotificationsScreen Lambda function to navigate to the notifications screen.
+ * @param viewModel Instance of [DoctorHomeViewModel] for this screen.
+ */
 @Composable
 fun DoctorHomeScreen(
     openSettingsScreen: () -> Unit,
@@ -99,6 +116,28 @@ fun DoctorHomeScreen(
     )
 }
 
+
+/**
+ * Content composable for the Doctor's Home Screen.
+ *
+ * This composable is responsible for laying out the UI elements of the screen.
+ * It is a stateless composable that receives all its data and callbacks as parameters.
+ *
+ * @param openSettingsScreen Lambda function to navigate to the settings screen.
+ * @param patientList List of [Patient] objects to display.
+ * @param upcomingAppointmentList List of upcoming [Appointment] objects.
+ * @param pendingAppointmentList List of pending [Appointment] objects.
+ * @param tasks List of [Task] objects.
+ * @param totalAppointments Total number of appointments (pending + upcoming).
+ * @param totalPatients Total number of patients.
+ * @param onAccept Callback function when a pending appointment is accepted.
+ * @param onDecline Callback function when a pending appointment is declined.
+ * @param onAddTask Callback function to add a new task.
+ * @param onUpdateTask Callback function to update an existing task.
+ * @param onDeleteTask Callback function to delete a task.
+ * @param showSnackBar Callback function to display a snackbar message.
+ * @param openNotificationsScreen Lambda function to navigate to the notifications screen.
+ */
 @Composable
 fun DoctorHomeScreenContent(
     openSettingsScreen: () -> Unit = {},
@@ -370,6 +409,17 @@ fun DoctorHomeScreenContent(
 
 }
 
+
+/**
+ * Composable function to display a card for a pending appointment.
+ *
+ * This card shows information about a pending appointment and provides
+ * buttons to accept or decline the appointment.
+ *
+ * @param appt The [Appointment] object to display.
+ * @param onAccept Lambda function to be invoked when the "Accept" button is clicked.
+ * @param onDecline Lambda function to be invoked when the "Decline" button is clicked.
+ */
 @Composable
 fun PendingAppointmentCard(
     appt: Appointment,

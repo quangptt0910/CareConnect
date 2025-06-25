@@ -63,6 +63,13 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 
+
+/**
+ * Composable function for the Doctor Appointment screen.
+ * This screen displays a list of appointments for the doctor, allowing them to filter, sort, and navigate through dates.
+ *
+ * @param viewModel The [DoctorAppointmentViewModel] used to manage the state and logic of this screen.
+ */
 @Composable
 fun DoctorAppointmentScreen(
     viewModel: DoctorAppointmentViewModel = hiltViewModel()
@@ -78,6 +85,17 @@ fun DoctorAppointmentScreen(
     )
 }
 
+
+/**
+ * Composable function for the content of the Doctor Appointment screen.
+ *
+ * @param uiState The current state of the UI, containing appointment data, selected filters, etc.
+ * @param onRangeChange Callback invoked when the time range (Day, Week, Month, All) is changed.
+ * @param onDateChange Callback invoked when the current date is changed.
+ * @param onFilterChange Callback invoked when the appointment status filters are changed.
+ * @param onSortChange Callback invoked when the sorting option for appointments is changed.
+ * @param onReset Callback invoked when the reset button is clicked to clear all filters and selections.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun DoctorAppointmentScreenContent(
