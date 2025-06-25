@@ -61,6 +61,7 @@ import java.time.LocalDate
 @Composable
 fun DoctorHomeScreen(
     openSettingsScreen: () -> Unit,
+    openNotificationsScreen: () -> Unit,
     viewModel: DoctorHomeViewModel = hiltViewModel()
 ) {
     val patientList by viewModel.patientList.collectAsStateWithLifecycle(emptyList())
@@ -93,7 +94,8 @@ fun DoctorHomeScreen(
         onDeleteTask = { task ->
             viewModel.deleteTask(task)
         },
-        showSnackBar = {}
+        showSnackBar = {},
+        openNotificationsScreen = openNotificationsScreen
     )
 }
 
@@ -112,6 +114,7 @@ fun DoctorHomeScreenContent(
     onUpdateTask: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     showSnackBar: (SnackBarMessage) -> Unit,
+    openNotificationsScreen: () -> Unit = {}
 ) {
     val date = LocalDate.now()
     var isAddDialogOpen by remember { mutableStateOf(false) }
@@ -142,7 +145,7 @@ fun DoctorHomeScreenContent(
                     )
 
                     Row {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { openNotificationsScreen() }) {
                             Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
                         }
                         IconButton(onClick = openSettingsScreen) {

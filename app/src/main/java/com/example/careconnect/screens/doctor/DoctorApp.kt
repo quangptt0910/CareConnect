@@ -32,6 +32,7 @@ import com.example.careconnect.screens.doctor.profile.DoctorProfileScreen
 import com.example.careconnect.screens.doctor.profile.ScheduleScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
+import com.example.careconnect.screens.settings.NotificationSettingsScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.DOCTOR_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_CREATE_MEDICAL_REPORT_ROUTE
@@ -41,6 +42,7 @@ import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_MEDICAL_REPOR
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PRESCRIPTIONS_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_SCHEDULE_ROUTE
+import com.example.careconnect.ui.navigation.Route.NOTIFICATION_ROUTE
 import com.example.careconnect.ui.navigation.Route.SETTINGS_ROUTE
 import com.example.careconnect.ui.navigation.Route.getDoctorChatRoute
 import com.example.careconnect.ui.navigation.Route.getDoctorPatientsCreateMedicalReportRoute
@@ -108,7 +110,8 @@ fun DoctorApp(
         ) {
             composable(BarRoutesDoctor.FEED.route) {
                 DoctorHomeScreen(
-                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) }
+                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
+                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) }
                 )
             }
             composable(BarRoutesDoctor.CHAT.route) {
@@ -116,7 +119,8 @@ fun DoctorApp(
                     openChatScreen = { chatId, patientId, doctorId ->
                         navController.navigate(getDoctorChatRoute(doctorId, patientId, chatId))
                     },
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) }
                 )
             }
 
@@ -184,6 +188,7 @@ fun DoctorApp(
                     openCreateMedicalReportScreen = { patientId ->
                         navController.navigate(getDoctorPatientsCreateMedicalReportRoute(patientId))
                     },
+                    goBack = { navController.popBackStack() }
                 )
             }
 
@@ -199,7 +204,8 @@ fun DoctorApp(
                     patientId = backStackEntry.arguments?.getString("patientId") ?: "",
                     openCreatePrescriptionsScreen = { patientId ->
                         navController.navigate(getDoctorPatientsCreatePrescriptionsRoute(patientId))
-                    }
+                    },
+                    goBack = { navController.popBackStack() }
                 )
             }
 
@@ -226,7 +232,11 @@ fun DoctorApp(
                 )
             }
 
-
+            composable(NOTIFICATION_ROUTE) {
+                NotificationSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

@@ -10,8 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportCard
+import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportTopBar
 import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportUiModel
 import com.example.careconnect.ui.theme.CareConnectTheme
 
@@ -29,8 +29,8 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun MedicalReportsScreen(
     viewModel: MedicalReportsViewModel = hiltViewModel(),
     patientId: String,
-    openCreateMedicalReportScreen: (patientId: String) -> Unit
-
+    openCreateMedicalReportScreen: (patientId: String) -> Unit,
+    goBack: () -> Unit = {}
 ){
 
     val medicalReports by viewModel.medicalReport.collectAsState()
@@ -42,7 +42,8 @@ fun MedicalReportsScreen(
     MedicalReportsScreenContent(
         patientId = patientId,
         openCreateMedicalReportScreen = openCreateMedicalReportScreen,
-        medicalReports = medicalReports
+        medicalReports = medicalReports,
+        goBack = goBack
     )
 }
 
@@ -50,14 +51,21 @@ fun MedicalReportsScreen(
 fun MedicalReportsScreenContent(
     patientId: String,
     openCreateMedicalReportScreen: (patientId: String) -> Unit = {},
-    medicalReports: List<MedicalReportUiModel>
+    medicalReports: List<MedicalReportUiModel>,
+    goBack: () -> Unit = {}
 ){
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ){
+    Scaffold(
+        topBar = {
+            MedicalReportTopBar(
+                goBack = goBack
+            )
+        }
+    ){ paddingValues ->
 
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+        ) {
             items(medicalReports) { medicalReport ->
                 MedicalReportCard(
                     medicalReport

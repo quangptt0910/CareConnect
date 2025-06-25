@@ -22,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ArrowForwardIos
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -280,16 +279,6 @@ fun DoctorProfileTopBar(
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                },
-                actions = {  // <-- Add actions here (right side of the TopAppBar)
-                    Spacer(modifier = Modifier.width(100.dp))  // Add spacing before the icon
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            imageVector = Icons.Outlined.Notifications,
                             contentDescription = "Localized description"
                         )
                     }

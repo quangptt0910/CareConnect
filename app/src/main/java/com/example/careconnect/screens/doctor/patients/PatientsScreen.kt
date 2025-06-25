@@ -1,11 +1,9 @@
 package com.example.careconnect.screens.doctor.patients
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -13,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,25 +44,33 @@ fun PatientsScreenContent(
     onBack: () -> Unit = {},
     openPatientsProfile: (patientId: String) -> Unit = {}
 ){
-   Surface(
-       modifier = Modifier.fillMaxSize(),
-       color = MaterialTheme.colorScheme.background
-   ){
-       PatientsListTopBar(
-           onBack = onBack
-       )
-
-       Column(modifier = Modifier.padding(top = 90.dp, start = 16.dp, end = 16.dp).fillMaxSize()) {
-
-           Spacer(modifier = Modifier.height(20.dp))
-
-
-           FilledCardPatientsView(
-               title = "Patients",
-               patients = patientList,
-               onEditClick = { patientId -> openPatientsProfile(patientId) },
-               onDeleteProduct = { /* Handle product deletion */ }
+   Scaffold(
+       topBar = {
+           PatientsListTopBar(
+               onBack = onBack
            )
+       }
+   ){ paddingValues ->
+
+       LazyColumn(
+           modifier = Modifier
+               .fillMaxSize()
+               .padding(paddingValues)
+       ) {
+           item {
+               Column(
+                   modifier = Modifier.padding(16.dp)
+               ){
+                   FilledCardPatientsView(
+                       title = "Patients",
+                       patients = patientList,
+                       onEditClick = { patientId -> openPatientsProfile(patientId) },
+                       onDeleteProduct = { /* Handle product deletion */ }
+                   )
+               }
+
+           }
+
        }
    }
 }
@@ -75,8 +80,6 @@ fun PatientsScreenContent(
 fun PatientsListTopBar(
     onBack: () -> Unit = {}
 ) {
-    Scaffold(
-        topBar = {
             TopAppBar(
                 modifier = Modifier,
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -99,10 +102,6 @@ fun PatientsListTopBar(
                     }
                 }
             )
-        },
-    ){
-        Box(modifier = Modifier.padding(it))
-    }
 }
 
 @Preview
