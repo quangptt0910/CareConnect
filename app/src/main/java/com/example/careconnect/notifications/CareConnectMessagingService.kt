@@ -10,6 +10,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.careconnect.MainActivity
 import com.example.careconnect.R
+import com.example.careconnect.data.repository.AuthRepository
+import com.example.careconnect.data.repository.NotificationSettingsRepository
+import com.example.careconnect.dataclass.Role
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,7 +29,10 @@ class CareConnectMessagingService : FirebaseMessagingService() {
     lateinit var fcmTokenManager: FCMTokenManager
 
     @Inject
-    lateinit var notificationSettingsManager: NotificationSettingsManager
+    lateinit var notificationRepository: NotificationSettingsRepository
+
+    @Inject
+    lateinit var authRepository: AuthRepository
 
     companion object {
         private const val TAG = "FCMService"
@@ -38,15 +44,10 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         private const val CHAT_CHANNEL_DESCRIPTION = "Notifications for new chat messages"
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        Log.d(TAG, "🔔 FCM Service created")
-    }
-
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCMService", "NEW_TOKEN: $token")
-        CoroutineScope(Dispatchers.IO).launch {
+        Log.d(TAG, "NEW_TOKEN: $token")
+        runBlocking {
             fcmTokenManager.updateFCMToken()
         }
     }
@@ -54,32 +55,47 @@ class CareConnectMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        // Get user settings before processing notification
-        val settings = runBlocking {
-            notificationSettingsManager.getSettings()
-        }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val role = authRepository.getCurrentUserRole()
+                Log.d(TAG, "User role fetched: $role")
 
-        val notificationType = remoteMessage.data["type"] ?: ""
+                val notificationType = remoteMessage.data["type"] ?: ""
 
-        when (notificationType) {
-            "CHAT_MESSAGE" -> {
-                if (settings.chatNotifications.enabled) {
-                    handleChatNotification(remoteMessage, settings.chatNotifications)
-                } else {
-                    Log.d(TAG, "Chat notifications disabled - skipping")
+                when (notificationType) {
+                    "CHAT_MESSAGE" -> {
+                        if (notificationRepository.shouldShowChatNotifications()) {
+                            val settings = notificationRepository.getNotificationSettings(role)
+                            if (role == Role.DOCTOR || role == Role.PATIENT) {
+                                handleChatNotification(remoteMessage, settings.chatNotifications)
+                            } else {
+                                Log.d(TAG, "User role $role not eligible for chat notifications")
+                            }
+                        } else {
+                            Log.d(TAG, "Chat notifications disabled")
+                        }
+                    }
+                    else -> {
+                        if (notificationRepository.shouldShowAppointmentNotifications()) {
+                            val settings = notificationRepository.getNotificationSettings(role)
+                            if (role == Role.DOCTOR || role == Role.PATIENT) {
+                                handleAppointmentNotification(remoteMessage, settings.appointmentNotifications)
+                            } else {
+                                Log.d(TAG, "User role $role not eligible for appointment notifications")
+                            }
+                        } else {
+                            Log.d(TAG, "Appointment notifications disabled")
+                        }
+                    }
                 }
-            }
-            else -> {
-                if (settings.appointmentNotifications.enabled) {
-                    handleAppointmentNotification(remoteMessage, settings.appointmentNotifications)
-                } else {
-                    Log.d(TAG, "Appointment notifications disabled - skipping")
-                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to fetch role or handle notification: ${e.message}", e)
             }
         }
     }
 
-    // CHAT NOTIFICATION
+
     private fun handleChatNotification(remoteMessage: RemoteMessage, chatSettings: ChatNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "New Message"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
@@ -119,48 +135,54 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
         val notificationBuilder = NotificationCompat.Builder(this, CHAT_CHANNEL_ID)
             .setSmallIcon(R.drawable.groups_24px)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setContentTitle(if (chatSettings.showPreview) title else "New Message")
+            .setContentText(if (chatSettings.showPreview) body else "You have a new message")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(if (chatSettings.showPreview) body else "You have a new message"))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
 
-        // Apply user settings
-        if (chatSettings.showPreview) {
-            // Keep title and body as is
-        } else {
-            // Hide message content
-            notificationBuilder
-                .setContentTitle("New Message")
-                .setContentText("You have a new message")
-                .setStyle(NotificationCompat.BigTextStyle().bigText("You have a new message"))
-        }
-
         if (chatSettings.sound) {
             notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        } else {
+            notificationBuilder.setSound(null)
         }
 
         if (chatSettings.vibration) {
             notificationBuilder.setVibrate(longArrayOf(0, 250, 250, 250))
+        } else {
+            notificationBuilder.setVibrate(null)
         }
 
         val notification = notificationBuilder.build()
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.notify(chatId.hashCode(), notification)
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(chatId.hashCode(), notification)
     }
 
-    // APPOINTMENT NOTIFICATION
     private fun handleAppointmentNotification(remoteMessage: RemoteMessage, appointmentSettings: AppointmentNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "CareConnect"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
-        val notificationType = remoteMessage.data["type"] ?: ""
+        val type = remoteMessage.data["type"] ?: ""
         val appointmentId = remoteMessage.data["appointmentId"] ?: ""
         val userType = remoteMessage.data["userType"] ?: ""
 
-        showAppointmentNotification(title, body, notificationType, appointmentId, userType, appointmentSettings)
+        if (!shouldShowAppointmentType(type, appointmentSettings)) {
+            Log.d(TAG, "Appointment type $type disabled - skipping notification")
+            return
+        }
+
+        showAppointmentNotification(title, body, type, appointmentId, userType, appointmentSettings)
+    }
+
+    private fun shouldShowAppointmentType(type: String, settings: AppointmentNotificationSettings): Boolean {
+        return when (type.uppercase()) {
+            "CONFIRMED", "PENDING" -> settings.confirmations
+            "REMINDER" -> settings.reminders
+            "CANCELED", "CANCELLED" -> settings.cancellations
+            "COMPLETED", "NO_SHOW" -> settings.completions
+            else -> true
+        }
     }
 
     private fun showAppointmentNotification(
@@ -198,38 +220,30 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
-        // Apply user settings
         if (appointmentSettings.sound) {
             notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        } else {
+            notificationBuilder.setSound(null)
         }
 
         if (appointmentSettings.vibration) {
             notificationBuilder.setVibrate(longArrayOf(0, 1000, 500, 1000))
+        } else {
+            notificationBuilder.setVibrate(null)
         }
 
         val notification = notificationBuilder.build()
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        val notificationId = appointmentId.hashCode()
-        notificationManager.notify(notificationId, notification)
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(appointmentId.hashCode(), notification)
     }
 
-    private fun createNotificationChannel(channelId: String, channelName: String, channelDescription: String) {
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
+    private fun createNotificationChannel(channelId: String, name: String, descriptionText: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Check if channel already exists
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             val existingChannel = notificationManager.getNotificationChannel(channelId)
-            if (existingChannel != null) {
-                Log.d(TAG, "📱 channel $channelId already exists")
-                return
-            }
+            if (existingChannel != null) return
 
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = channelDescription
+            val channel = NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_HIGH).apply {
+                description = descriptionText
                 enableLights(true)
                 lightColor = android.graphics.Color.BLUE
                 enableVibration(true)
@@ -238,14 +252,10 @@ class CareConnectMessagingService : FirebaseMessagingService() {
                     CHAT_CHANNEL_ID -> longArrayOf(0, 250, 250, 250)
                     else -> longArrayOf(0, 500)
                 }
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    null
-                )
+                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null)
             }
 
             notificationManager.createNotificationChannel(channel)
-            Log.d(TAG, "Notification channel $channelId created")
         }
     }
 }
