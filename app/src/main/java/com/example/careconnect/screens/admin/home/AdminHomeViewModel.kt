@@ -10,6 +10,15 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * ViewModel for the Admin Home Screen.
+ *
+ * Responsible for loading and exposing data related to today's appointments, upcoming appointments,
+ * recent doctors, doctors working today, and cancelled appointments.
+ *
+ * @property appointmentRepository Repository for accessing appointment data.
+ * @property doctorRepository Repository for accessing doctor data.
+ */
 @HiltViewModel
 class AdminHomeViewModel @Inject constructor(
     private val appointmentRepository: AppointmentRepository,
@@ -37,6 +46,9 @@ class AdminHomeViewModel @Inject constructor(
         loadData()
     }
 
+    /**
+     * Loads all required data asynchronously from repositories.
+     */
     private fun loadData() {
         launchCatching {
             _appointmentsToday.value = appointmentRepository.getTodayAppointments().size

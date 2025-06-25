@@ -29,7 +29,13 @@ import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.ui.theme.CareConnectTheme
 
-// Overview admin screen
+/**
+ * Admin Home Screen composable displaying an overview of today's activity,
+ * recent activities, and quick actions.
+ *
+ * @param openAddDoctorScreen Lambda callback to navigate to the add doctor screen.
+ * @param viewModel ViewModel providing data streams for the screen (default via Hilt injection).
+ */
 @Composable
 fun AdminHomeScreen(
     openAddDoctorScreen: () -> Unit,
@@ -54,7 +60,19 @@ fun AdminHomeScreen(
     )
 }
 
-
+/**
+ * UI content of the Admin Home Screen.
+ *
+ * Displays sections for today's overview, recent activities, and quick actions.
+ *
+ * @param openAddDoctorScreen Lambda callback triggered when quick action button is clicked.
+ * @param appointmentsToday Number of appointments scheduled for today.
+ * @param upcomingAppointments Number of upcoming appointments.
+ * @param recentDoctors List of doctors recently added to the system.
+ * @param cancelledAppointmentsToday Number of appointments cancelled today.
+ * @param appointmentsUpcoming List of upcoming appointments.
+ * @param doctorsWorkingToday List of doctors working today.
+ */
 @Composable
 fun AdminHomeScreenContent(
     openAddDoctorScreen: () -> Unit,
@@ -99,6 +117,13 @@ fun AdminHomeScreenContent(
     }
 }
 
+/**
+ * Overview section showing counts of doctors available, scheduled appointments, and cancellations for today.
+ *
+ * @param doctorsAvailable Number of doctors currently available.
+ * @param appointmentsScheduled Number of appointments scheduled for today.
+ * @param cancellationsToday Number of appointments cancelled today.
+ */
 @Composable
 fun OverviewSection(
     doctorsAvailable: Int,
@@ -116,6 +141,12 @@ fun OverviewSection(
     }
 }
 
+/**
+ * Displays recent doctors added and upcoming appointments in a scrollable card.
+ *
+ * @param recentDoctors List of recently added doctors.
+ * @param upcomingAppointments List of upcoming appointments.
+ */
 @Composable
 fun RecentActivities(
     recentDoctors: List<Doctor> = emptyList(),
@@ -143,6 +174,12 @@ fun RecentActivities(
     }
 }
 
+/**
+ * A row containing a quick action button.
+ *
+ * @param label Text label of the button.
+ * @param onClick Callback triggered when the button is clicked.
+ */
 @Composable
 fun QuickActions(
     label: String,
@@ -155,7 +192,9 @@ fun QuickActions(
     }
 }
 
-
+/**
+ * Preview for AdminHomeScreenContent showing sample data.
+ */
 @Preview
 @Composable
 fun HomeScreenPreview() {

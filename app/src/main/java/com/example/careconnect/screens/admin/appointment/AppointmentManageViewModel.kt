@@ -23,7 +23,16 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 import javax.inject.Inject
 
+/**
+ * Represents the possible time ranges for filtering appointments.
+ */
 enum class TimeRange { Day, Week, Month, All }
+
+/**
+ * Sorting options available for appointment list display.
+ *
+ * @property label Human-readable label describing the sort order.
+ */
 enum class SortOption(val label: String) {
     TimeAsc("Time: Earliest"),
     TimeDesc("Time: Latest"),
@@ -32,6 +41,18 @@ enum class SortOption(val label: String) {
     Status("Status")
 }
 
+/**
+ * Represents the UI state for [AppointmentManageScreen], including
+ * the list of appointments, loading/error states, and filter/sort selections.
+ *
+ * @property appointments The list of filtered and sorted appointments to display.
+ * @property isLoading Whether data is currently being loaded.
+ * @property error Any error message encountered during loading, or null if none.
+ * @property selectedRange The currently selected time range filter.
+ * @property currentDate The currently selected date (used for filtering).
+ * @property filterStatus The set of appointment statuses currently used to filter appointments.
+ * @property sortOption The current sorting option for the appointments.
+ */
 data class AppointmentUiState(
     val appointments: List<Appointment> = emptyList(),
     val isLoading: Boolean = true,
@@ -44,6 +65,14 @@ data class AppointmentUiState(
     val sortOption: SortOption = SortOption.TimeAsc
 )
 
+/**
+ * ViewModel for managing appointment data and UI state in the admin appointment screen.
+ *
+ * Fetches appointment data from [AppointmentRepository] based on current filter, date range,
+ * and sort selections. Exposes [uiState] as a [StateFlow] to be collected by the UI.
+ *
+ * @property repo The appointment repository used to fetch appointment data.
+ */
 @HiltViewModel
 class AppointmentManageViewModel @Inject constructor(
     private val repo: AppointmentRepository
@@ -122,10 +151,33 @@ class AppointmentManageViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, AppointmentUiState())
 
     // UI event handlers
+    /**
+     * Updates the selected time range filter.
+     * @param range The new [TimeRange] to select.
+     */
     fun setRange(range: TimeRange)  { _selectedRange.value = range }
+
+    /**
+     * Updates the selected date used for filtering appointments.
+     * @param date The new [LocalDate] to select.
+     */
     fun setDate(date: LocalDate)   { _currentDate.value   = date }
+
+    /**
+     * Updates the set of appointment statuses used as filters.
+     * @param status The new set of [AppointmentStatus] filters.
+     */
     fun setFilter(status: Set<AppointmentStatus?>) { _filterStatus.value = status }
+
+    /**
+     * Updates the current sorting option for appointments.
+     * @param option The new [SortOption] to apply.
+     */
     fun setSort(option: SortOption)  { _sortOption.value  = option }
+
+    /**
+     * Resets all filters, sorting options, and date selections to their default states.
+     */
     fun resetAll() {
         _selectedRange.value = TimeRange.All
         _currentDate.value   = LocalDate.now()

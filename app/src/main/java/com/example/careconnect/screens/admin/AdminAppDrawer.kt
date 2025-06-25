@@ -27,6 +27,21 @@ import androidx.compose.ui.unit.dp
 import com.example.careconnect.R
 import com.example.careconnect.ui.navigation.Route
 
+/**
+ * The navigation drawer content composable for the admin section.
+ *
+ * Displays a vertical list of navigation items representing the admin app's main sections.
+ * Highlights the currently selected route and provides navigation callbacks.
+ *
+ * @param currentRoute The current active route string to highlight the selected item.
+ * @param openSettingsScreen Callback to navigate to the settings screen.
+ * @param openOverviewScreen Callback to navigate to the overview screen.
+ * @param openDoctorManageScreen Callback to navigate to doctor management screen.
+ * @param openPatientManageScreen Callback to navigate to patient management screen.
+ * @param openAppointmentsScreen Callback to navigate to appointments screen.
+ * @param closeDrawer Callback to close the drawer after a navigation item is clicked.
+ * @param modifier Optional [Modifier] to be applied to the drawer content.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDrawerContent(
@@ -94,7 +109,13 @@ fun AdminDrawerContent(
 }
 
 
-
+/**
+ * The top app bar for the admin section.
+ *
+ * Displays the app title and a menu icon to toggle the navigation drawer.
+ *
+ * @param onMenuClick Callback invoked when the menu icon is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminTopAppBar(onMenuClick: () -> Unit) {

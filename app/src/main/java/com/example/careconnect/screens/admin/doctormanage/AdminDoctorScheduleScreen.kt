@@ -29,7 +29,13 @@ import com.example.careconnect.R
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.LocalDate
 
-
+/**
+ * Screen composable for adding a doctor's work schedule.
+ *
+ * @param openDoctorManageScreen Lambda invoked to navigate to the doctor management screen upon successful schedule addition.
+ * @param onBack Lambda invoked when the back button is pressed to navigate back.
+ * @param viewModel The [AdminDoctorScheduleViewModel] instance, injected by Hilt by default.
+ */
 @Composable
 fun AddDoctorScheduleScreen(
     openDoctorManageScreen: () -> Unit,
@@ -52,6 +58,16 @@ fun AddDoctorScheduleScreen(
     )
 }
 
+/**
+ * UI content for the add doctor schedule screen.
+ *
+ * Displays a progress stepper, instructions, multi-date picker, and navigation buttons.
+ *
+ * @param uiState The current UI state holding selected dates, loading/saving states, and navigation flags.
+ * @param onDateSelected Lambda called when a date is selected or deselected.
+ * @param onNextStep Lambda called when the user clicks the next button to save and proceed.
+ * @param onBack Lambda called when the user clicks the back button.
+ */
 @Composable
 fun AddDoctorScheduleScreenContent(
     uiState: DoctorScheduleUiState,
@@ -109,7 +125,9 @@ fun AddDoctorScheduleScreenContent(
     }
 }
 
-
+/**
+ * Preview composable for the AddDoctorScheduleScreenContent.
+ */
 @Preview
 @Composable
 fun AdminDoctorScheduleScreenPreview() {

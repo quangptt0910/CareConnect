@@ -35,6 +35,16 @@ import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+/**
+ * Screen composable to manage the list of doctors in the admin interface.
+ *
+ * This screen fetches and displays all doctors, showing each doctor in a card with options to edit or delete.
+ * It also provides a floating action button to navigate to the screen to add a new doctor.
+ *
+ * @param openAddDoctorScreen Lambda function triggered when the user clicks the add doctor button.
+ * @param viewModel ViewModel to manage doctors data and state.
+ * @param showSnackBar Function to display snackbar messages, e.g., on errors or actions.
+ */
 @Composable
 fun DoctorManageScreen(
     openAddDoctorScreen: () -> Unit,
@@ -54,7 +64,14 @@ fun DoctorManageScreen(
     )
 }
 
-
+/**
+ * Composable to render the UI content of the Doctor Manage Screen.
+ *
+ * Displays a list of doctors with a title and a floating action button to add new doctors.
+ *
+ * @param openAddDoctorScreen Callback triggered when the add doctor button is clicked.
+ * @param doctors List of doctors to display.
+ */
 @Composable
 fun DoctorManageScreenContent(
     openAddDoctorScreen: () -> Unit = {},
@@ -110,7 +127,9 @@ fun DoctorManageScreenContent(
 }
 
 
-
+/**
+ * Preview for the DoctorManageScreenContent composable with sample data.
+ */
 @Preview(showBackground = true)
 @Composable
 fun DoctorManageScreenPreview() {

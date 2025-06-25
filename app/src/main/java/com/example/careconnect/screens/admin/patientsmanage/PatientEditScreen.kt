@@ -28,7 +28,12 @@ fun PatientEditScreen(
 
 }
 
-
+/**
+ * Content composable for [PatientEditScreen].
+ *
+ * Displays the patient profile heading, and placeholders for editing patient info
+ * and appointments using [FilledCardEdit] and [FilledCardAppointment].
+ */
 @Composable
 fun PatientEditScreenContent(
 ) {

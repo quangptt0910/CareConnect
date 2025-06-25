@@ -21,6 +21,18 @@ import com.example.careconnect.screens.admin.navigation.AdminNavigationActions
 import com.example.careconnect.ui.navigation.Route
 import kotlinx.coroutines.launch
 
+
+/**
+ * The main admin app container composable.
+ *
+ * This composable sets up the navigation controller, drawer state, and scaffold structure
+ * including the navigation drawer, top app bar, and snackbar host.
+ * It manages showing/hiding the drawer and top bar based on the current route.
+ *
+ * @param openSplashScreen Lambda to navigate to the splash screen.
+ * @param showSnackBar Lambda to show a snackbar message.
+ * @param modifier Optional [Modifier] to be applied to this composable.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminApp(

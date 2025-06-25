@@ -9,7 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-
+/**
+ * ViewModel responsible for managing the doctor data and business logic
+ * in the Doctor Manage screen.
+ *
+ * Provides flows for doctor list and navigation state, and handles data loading.
+ *
+ * @property doctorRepository Repository for doctor data operations.
+ */
 @HiltViewModel
 class DoctorManageViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository
@@ -29,6 +36,9 @@ class DoctorManageViewModel @Inject constructor(
 
     val allDoctors = doctorRepository.getAllDoctorsFlow()
 
+    /**
+     * Loads the list of doctors asynchronously and updates the internal state.
+     */
     fun loadDoctors() {
         launchCatching {
             _doctorsList.value = doctorRepository.getAllDoctors()

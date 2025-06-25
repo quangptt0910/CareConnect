@@ -10,6 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for managing patients data in the admin patients management screen.
+ *
+ * Fetches the list of patients from [PatientRepository] and exposes it as a [StateFlow].
+ *
+ * @property patientRepository Repository used to retrieve patient data.
+ */
 @HiltViewModel
 class PatientsManageViewModel @Inject constructor(
     private val patientRepository: PatientRepository
@@ -21,6 +28,9 @@ class PatientsManageViewModel @Inject constructor(
         loadPatients()
     }
 
+    /**
+     * Loads all patients from the repository asynchronously.
+     */
     private fun loadPatients() {
         viewModelScope.launch {
             _patients.value = patientRepository.getAllPatients()

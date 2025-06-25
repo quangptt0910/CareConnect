@@ -63,7 +63,14 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-
+/**
+ * The main composable screen for managing appointments in the admin section.
+ *
+ * Collects state from [AppointmentManageViewModel] and displays
+ * the appointment management UI with filtering, sorting, and date range controls.
+ *
+ * @param viewModel The [AppointmentManageViewModel] instance providing UI state and event handlers.
+ */
 @Composable
 fun AppointmentManageScreen(
     viewModel: AppointmentManageViewModel = hiltViewModel()
@@ -79,6 +86,18 @@ fun AppointmentManageScreen(
     )
 }
 
+/**
+ * The content composable for [AppointmentManageScreen] displaying
+ * the UI elements to select date ranges, filters, sorting options,
+ * and the list of appointments accordingly.
+ *
+ * @param uiState The current UI state containing appointment data, filters, and sorting info.
+ * @param onRangeChange Callback invoked when the user changes the time range (Day, Week, Month, All).
+ * @param onDateChange Callback invoked when the user changes the selected date.
+ * @param onFilterChange Callback invoked when the user updates the appointment status filters.
+ * @param onSortChange Callback invoked when the user changes the sorting option.
+ * @param onReset Callback invoked to reset all filters, sorting, and date selections.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppointmentManageScreenContent(

@@ -40,7 +40,15 @@ import com.example.careconnect.R
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 
-
+/**
+ * Screen to add a new doctor by inputting personal and professional details.
+ *
+ * Handles navigation to the doctor schedule screen after successful creation.
+ *
+ * @param openDoctorScheduleScreen Lambda invoked with the created doctor's ID to navigate to the schedule setup.
+ * @param showSnackBar Lambda to show feedback messages as snack bars.
+ * @param viewModel ViewModel responsible for managing doctor creation state.
+ */
 @Composable
 fun AddDoctorScreen(
     openDoctorScheduleScreen: (doctorId: String) -> Unit,
@@ -61,7 +69,15 @@ fun AddDoctorScreen(
 }
 
 
-
+/**
+ * UI content for adding doctor information.
+ *
+ * Presents a form with fields for doctor's name, surname, email, specialization, experience, address,
+ * phone number, and password. Contains a stepper indicator for progress.
+ *
+ * @param createDoctorInfo Callback invoked with doctor info and a snack bar callback when user submits.
+ * @param showSnackBar Callback to display snack bar messages, default empty.
+ */
 @Composable
 fun AddDoctorScreenContent(
     createDoctorInfo: (String, String, String, String, String, String, String, String, (SnackBarMessage) -> Unit) -> Unit,
@@ -140,6 +156,11 @@ fun AddDoctorScreenContent(
 }
 
 // Progress Stepper UI
+/**
+ * Displays a horizontal stepper indicator showing progress in doctor creation.
+ *
+ * @param currentStep Current step number (1-based index).
+ */
 @Composable
 fun StepperIndicator(currentStep: Int) {
     val steps = listOf("Info", "Schedule")
@@ -178,6 +199,13 @@ fun StepperIndicator(currentStep: Int) {
 }
 
 // Custom TextField
+/**
+ * A custom styled outlined text field used in doctor form inputs.
+ *
+ * @param label Label text describing the field.
+ * @param value Current value of the text field.
+ * @param onValueChange Callback triggered when the user changes the input text.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTextField(label: String, value: String, onValueChange: (String) -> Unit) {
@@ -188,7 +216,6 @@ fun CustomTextField(label: String, value: String, onValueChange: (String) -> Uni
         modifier = Modifier.fillMaxWidth()
     )
 }
-
 
 
 @Preview

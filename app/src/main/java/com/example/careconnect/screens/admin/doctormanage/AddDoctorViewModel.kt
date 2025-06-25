@@ -12,7 +12,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-
+/**
+ * ViewModel responsible for adding a new doctor.
+ *
+ * Manages form validation, doctor creation via repository, and navigation triggers.
+ *
+ * @property doctorRepository Repository managing doctor data operations.
+ * @property authRepository Repository managing authentication operations.
+ */
 @HiltViewModel
 class AddDoctorViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository,
@@ -27,7 +34,22 @@ class AddDoctorViewModel @Inject constructor(
     val newDoctorId: StateFlow<String?>
         get() = _newDoctorId.asStateFlow()
 
-
+    /**
+     * Validates and creates a new doctor record.
+     *
+     * Performs field validations such as empty checks, email format, and numeric conversions.
+     * Calls the doctor repository to create the doctor, updates state flows, and displays snack bar messages.
+     *
+     * @param name Doctor's first name.
+     * @param surname Doctor's surname.
+     * @param email Doctor's email address.
+     * @param phone Doctor's phone number as string.
+     * @param address Doctor's address.
+     * @param specialization Doctor's medical specialization.
+     * @param experience Doctor's years of experience as string.
+     * @param password Password for doctor's account.
+     * @param showSnackBar Callback to show snack bar messages.
+     */
     fun createDoctorInfo(
         name: String,
         surname: String,

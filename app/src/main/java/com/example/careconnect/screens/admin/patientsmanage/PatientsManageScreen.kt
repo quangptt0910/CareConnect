@@ -23,7 +23,14 @@ import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
-
+/**
+ * Admin screen for managing patients.
+ *
+ * Collects the patient list from the [PatientsManageViewModel] and displays
+ * it using [PatientManageScreenContent].
+ *
+ * @param viewModel The ViewModel to provide patient data; defaults to Hilt injected instance.
+ */
 @Composable
 fun PatientManageScreen(
     viewModel: PatientsManageViewModel = hiltViewModel()
@@ -35,7 +42,13 @@ fun PatientManageScreen(
     )
 }
 
-
+/**
+ * Content composable for [PatientManageScreen].
+ *
+ * Displays a list of patients in a scrollable card with the heading "Patients".
+ *
+ * @param patients List of [Patient] objects to display.
+ */
 @Composable
 fun PatientManageScreenContent(
     patients: List<Patient> = emptyList()

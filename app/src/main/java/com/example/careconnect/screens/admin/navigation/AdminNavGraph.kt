@@ -17,6 +17,16 @@ import com.example.careconnect.screens.admin.patientsmanage.PatientManageScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route
 
+/**
+ * Composable NavHost that defines the navigation graph for the admin section of the app.
+ *
+ * This hosts all admin-related screens and manages navigation between them.
+ *
+ * @param navController The NavHostController to manage navigation state.
+ * @param openSplashScreen Lambda to navigate to the splash screen (used from settings).
+ * @param showSnackBar Lambda to show snack bar messages in various screens.
+ * @param modifier Optional [Modifier] to be applied to the NavHost.
+ */
 @Composable
 fun AdminNavHost(
     navController: NavHostController,

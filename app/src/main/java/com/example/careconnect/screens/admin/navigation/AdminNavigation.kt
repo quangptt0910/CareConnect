@@ -5,7 +5,12 @@ import androidx.navigation.NavHostController
 import com.example.careconnect.ui.navigation.Route
 
 /**
- * Models the navigation actions in the app.
+ * Encapsulates navigation actions for the admin section of the app.
+ *
+ * Provides convenience methods for navigating between admin screens,
+ * ensuring correct back stack behavior and state restoration.
+ *
+ * @property navController The NavHostController used to perform navigation.
  */
 class AdminNavigationActions(val navController: NavHostController) {
     fun navigateTo(route: String) {

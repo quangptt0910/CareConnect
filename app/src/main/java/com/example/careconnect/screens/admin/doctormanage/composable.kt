@@ -56,7 +56,12 @@ import java.time.format.TextStyle
 import java.util.Locale
 import com.example.careconnect.R.string as AppText
 
-
+/**
+ * A top app bar for the admin screens with a title and a back navigation icon.
+ *
+ * @param label The title text to be displayed in the app bar.
+ * @param onBack Callback triggered when the back button is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminTopAppBar(
@@ -94,10 +99,14 @@ fun AdminTopAppBar(
 }
 
 /**
- * Composable function to display a filled card of doctors
+ * Displays a card representing a doctor with their details and action buttons for editing or deleting.
  *
- * @param doctor the doctor to be displayed
- * @param onDeleteDoc Callback function to handle product deletion.
+ * Shows a confirmation dialog when the delete button is pressed.
+ *
+ * @param modifier Modifier to be applied to the card.
+ * @param doctor The [Doctor] data object to display.
+ * @param onOpenProfile Callback triggered when the edit icon is clicked.
+ * @param onDeleteDoc Callback triggered when the doctor deletion is confirmed.
  */
 @Composable
 fun DoctorCard(
@@ -225,11 +234,10 @@ fun DoctorCard(
 //}
 
 /**
- * A confirmation button composable typically used in dialogs.
- * The button uses the primary color from the Material theme.
+ * Confirmation button used in dialogs, styled with primary theme colors.
  *
- * @param text The string resource ID for the button text.
- * @param action The action to be triggered when the button is clicked.
+ * @param text String resource ID for the button text.
+ * @param action Callback triggered when button is clicked.
  */
 @Composable
 fun DialogConfirmButton(@StringRes text: Int, action: () -> Unit) {
@@ -247,11 +255,10 @@ fun DialogConfirmButton(@StringRes text: Int, action: () -> Unit) {
 
 
 /**
- * A cancellation button composable typically used in dialogs.
- * The button uses the primary color from the Material theme.
+ * Cancellation button used in dialogs, styled with primary theme colors.
  *
- * @param text The string resource ID for the button text.
- * @param action The action to be triggered when the button is clicked.
+ * @param text String resource ID for the button text.
+ * @param action Callback triggered when button is clicked.
  */
 @Composable
 fun DialogCancelButton(@StringRes text: Int, action: () -> Unit) {
@@ -286,8 +293,15 @@ fun DialogCancelButton(@StringRes text: Int, action: () -> Unit) {
 //    return totalMinutesWorked / 60.0  // Convert minutes to hours
 //}
 
-/*
- * 📅 Multi-Day Date Picker for work days
+/**
+ * Multi-date picker calendar allowing selection of multiple workdays.
+ *
+ * Displays a monthly calendar grid with navigation arrows to switch months.
+ * Selected dates are highlighted.
+ *
+ * @param selectedDates Set of currently selected [LocalDate]s.
+ * @param onDateSelected Callback triggered when a date is selected or deselected.
+ * @param modifier Modifier to be applied to the calendar card.
  */
 @Composable
 fun MultiDatePicker(
@@ -396,6 +410,16 @@ fun MultiDatePicker(
     }
 }
 
+/**
+ * A single day cell within the [MultiDatePicker] calendar grid.
+ *
+ * Highlights the cell if the date is selected, today, or outside the current month.
+ *
+ * @param date The date represented by this cell.
+ * @param isSelected Whether this date is currently selected.
+ * @param isCurrentMonth Whether this date belongs to the currently displayed month.
+ * @param onDateSelected Callback invoked when this date cell is clicked.
+ */
 @Composable
 private fun RowScope.DayCell(
     date: LocalDate,

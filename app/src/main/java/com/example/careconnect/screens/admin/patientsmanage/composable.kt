@@ -36,11 +36,15 @@ import com.example.careconnect.screens.admin.doctormanage.DialogCancelButton
 import com.example.careconnect.screens.admin.doctormanage.DialogConfirmButton
 
 /**
- * Composable function to display a filled card with a title, expandable list of user products, and delete functionality.
+ * Displays a card containing a list of patients with edit and delete actions.
  *
- * @param title The title of the card.
- * @param user List of user-added products to be displayed.
- * @param onDeleteProduct Callback function to handle product deletion.
+ * Each patient is displayed as a list item with their full name, and icons for editing
+ * and deleting the patient. Deletion requires user confirmation via a dialog.
+ *
+ * @param title The title to display on the card.
+ * @param modifier Modifier to be applied to the card.
+ * @param patients List of patients to display inside the card.
+ * @param onDeleteProduct Callback invoked when the user confirms deletion of a patient.
  */
 @Composable
 fun FilledCardPatients(
@@ -136,7 +140,13 @@ fun FilledCardPatients(
     }
 }
 
-
+/**
+ * Displays an overview card with placeholder patient information.
+ *
+ * Shows static information such as name, address, phone, email, and gender.
+ *
+ * @param modifier Modifier to be applied to the card.
+ */
 @Composable
 fun FilledCardEdit(
     modifier: Modifier = Modifier,
@@ -215,7 +225,13 @@ fun FilledCardEdit(
     }
 }
 
-
+/**
+ * Displays a card showing details about patient appointments.
+ *
+ * Shows recent and next appointment dates and assigned doctor.
+ *
+ * @param modifier Modifier to be applied to the card.
+ */
 @Composable
 fun FilledCardAppointment(
     modifier: Modifier = Modifier,
