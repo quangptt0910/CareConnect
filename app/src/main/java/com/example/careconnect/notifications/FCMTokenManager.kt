@@ -14,6 +14,15 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
+/**
+ * Manages Firebase Cloud Messaging (FCM) tokens for the current authenticated user.
+ * This includes fetching, storing, and updating FCM tokens in Firestore.
+ *
+ * @property context Application context used for device ID storage.
+ * @property auth Firebase Authentication instance to get the current user.
+ * @property firestore Firebase Firestore instance used to store FCM token data.
+ */
 @Singleton
 class FCMTokenManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -21,6 +30,9 @@ class FCMTokenManager @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
 
+    /**
+     * Fetches the current FCM token and updates Firestore with it, along with a device ID and platform info.
+     */
     suspend fun updateFCMToken() {
         try {
             val currentUser = auth.currentUser ?: return
@@ -46,6 +58,12 @@ class FCMTokenManager @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves or generates a unique device ID and persists it locally.
+     *
+     * @param context The application context used to access SharedPreferences.
+     * @return The unique device ID.
+     */
     private fun getDeviceId(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         var deviceId = sharedPreferences.getString("device_id", null)
@@ -58,6 +76,10 @@ class FCMTokenManager @Inject constructor(
         return deviceId
     }
 
+    /**
+     * Debug utility to log and verify the current FCM token and Firestore data.
+     * Also re-invokes [updateFCMToken] after printing the current state.
+     */
     suspend fun debugFCMToken() {
         try {
             val currentUser = auth.currentUser

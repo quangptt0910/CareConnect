@@ -7,6 +7,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
+
+/**
+ * Manages the storage and retrieval of user notification settings using SharedPreferences.
+ * Supports chat and appointment notification preferences.
+ *
+ * @property context Application context for accessing shared preferences.
+ */
 @Singleton
 class NotificationSettingsManager @Inject constructor(
     @ApplicationContext private val context: Context
@@ -20,6 +28,11 @@ class NotificationSettingsManager @Inject constructor(
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
 
+    /**
+     * Retrieves the user's saved [NotificationSettings], or returns defaults if none are found.
+     *
+     * @return The current [NotificationSettings].
+     */
     fun getSettings(): NotificationSettings {
         val json = sharedPreferences.getString(KEY_SETTINGS, null)
         return if (json != null) {
@@ -33,6 +46,11 @@ class NotificationSettingsManager @Inject constructor(
         }
     }
 
+    /**
+     * Saves the given [NotificationSettings] to SharedPreferences.
+     *
+     * @param settings The settings to persist.
+     */
     fun saveSettings(settings: NotificationSettings) {
         val json = gson.toJson(settings)
         sharedPreferences.edit()
@@ -45,6 +63,12 @@ class NotificationSettingsManager @Inject constructor(
 
     fun shouldShowAppointmentNotifications(): Boolean = getSettings().appointmentNotifications.enabled
 
+    /**
+     * Determines if a specific appointment notification type should be shown based on settings.
+     *
+     * @param type The type of appointment notification (e.g., CONFIRMED, REMINDER).
+     * @return `true` if the type should be shown.
+     */
     fun shouldShowAppointmentType(type: String): Boolean {
         val settings = getSettings().appointmentNotifications
         return when (type.uppercase()) {
@@ -56,6 +80,12 @@ class NotificationSettingsManager @Inject constructor(
         }
     }
 
+    /**
+     * Checks if sound should be played based on notification type.
+     *
+     * @param isChat `true` if checking chat sound setting, otherwise appointment.
+     * @return `true` if sound is enabled.
+     */
     fun shouldPlaySound(isChat: Boolean): Boolean {
         return if (isChat) {
             getSettings().chatNotifications.sound
@@ -64,6 +94,12 @@ class NotificationSettingsManager @Inject constructor(
         }
     }
 
+    /**
+     * Checks if vibration should be used based on notification type.
+     *
+     * @param isChat `true` if checking chat vibration setting, otherwise appointment.
+     * @return `true` if vibration is enabled.
+     */
     fun shouldVibrate(isChat: Boolean): Boolean {
         return if (isChat) {
             getSettings().chatNotifications.vibration

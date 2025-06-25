@@ -22,6 +22,24 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
+
+/**
+ * Service to handle Firebase Cloud Messaging (FCM) notifications for the CareConnect app.
+ *
+ * This service:
+ * - Listens for new FCM tokens and updates them via [FCMTokenManager].
+ * - Receives incoming FCM messages and processes them according to notification settings and user roles.
+ * - Supports two main notification categories: Chat messages and Appointment updates.
+ * - Creates and manages notification channels for Android O and above.
+ * - Builds and displays notifications based on user preferences including sound, vibration, and message preview.
+ *
+ * Notifications are only shown to users with eligible roles (Doctor or Patient).
+ *
+ * @see FirebaseMessagingService
+ * @see FCMTokenManager
+ * @see NotificationSettingsRepository
+ * @see AuthRepository
+ */
 @AndroidEntryPoint
 class CareConnectMessagingService : FirebaseMessagingService() {
 
@@ -44,6 +62,12 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         private const val CHAT_CHANNEL_DESCRIPTION = "Notifications for new chat messages"
     }
 
+    /**
+     * Called when a new FCM token is generated.
+     * Updates the token on the backend via [FCMTokenManager].
+     *
+     * @param token The new FCM token.
+     */
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d(TAG, "NEW_TOKEN: $token")
@@ -52,6 +76,16 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Called when an FCM message is received.
+     * Processes the message and displays appropriate notifications based on user role and settings.
+     *
+     * Supports two types of notifications:
+     * - CHAT_MESSAGE: Notifications about new chat messages.
+     * - Other types (appointment-related): Notifications about appointment status changes and reminders.
+     *
+     * @param remoteMessage The incoming Firebase Cloud Message.
+     */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
@@ -95,7 +129,12 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         }
     }
 
-
+    /**
+     * Handles an incoming chat notification message and shows a notification.
+     *
+     * @param remoteMessage The incoming FCM message.
+     * @param chatSettings User's chat notification settings.
+     */
     private fun handleChatNotification(remoteMessage: RemoteMessage, chatSettings: ChatNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "New Message"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
@@ -107,6 +146,17 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         showChatNotification(title, body, chatId, senderId, senderName, recipientId, chatSettings)
     }
 
+    /**
+     * Builds and shows a chat notification with user preferences.
+     *
+     * @param title Notification title.
+     * @param body Notification body text.
+     * @param chatId Unique chat identifier.
+     * @param senderId Sender's user ID.
+     * @param senderName Sender's display name.
+     * @param recipientId Recipient's user ID.
+     * @param chatSettings User's chat notification preferences.
+     */
     private fun showChatNotification(
         title: String,
         body: String,
@@ -160,6 +210,12 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(chatId.hashCode(), notification)
     }
 
+    /**
+     * Handles an incoming appointment notification message and shows a notification if enabled.
+     *
+     * @param remoteMessage The incoming FCM message.
+     * @param appointmentSettings User's appointment notification settings.
+     */
     private fun handleAppointmentNotification(remoteMessage: RemoteMessage, appointmentSettings: AppointmentNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "CareConnect"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
@@ -175,6 +231,13 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         showAppointmentNotification(title, body, type, appointmentId, userType, appointmentSettings)
     }
 
+    /**
+     * Determines whether a specific appointment notification type should be shown based on user settings.
+     *
+     * @param type Appointment notification type (e.g. "CONFIRMED", "REMINDER").
+     * @param settings User's appointment notification preferences.
+     * @return `true` if the notification should be shown, `false` otherwise.
+     */
     private fun shouldShowAppointmentType(type: String, settings: AppointmentNotificationSettings): Boolean {
         return when (type.uppercase()) {
             "CONFIRMED", "PENDING" -> settings.confirmations
@@ -185,6 +248,16 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Builds and shows an appointment notification with user preferences.
+     *
+     * @param title Notification title.
+     * @param body Notification body text.
+     * @param type Appointment notification type.
+     * @param appointmentId Unique appointment identifier.
+     * @param userType User type (e.g. Doctor or Patient).
+     * @param appointmentSettings User's appointment notification preferences.
+     */
     private fun showAppointmentNotification(
         title: String,
         body: String,
@@ -236,6 +309,13 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).notify(appointmentId.hashCode(), notification)
     }
 
+    /**
+     * Creates a notification channel if it does not already exist.
+     *
+     * @param channelId The ID of the channel.
+     * @param name The user-visible name of the channel.
+     * @param descriptionText The user-visible description of the channel.
+     */
     private fun createNotificationChannel(channelId: String, name: String, descriptionText: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

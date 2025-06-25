@@ -8,6 +8,14 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Handles triggering notifications by writing to Firestore,
+ * which can invoke Firebase Cloud Functions.
+ *
+ * This class is marked as a singleton and should be injected via Hilt or other DI frameworks.
+ *
+ * @property firestore Firebase Firestore instance used for triggering notifications.
+ */
 @Singleton
 class NotificationManager @Inject constructor(
     private val firestore: FirebaseFirestore
@@ -17,6 +25,14 @@ class NotificationManager @Inject constructor(
     }
 
     // This will trigger Firebase Functions via Firestore write
+    /**
+     * Triggers an appointment-related notification by writing a trigger document to Firestore.
+     * This write will be picked up by a Firebase Function to send a notification.
+     *
+     * @param appointment The [Appointment] object containing required data.
+     * @param notificationType Type of notification (e.g., PENDING, CONFIRMED, COMPLETED, CANCELED, NO_SHOW).
+     * @return `true` if the trigger was successfully written, `false` otherwise.
+     */
     suspend fun triggerAppointmentNotification(appointment: Appointment, notificationType: String): Boolean {
         return try {
 
@@ -63,6 +79,17 @@ class NotificationManager @Inject constructor(
         }
     }
 
+    /**
+     * Triggers a chat message notification by writing a trigger document to Firestore.
+     * This trigger may be used to notify the recipient about a new chat message.
+     *
+     * @param chatId ID of the chat session.
+     * @param message Message content.
+     * @param senderId Sender's user ID.
+     * @param senderName Sender's display name.
+     * @param recipientId Recipient's user ID.
+     * @return `true` if the notification trigger was successfully written, `false` otherwise.
+     */
     suspend fun triggerChatNotification(
         chatId: String,
         message: String,

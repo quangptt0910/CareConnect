@@ -9,6 +9,10 @@ import com.example.careconnect.R
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Sends test notifications for both chat and appointment types based on user preferences.
+ * Used to verify notification configuration.
+ */
 @Singleton
 class TestNotificationHelper @Inject constructor() {
 
@@ -18,6 +22,12 @@ class TestNotificationHelper @Inject constructor() {
         private const val TEST_CHANNEL_DESCRIPTION = "Test notifications for settings verification"
     }
 
+    /**
+     * Sends a test chat and/or appointment notification based on [settings].
+     *
+     * @param context The application context.
+     * @param settings The user’s notification preferences.
+     */
     fun sendTestNotification(context: Context, settings: NotificationSettings) {
         createTestNotificationChannel(context)
 
@@ -32,6 +42,12 @@ class TestNotificationHelper @Inject constructor() {
         }
     }
 
+    /**
+     * Sends a test chat notification respecting the given chat settings.
+     *
+     * @param context Application context.
+     * @param chatSettings Settings for chat notifications.
+     */
     private fun sendTestChatNotification(context: Context, chatSettings: ChatNotificationSettings) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -65,6 +81,12 @@ class TestNotificationHelper @Inject constructor() {
         notificationManager.notify(1001, builder.build())
     }
 
+    /**
+     * Sends a test appointment notification respecting the given settings.
+     *
+     * @param context Application context.
+     * @param appointmentSettings Settings for appointment notifications.
+     */
     private fun sendTestAppointmentNotification(context: Context, appointmentSettings: AppointmentNotificationSettings) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -94,6 +116,11 @@ class TestNotificationHelper @Inject constructor() {
         notificationManager.notify(1002, builder.build())
     }
 
+    /**
+     * Creates a notification channel for test notifications if running on Android O or higher.
+     *
+     * @param context Application context.
+     */
     private fun createTestNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
