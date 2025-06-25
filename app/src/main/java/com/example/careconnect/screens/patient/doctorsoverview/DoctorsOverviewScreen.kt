@@ -24,6 +24,16 @@ import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 
+/**
+ * Main screen composable displaying a list of doctors filtered by specialty.
+ * Fetches the doctor list from the provided [viewModel].
+ *
+ * @param specialty The medical speciality to filter doctors by.
+ * @param openBookingScreen Lambda to navigate to the booking screen for a given doctor ID.
+ * @param openDoctorProfileScreen Lambda to navigate to the doctor's profile screen.
+ * @param goBack Lambda to navigate back from this screen.
+ * @param viewModel ViewModel managing the doctors data and filtering logic.
+ */
 @Composable
 fun DoctorsOverviewScreen(
     specialty: String,
@@ -48,6 +58,17 @@ fun DoctorsOverviewScreen(
 }
 
 
+/**
+ * UI content composable for the Doctors Overview screen showing
+ * a top bar and a list of doctors. Handles empty state if no doctors
+ * are found for the specified specialty.
+ *
+ * @param doctors List of doctors to display.
+ * @param specialty The medical specialty being viewed.
+ * @param goBack Lambda to handle back navigation.
+ * @param openBookingScreen Lambda to open booking screen for a doctor.
+ * @param openDoctorProfileScreen Lambda to open doctor's profile screen.
+ */
 @Composable
 fun DoctorsOverviewScreenContent(
     doctors: List<Doctor> = emptyList(),
@@ -111,7 +132,10 @@ fun DoctorsOverviewScreenContent(
 }
 
 
-
+/**
+ * Preview composable for the Doctors Overview screen,
+ * showing a sample list of doctors to assist in UI development.
+ */
 @Preview
 @Composable
 fun DoctorsOverviewScreenPreview() {

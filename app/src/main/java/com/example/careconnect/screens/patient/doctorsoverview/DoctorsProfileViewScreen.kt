@@ -36,7 +36,16 @@ import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
 
-
+/**
+ * Composable screen showing detailed information about a specific doctor,
+ * including actions to chat and book an appointment.
+ *
+ * @param doctorId The ID of the doctor to display.
+ * @param viewModel ViewModel instance to provide data and handle logic.
+ * @param openChatScreen Callback invoked with chatId, patientId, and doctorId when chat screen should open.
+ * @param openBookingScreen Callback invoked with doctorId when booking screen should open.
+ * @param goBack Callback invoked when user wants to navigate back.
+ */
 @Composable
 fun DoctorsProfileViewScreen(
     doctorId: String,
@@ -80,7 +89,18 @@ fun DoctorsProfileViewScreen(
     }
 }
 
-
+/**
+ * Content composable displaying doctor's detailed profile,
+ * with buttons to chat or book an appointment.
+ *
+ * @param doctor Doctor data to display.
+ * @param doctorId The ID of the doctor.
+ * @param getChatId Suspended lambda to get or create a chat room ID.
+ * @param openBookingScreen Callback invoked with doctorId to open booking.
+ * @param openChatScreen Callback invoked with chatId to open chat screen.
+ * @param addPatient Callback to add the patient to the doctor's list.
+ * @param goBack Callback for navigation back.
+ */
 @Composable
 fun DoctorsProfileViewScreenContent(
     doctor: Doctor,
@@ -201,8 +221,9 @@ fun DoctorsProfileViewScreenContent(
 }
 
 
-
-
+/**
+ * Preview for [DoctorsProfileViewScreenContent] to show sample doctor profile UI.
+ */
 @Preview
 @Composable
 fun DoctorsProfileViewScreenPreview() {

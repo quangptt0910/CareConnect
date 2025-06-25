@@ -49,6 +49,17 @@ import com.example.careconnect.ui.navigation.Route.getPatientDoctorsProfileRoute
 import com.example.careconnect.ui.navigation.Route.getPatientProfileMedicalHistoryRoute
 import kotlinx.coroutines.flow.first
 
+/**
+ * Root composable for the Patient app's main UI and navigation.
+ *
+ * Sets up the navigation host, bottom navigation bar, and handles notifications.
+ * Manages the user's current patient ID and navigates accordingly.
+ *
+ * @param openSplashScreen Callback to open the splash screen, typically for logout.
+ * @param showSnackBar Callback to display a snack bar with messages.
+ * @param notificationData Optional notification data to handle navigation on notification taps.
+ * @param viewModel The [PatientAppViewModel] instance for managing UI state and data.
+ */
 @Composable
 fun PatientApp(
     openSplashScreen: () -> Unit = {},
@@ -231,6 +242,11 @@ fun PatientApp(
     }
 }
 
+/**
+ * Preview composable for [PatientApp].
+ *
+ * Allows rendering the PatientApp UI in Android Studio Preview without runtime dependencies.
+ */
 @Preview
 @Composable
 fun PatientAppPreview() {

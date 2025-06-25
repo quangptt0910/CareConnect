@@ -31,11 +31,11 @@ import androidx.compose.ui.unit.dp
 import com.example.careconnect.dataclass.Doctor
 
 /**
- * Composable function for displaying a search bar and search results.
+ * Composable function displaying a search bar and its results for doctors.
  *
- * @param uiState UI state containing search information.
- * @param onProductSelected Callback for selecting products.
- * @param onSearchQueryChange Callback for updating search queries.
+ * @param uiState The UI state holding the current search query, suggestions, selected doctors, loading and error states.
+ * @param onDoctorSelected Callback invoked when a doctor is selected or deselected. Provides the doctor and a boolean indicating selection state.
+ * @param onSearchQueryChange Callback invoked when the search query changes.
  */
 @ExperimentalMaterial3Api
 @Composable

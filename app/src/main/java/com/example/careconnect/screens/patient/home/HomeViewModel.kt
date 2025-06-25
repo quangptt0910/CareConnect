@@ -15,6 +15,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+/**
+ * ViewModel responsible for managing data related to the home screen for patients.
+ *
+ * Fetches and exposes a list of doctors and upcoming appointments for the current user.
+ *
+ * @property doctorList A StateFlow providing a list of doctors to display (random 5 doctors).
+ * @property upcomingAppointments A StateFlow providing the user's upcoming confirmed appointments (max 3).
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository,
@@ -32,6 +40,9 @@ class HomeViewModel @Inject constructor(
         fetchUpcomingAppointments()
     }
 
+    /**
+     * Fetches all doctors from the repository and selects a random subset for display.
+     */
     private fun fetchDoctors() {
         viewModelScope.launch {
             val allDoctors = doctorRepository.getAllDoctors()
@@ -39,6 +50,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetches upcoming confirmed appointments for the current user, limited to the next 3 appointments.
+     *
+     * Handles cases where the user ID is null or errors occur during fetching by logging and returning empty list.
+     */
     fun fetchUpcomingAppointments() {
         launchCatching {
             val userId = authRepository.currentUser?.uid
