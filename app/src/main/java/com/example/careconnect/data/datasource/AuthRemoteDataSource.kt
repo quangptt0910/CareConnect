@@ -10,6 +10,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.ClearCredentialException
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.Admin
+import com.example.careconnect.dataclass.AuthProvider
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Gender
 import com.example.careconnect.dataclass.Patient
@@ -168,11 +169,11 @@ class AuthRemoteDataSource @Inject constructor(
     suspend fun deleteAccount() {
         auth.currentUser!!.delete().await()
     }
+
     suspend fun signInWithGoogle(context: Context) {
         try {
 
             val serverClientId = context.getString(R.string.web_client_id)
-
             val authRequest = createGoogleSignInRequest(serverClientId, true)
 
             val result = try {
@@ -184,7 +185,6 @@ class AuthRemoteDataSource @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Couldn't get user for auth request credentials: ${e.localizedMessage}")
                 val notAuthRequest = createGoogleSignInRequest(serverClientId, false)
-
                 credentialManager.getCredential(
                     request = notAuthRequest,
                     context = context
@@ -232,12 +232,88 @@ class AuthRemoteDataSource @Inject constructor(
     suspend fun firebaseAuthWithGoogle(idToken: String) {
         try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
-            auth.signInWithCredential(credential).await()
+            val authResult = auth.signInWithCredential(credential).await()
+
+            // Check if this is a new user or existing user
+            val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+
+            if (isNewUser) {
+                Log.d(TAG, "New Google user, creating patient record")
+                createPatientRecordFromGoogleUser()
+            } else {
+                Log.d(TAG, "Existing user signed in with Google")
+                // Ensure patient record exists (in case of edge cases)
+                ensurePatientRecordExists()
+            }
+
         } catch (e: Exception) {
             Log.e("TAG", "Firebase auth failed: ${e.localizedMessage}")
             throw e
         }
     }
+
+    /*
+     * NEW google login
+     */
+    private suspend fun createPatientRecordFromGoogleUser() {
+        val user = auth.currentUser ?: return
+        val uid = user.uid
+
+        // Check if patient record already exists
+        val patientDoc = firestore.collection("patients").document(uid).get().await()
+        if (patientDoc.exists()) {
+            Log.d(TAG, "Patient record already exists for Google user")
+            return
+        }
+
+        // Parse display name
+        val fullName = user.displayName.orEmpty().split(" ", limit = 2)
+        val name = fullName.getOrNull(0).orEmpty()
+        val surname = fullName.getOrNull(1).orEmpty()
+
+        val patient = Patient(
+            id = uid,
+            name = name,
+            surname = surname,
+            email = user.email.orEmpty(),
+            role = Role.PATIENT
+            // Other fields remain at defaults and can be filled later
+        )
+
+        firestore.collection("patients").document(uid).set(patient).await()
+        Log.d(TAG, "Patient record created for Google user: $uid")
+    }
+
+    /**
+     * Ensure patient record exists for current user
+     */
+    private suspend fun ensurePatientRecordExists() {
+        val user = auth.currentUser ?: return
+        val uid = user.uid
+
+        val patientDoc = firestore.collection("patients").document(uid).get().await()
+        if (!patientDoc.exists()) {
+            Log.d(TAG, "Patient record missing, creating it")
+            createPatientRecordFromGoogleUser()
+        }
+    }
+
+
+    /**
+     * Check user's authentication providers
+     */
+    fun getUserAuthProviders(): List<String> {
+        return currentUser?.providerData?.map { it.providerId } ?: emptyList()
+    }
+
+    /**
+     * Check if user has both email and Google authentication
+     */
+    fun hasMultipleAuthMethods(): Boolean {
+        val providers = getUserAuthProviders()
+        return providers.contains("password") && providers.contains("google.com")
+    }
+
 
     suspend fun patientRecord(): Boolean {
         val user = auth.currentUser!!
@@ -264,6 +340,25 @@ class AuthRemoteDataSource @Inject constructor(
         return false // Existing USER patient
     }
 
+    /**
+     * Check authentication providers for current user
+     */
+    fun checkUserAuthProviders(): AuthProvider {
+        val user = currentUser ?: return AuthProvider.NOT_SIGNED_IN
+
+        val providers = user.providerData.map { it.providerId }
+        val hasEmailAuth = providers.contains("password")
+        val hasGoogleAuth = providers.contains("google.com")
+
+        return when {
+            hasEmailAuth && hasGoogleAuth -> AuthProvider.BOTH_LINKED
+            hasEmailAuth && !hasGoogleAuth -> AuthProvider.EMAIL_ONLY
+            !hasEmailAuth && hasGoogleAuth -> AuthProvider.GOOGLE_ONLY
+            else -> AuthProvider.UNKNOWN
+        }
+    }
+
+
 
     sealed class UserData {
         data class AdminData(val admin: Admin) : UserData()
@@ -272,6 +367,7 @@ class AuthRemoteDataSource @Inject constructor(
         object NoUser: UserData()
         object Error: UserData()
     }
+
 
     companion object {
         private const val TAG = "AuthRemoteDataSource"

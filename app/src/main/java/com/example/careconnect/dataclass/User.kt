@@ -47,8 +47,30 @@ data class Patient(
     val pesel: String = "",
     val height: Double = 0.0,
     val weight: Double = 0.0,
-)
 
+    // Enhanced fields for better auth tracking (optional)
+    val authProviders: List<String> = emptyList(), // ["password", "google.com"]
+    val hasEmailAuth: Boolean = false,
+    val hasGoogleAuth: Boolean = false,
+    val profileComplete: Boolean = false, // Track if profile setup is complete
+    val createdAt: Long = System.currentTimeMillis(),
+    val lastLoginAt: Long = System.currentTimeMillis()
+) {
+    // Helper methods
+    fun hasMultipleAuthMethods(): Boolean = authProviders.size > 1
+    fun getFullName(): String = "$name $surname".trim()
+}
+
+/**
+ * Get user's authentication provider information
+ */
+enum class AuthProvider {
+    NOT_SIGNED_IN,
+    EMAIL_ONLY,
+    GOOGLE_ONLY,
+    BOTH_LINKED,
+    UNKNOWN
+}
 
 enum class Role {
     ADMIN, DOCTOR, PATIENT

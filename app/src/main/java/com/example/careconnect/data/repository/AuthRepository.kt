@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.Credential
 import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.datasource.AuthRemoteDataSource.UserData
+import com.example.careconnect.dataclass.AuthProvider
 import com.example.careconnect.dataclass.Role
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.flow.Flow
@@ -61,5 +62,9 @@ class AuthRepository @Inject constructor(
         return authRemoteDataSource.patientRecord()
     }
 
+    fun checkUserAuthProviders(): AuthProvider {
+        return authRemoteDataSource.checkUserAuthProviders()
+
+    }
 
 }

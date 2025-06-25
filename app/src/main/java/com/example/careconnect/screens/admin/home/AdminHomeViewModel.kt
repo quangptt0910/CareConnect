@@ -1,6 +1,5 @@
 package com.example.careconnect.screens.admin.home
 
-import androidx.lifecycle.viewModelScope
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.data.repository.AppointmentRepository
 import com.example.careconnect.data.repository.DoctorRepository
@@ -10,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AdminHomeViewModel @Inject constructor(
@@ -40,7 +38,7 @@ class AdminHomeViewModel @Inject constructor(
     }
 
     private fun loadData() {
-        viewModelScope.launch {
+        launchCatching {
             _appointmentsToday.value = appointmentRepository.getTodayAppointments().size
             _upcomingAppointments.value = appointmentRepository.getUpcomingAppointmentsToday().size
             _recentDoctors.value = doctorRepository.getRecentlyAddedDoctors()

@@ -152,18 +152,17 @@ fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(15.dp))
 
                     // Forgot Password Section TODO()
-//                Row(
-//                    modifier = Modifier.width(280.dp),
-//                    horizontalArrangement = Arrangement.End
-//                ) {
-//                    Text(
-//                        modifier = Modifier.clickable { onForgotPasswordClick() },
-//                        text = "Forgot password?",
-//                        style = MaterialTheme.typography.labelMedium,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        textDecoration = TextDecoration.Underline
-//                    )
-//                }
+                Row(
+                    modifier = Modifier.width(280.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        modifier = Modifier.clickable { onForgotPasswordClick() },
+                        text = "Forgot password?",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
 
                     Spacer(modifier = Modifier.height(30.dp))
 

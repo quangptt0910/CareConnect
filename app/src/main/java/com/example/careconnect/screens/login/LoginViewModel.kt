@@ -7,6 +7,7 @@ import androidx.credentials.exceptions.NoCredentialException
 import com.example.careconnect.MainViewModel
 import com.example.careconnect.R
 import com.example.careconnect.data.repository.AuthRepository
+import com.example.careconnect.dataclass.AuthProvider
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -30,6 +31,10 @@ class LoginViewModel @Inject constructor(
     val navigateToProfile: StateFlow<Boolean>
         get() = _navigateToProfile.asStateFlow()
 
+    private val _accountLinked = MutableStateFlow(false)
+    val accountLinked: StateFlow<Boolean>
+        get() = _accountLinked.asStateFlow()
+
     fun login(
         email: String,
         password: String,
@@ -43,6 +48,8 @@ class LoginViewModel @Inject constructor(
         launchCatching(showSnackBar) {
             try {
                 authRepository.login(email, password)
+
+                checkAuthProviders(showSnackBar)
                 _shouldRestartApp.value = true
             } catch (e: Exception) {
                 val errorMessage = getAuthErrorMessage(e)
@@ -58,6 +65,13 @@ class LoginViewModel @Inject constructor(
         launchCatching(showSnackBar) {
             try {
                 authRepository.signInWithGoogle(context)
+                println("Debug: Google sign-in clicked")
+                val authProvider = authRepository.checkUserAuthProviders()
+                if (authProvider == AuthProvider.BOTH_LINKED) {
+                    _accountLinked.value = true
+                    showSnackBar(SnackBarMessage.StringMessage("Accounts successfully linked! You can now sign in with either method."))
+                }
+
                 val isNewUser = authRepository.patientRecord()
 
                 if (isNewUser) {
@@ -81,9 +95,35 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private fun checkAuthProviders(showSnackBar: (SnackBarMessage) -> Unit) {
+        try {
+            val authProviders = authRepository.checkUserAuthProviders()
+
+            when (authProviders) {
+                AuthProvider.BOTH_LINKED -> {
+                    Log.d("LoginViewModel", "User has both email and Google authentication")
+                }
+                AuthProvider.EMAIL_ONLY -> {
+                    Log.d("LoginViewModel", "User has only email authentication")
+                    // Optionally prompt user to add Google sign-in as backup
+                }
+                AuthProvider.GOOGLE_ONLY -> {
+                    Log.d("LoginViewModel", "User has only Google authentication")
+                    // Optionally prompt user to add password as backup
+                }
+                else -> {
+                    Log.d("LoginViewModel", "Unknown authentication state")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("LoginViewModel", "Error checking auth providers", e)
+        }
+    }
+
     fun resetNavigate() {
         _shouldRestartApp.value = false
         _navigateToProfile.value = false
+        _accountLinked.value = false
     }
 
     private fun getAuthErrorMessage(e: Exception): Int {
