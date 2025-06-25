@@ -16,6 +16,18 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * ViewModel responsible for managing patient medical history data.
+ *
+ * Loads, adds, updates, and deletes medical history entries of various types such as medications,
+ * allergies, conditions, surgeries, and immunizations.
+ *
+ * Uses [PatientRepository] to fetch and manipulate patient data, and [AuthRepository] to
+ * identify the current authenticated user.
+ *
+ * @property patientRepository Repository for patient medical history data.
+ * @property authRepository Repository for authentication and user data.
+ */
 @HiltViewModel
 class PatientMedicalHistoryViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
@@ -34,6 +46,14 @@ class PatientMedicalHistoryViewModel @Inject constructor(
         _patientId.value = authRepository.currentUser?.uid
     }
 
+    /**
+     * Loads medical history entries of the specified [type] for the given [patientId].
+     *
+     * Updates [_entries] with the fetched data or clears it if an error occurs.
+     *
+     * @param patientId The ID of the patient whose data to load.
+     * @param type The type of medical history entries to load.
+     */
     fun loadEntries(patientId: String, type: MedicalHistoryType) {
         launchCatching {
             _isLoading.value = true
@@ -57,6 +77,13 @@ class PatientMedicalHistoryViewModel @Inject constructor(
 
 
     // Generic add function
+    /**
+     * Adds a new medical history [entry] for the specified [patientId].
+     *
+     * @param patientId The ID of the patient.
+     * @param entry The medical history entry to add.
+     * @return The ID of the added entry if successful, or null if failed.
+     */
     suspend fun addEntry(patientId: String, entry: MedicalHistoryEntry): String? {
         return try {
             when (entry) {
@@ -73,6 +100,13 @@ class PatientMedicalHistoryViewModel @Inject constructor(
     }
 
     // Generic update function
+    /**
+     * Updates an existing medical history [entry] for the specified [patientId].
+     *
+     * @param patientId The ID of the patient.
+     * @param entry The medical history entry to update.
+     * @return True if the update was successful, false otherwise.
+     */
     suspend fun updateEntry(patientId: String, entry: MedicalHistoryEntry): Boolean {
         return try {
             when (entry) {
@@ -89,6 +123,13 @@ class PatientMedicalHistoryViewModel @Inject constructor(
     }
 
     // Generic delete function
+    /**
+     * Deletes a medical history [entry] for the specified [patientId].
+     *
+     * @param patientId The ID of the patient.
+     * @param entry The medical history entry to delete.
+     * @return True if the deletion was successful, false otherwise.
+     */
     suspend fun deleteEntry(patientId: String, entry: MedicalHistoryEntry): Boolean {
         return try {
             when (entry) {

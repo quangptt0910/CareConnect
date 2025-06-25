@@ -43,6 +43,16 @@ import com.example.careconnect.dataclass.Gender
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+
+/**
+ * Screen composable displaying the patient's profile with options to edit profile,
+ * view prescriptions, medical reports, and medical history.
+ *
+ * @param openPrescriptionsScreen Lambda to navigate to the prescriptions screen.
+ * @param openMedicalReportsScreen Lambda to navigate to the medical reports screen.
+ * @param openMedicalHistoryScreen Lambda to navigate to the medical history screen, taking a type parameter.
+ * @param viewModel ViewModel managing patient profile data and operations.
+ */
 @Composable
 fun PatientProfileScreen(
     openPrescriptionsScreen: () -> Unit = {},
@@ -61,6 +71,15 @@ fun PatientProfileScreen(
     )
 }
 
+/**
+ * Composable content for the Patient Profile screen showing patient's data and navigation cards.
+ *
+ * @param openPrescriptionScreen Lambda to navigate to prescriptions.
+ * @param openMedicalReportsScreen Lambda to navigate to medical reports.
+ * @param openMedicalHistoryScreen Lambda to navigate to medical history with specified type.
+ * @param patient The current patient data to display.
+ * @param onSavePatient Callback invoked when patient profile changes are saved.
+ */
 @Composable
 fun PatientProfileScreenContent(
     openPrescriptionScreen: () -> Unit = {},
@@ -220,6 +239,15 @@ fun PatientProfileScreenContent(
     }
 }
 
+/**
+ * Dialog composable to edit patient profile details.
+ *
+ * Displays input fields for editable patient information and handles confirmation before saving.
+ *
+ * @param patient The patient data to edit.
+ * @param onDismiss Callback invoked when the dialog is dismissed without saving.
+ * @param onSave Callback invoked with updated patient data when saving changes.
+ */
 @Composable
 fun EditPatientDialog(
     patient: Patient,
@@ -312,6 +340,12 @@ fun EditPatientDialog(
     )
 }
 
+/**
+ * Dropdown menu for selecting a patient's gender.
+ *
+ * @param selectedGender The currently selected gender.
+ * @param onGenderSelected Callback when a gender is selected from the dropdown.
+ */
 @Composable
 fun GenderDropdown(selectedGender: Gender, onGenderSelected: (Gender) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
@@ -343,7 +377,9 @@ fun GenderDropdown(selectedGender: Gender, onGenderSelected: (Gender) -> Unit) {
 }
 
 
-
+/**
+ * Preview composable to visualize PatientProfileScreenContent in Android Studio.
+ */
 @Composable
 @Preview
 fun PatientProfilePreview(){

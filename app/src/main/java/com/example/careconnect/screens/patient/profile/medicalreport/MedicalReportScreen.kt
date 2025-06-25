@@ -54,6 +54,15 @@ import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
+/**
+ * Represents a UI model for a medical report containing necessary details
+ * to be displayed on the screen.
+ *
+ * @property id Unique identifier of the medical report.
+ * @property pdfUrl URL to the medical report PDF document.
+ * @property diagnosis Diagnosis or title of the medical report.
+ * @property reportDate Date when the report was created or issued.
+ */
 data class MedicalReportUiModel(
     val id: String,
     val pdfUrl: String,
@@ -61,6 +70,16 @@ data class MedicalReportUiModel(
     val reportDate: String
 )
 
+
+/**
+ * Composable screen displaying a list of medical reports for the current patient.
+ *
+ * Fetches the patient's medical reports via the [MedicalReportViewModel] and displays
+ * them in a scrollable list. Allows navigation back via [goBack].
+ *
+ * @param viewModel ViewModel responsible for fetching and holding medical reports data.
+ * @param goBack Lambda callback invoked to navigate back.
+ */
 @Composable
 fun MedicalReportScreen(
     viewModel: MedicalReportViewModel = hiltViewModel(),
@@ -81,6 +100,12 @@ fun MedicalReportScreen(
     )
 }
 
+/**
+ * Composable content showing a scaffold with a top bar and a list of medical report cards.
+ *
+ * @param medicalReports List of medical reports to display.
+ * @param goBack Lambda callback invoked when the back navigation is triggered.
+ */
 @Composable
 fun MedicalReportScreenContent(
     medicalReports: List<MedicalReportUiModel>,
@@ -106,6 +131,13 @@ fun MedicalReportScreenContent(
     }
 }
 
+/**
+ * Composable card representing a single medical report.
+ *
+ * Displays diagnosis text and provides a modal bottom sheet to download or view the report PDF.
+ *
+ * @param medicalReport The medical report data to display in the card.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicalReportCard(
@@ -218,6 +250,14 @@ fun downloadPdfOnly(context: Context, url: String) {
     }
 }
 
+
+/**
+ * Top app bar composable for the medical report screen.
+ *
+ * Shows a title and a back button.
+ *
+ * @param goBack Lambda callback invoked when back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicalReportTopBar(

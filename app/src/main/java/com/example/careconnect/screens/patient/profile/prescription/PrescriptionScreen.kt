@@ -45,6 +45,14 @@ import com.example.careconnect.R
 import com.example.careconnect.ui.theme.CareConnectTheme
 import qrgenerator.qrkitpainter.rememberQrKitPainter
 
+/**
+ * UI model representing a prescription with relevant details.
+ *
+ * @property id Unique identifier of the prescription.
+ * @property pdfUrl URL to the prescription PDF document.
+ * @property medicationName Name of the medication prescribed.
+ * @property issueDate Date when the prescription was issued (optional).
+ */
 data class PrescriptionUiModel(
     val id: String,
     val pdfUrl: String,
@@ -52,7 +60,15 @@ data class PrescriptionUiModel(
     val issueDate: String // optional
 )
 
-
+/**
+ * Composable screen that displays a list of prescriptions for the current patient.
+ *
+ * Fetches the prescriptions from [PrescriptionScreenViewModel] and shows
+ * them in a scrollable list with options to view, download, or generate QR codes.
+ *
+ * @param viewModel ViewModel that manages the prescriptions data and state.
+ * @param goBack Lambda callback triggered when user wants to navigate back.
+ */
 @Composable
 fun PrescriptionScreen(
     viewModel: PrescriptionScreenViewModel = hiltViewModel(),
@@ -73,6 +89,15 @@ fun PrescriptionScreen(
     )
 }
 
+/**
+ * Composable content that shows the scaffold layout for the prescription screen,
+ * including a top bar and a lazy column of [PrescriptionCard] items.
+ *
+ * Also handles showing a QR code dialog when requested.
+ *
+ * @param prescriptions List of prescriptions to display.
+ * @param goBack Lambda callback for back navigation.
+ */
 @Composable
 fun PrescriptionScreenContent(
     prescriptions: List<PrescriptionUiModel>,
@@ -103,6 +128,15 @@ fun PrescriptionScreenContent(
     }
 }
 
+/**
+ * Composable card that represents a single prescription.
+ *
+ * Displays the medication name and provides a modal bottom sheet with options:
+ * Download, View, or Generate QR code.
+ *
+ * @param prescription The prescription data to display.
+ * @param generateQRCode Lambda invoked with the PDF URL to generate a QR code.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrescriptionCard(
@@ -164,6 +198,14 @@ fun PrescriptionCard(
     }
 }
 
+/**
+ * Dialog composable that displays a QR code generated from the provided data string.
+ *
+ * Provides a close button to dismiss the dialog.
+ *
+ * @param data The string data encoded in the QR code.
+ * @param onDismiss Lambda callback when the dialog is dismissed.
+ */
 @Composable
 fun QrCodeDialog(data: String, onDismiss: () -> Unit) {
     val painter: Painter = rememberQrKitPainter(data = data)
@@ -195,6 +237,13 @@ fun QrCodeDialog(data: String, onDismiss: () -> Unit) {
     )
 }
 
+/**
+ * Top app bar composable for the prescription screen.
+ *
+ * Displays the screen title and a back navigation icon.
+ *
+ * @param goBack Lambda callback invoked when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrescriptionTopBar(

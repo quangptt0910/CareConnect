@@ -12,6 +12,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for managing patient profile data.
+ *
+ * Handles fetching the current patient data and updating patient information in repository.
+ *
+ * @property patientRepository Repository for patient data persistence.
+ * @property authRepository Repository for authentication (currently unused here but injected).
+ * @property addChatRoomRepository Repository used to fetch the current patient.
+ */
 @HiltViewModel
 class PatientProfileViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
@@ -25,12 +34,20 @@ class PatientProfileViewModel @Inject constructor(
         getPatient()
     }
 
+    /**
+     * Fetches the current patient data and updates the state.
+     */
     fun getPatient(){
         viewModelScope.launch {
             _patient.value = addChatRoomRepository.getCurrentPatient()
         }
     }
 
+    /**
+     * Updates the patient profile both locally and remotely.
+     *
+     * @param updatePatient The updated patient data to save.
+     */
     fun updatePatient(updatePatient: Patient) {
         _patient.value = updatePatient
         viewModelScope.launch {

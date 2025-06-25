@@ -26,6 +26,16 @@ val tabItems = listOf(
     MedicalHistoryType.IMMUNIZATION
 )
 
+/**
+ * Composable screen displaying the medical history of a patient segmented by different medical history types.
+ *
+ * Shows tabs for medication, allergy, condition, surgery, and immunization history.
+ * Loads and manages the patient's medical history entries for the selected type.
+ *
+ * @param viewModel The [PatientMedicalHistoryViewModel] to handle UI state and data operations.
+ * @param type The initially selected [MedicalHistoryType] as a string, defaults to the first tab if invalid.
+ * @param goBack Lambda to navigate back from this screen.
+ */
 @Composable
 fun PatientMedicalHistoryScreen(
     viewModel: PatientMedicalHistoryViewModel = hiltViewModel(),
@@ -63,6 +73,18 @@ fun PatientMedicalHistoryScreen(
     }
 }
 
+/**
+ * Composable content for the patient medical history screen, including the tab layout and the medical history list.
+ *
+ * @param patientId The unique identifier of the patient whose history is displayed.
+ * @param goBack Lambda invoked when the user wants to navigate back.
+ * @param entries List of [MedicalHistoryEntry] currently displayed.
+ * @param selectedTabIndex The index of the currently selected medical history tab.
+ * @param onTabSelected Callback invoked when a tab is selected, with the new tab index.
+ * @param addEntry Callback to add a new medical history entry for the patient.
+ * @param updateEntry Callback to update an existing medical history entry.
+ * @param deleteEntry Callback to delete a medical history entry.
+ */
 @Composable
 fun PatientMedicalHistoryScreenContent(
     patientId: String,

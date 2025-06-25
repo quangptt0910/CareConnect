@@ -10,6 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+/**
+ * ViewModel responsible for managing profile information state and business logic.
+ * Handles account linking via [AuthRepository] and triggers app restart if needed.
+ *
+ * @property authRepository Repository to handle authentication and user account operations.
+ */
 @HiltViewModel
 class ProfileInfoViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -20,6 +26,17 @@ class ProfileInfoViewModel @Inject constructor(
 
     val userId: String? = authRepository.currentUser?.uid
 
+    /**
+     * Attempts to link the user's account with provided profile information.
+     * Shows snackbar messages on failure.
+     *
+     * @param gender The user's gender.
+     * @param weight The user's weight.
+     * @param height The user's height.
+     * @param dob The user's date of birth as a formatted string.
+     * @param address The user's address.
+     * @param showSnackBar Callback to display snackbar messages.
+     */
     fun linkAccount(
         gender: String,
         weight: Double,

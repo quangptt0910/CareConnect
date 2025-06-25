@@ -50,7 +50,14 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import java.util.Calendar
 import java.util.Locale
 
-
+/**
+ * Screen composable that displays the profile info form for the patient.
+ * It observes ViewModel state and triggers navigation to splash screen if needed.
+ *
+ * @param viewModel The [ProfileInfoViewModel] instance to manage state and business logic.
+ * @param openSplashScreen Callback invoked to navigate to the splash screen after successful account linking.
+ * @param showSnackBar Callback to display snackbar messages.
+ */
 @Composable
 fun ProfileInfoScreen(
     viewModel: ProfileInfoViewModel = hiltViewModel(),
@@ -72,7 +79,13 @@ fun ProfileInfoScreen(
 }
 
 
-
+/**
+ * Composable content of the profile info screen.
+ * Displays inputs for gender, weight, height, address, and date of birth.
+ *
+ * @param linkAccount Callback invoked to link the account with the provided details.
+ * @param showSnackBar Callback to display snackbar messages.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileInfoScreenContent(
