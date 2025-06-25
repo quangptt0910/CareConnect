@@ -3,9 +3,20 @@ package com.example.careconnect.dataclass
 import com.google.firebase.firestore.DocumentId
 
 
-/*
- * Data class for medical report
- * Medical report for the consultation of the patient
+/**
+ * Represents a detailed medical report written by a doctor following a consultation.
+ *
+ * @property id Unique identifier for the report (Firestore document ID).
+ * @property patientId Firebase UID of the patient.
+ * @property doctorId Firebase UID of the doctor.
+ * @property symptoms List of symptoms the patient is experiencing.
+ * @property diagnosis Doctor's diagnosis based on the consultation.
+ * @property prognosis Expected outcome or forecast of the condition.
+ * @property treatment Description of the treatment plan.
+ * @property recommendations Any recommendations made by the doctor.
+ * @property plan Follow-up actions such as appointments or additional tests.
+ * @property reportDate Timestamp when the report was generated.
+ * @property reportPdfUrl Optional URL linking to a PDF version of the report.
  */
 data class MedicalReport(
     @DocumentId val id: String = "",  // Firestore document ID (optional)

@@ -1,6 +1,9 @@
 package com.example.careconnect.dataclass
 
-
+/**
+ * Enum class representing various medical specializations.
+ * Used for categorizing doctors or medical services.
+ */
 enum class Specialization {
     // Primary Care
     FAMILY_MEDICINE,
@@ -42,6 +45,9 @@ enum class Specialization {
         fun all(): List<Specialization> = enumValues<Specialization>().toList()
     }
 
+    /**
+     * Returns the human-readable name for the specialization.
+     */
     fun displayName(): String = when (this) {
         // Primary Care
         FAMILY_MEDICINE -> "Family Medicine"
