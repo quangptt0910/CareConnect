@@ -57,6 +57,17 @@ import java.util.Calendar
 import java.util.Locale
 
 
+/**
+ * Main screen for creating a prescription for a specific patient.
+ *
+ * - Loads patient details using the given [patientId].
+ * - Observes ViewModel states like [patient] and [prescriptionCreated].
+ * - Triggers UI feedback upon successful prescription submission.
+ *
+ * @param patientId ID of the patient for whom the prescription is being created.
+ * @param viewModel ViewModel that manages the prescription creation logic.
+ * @param navController Navigation controller used to navigate back after submission.
+ */
 @Composable
 fun CreatePrescriptionScreen(
     patientId: String,
@@ -86,6 +97,18 @@ fun CreatePrescriptionScreen(
     )
 }
 
+/**
+ * UI content for the Create Prescription screen.
+ *
+ * Allows the doctor to:
+ * - View patient details.
+ * - Input medication name, dosage, instructions, number of refills, and a valid-until date.
+ * - Submit the prescription using a confirmation dialog.
+ *
+ * @param patientId ID of the patient.
+ * @param patient Optional [Patient] object to display patient data.
+ * @param onCreatePrescription Callback function to handle prescription creation.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePrescriptionsScreenContent(
@@ -260,7 +283,17 @@ fun CreatePrescriptionsScreenContent(
     }
 }
 
-
+/**
+ * Reusable confirmation dialog component.
+ *
+ * Displays a modal dialog asking the user to confirm or cancel an action.
+ *
+ * @param onDismissRequest Callback when the dialog is dismissed.
+ * @param onConfirmation Callback when the user confirms the action.
+ * @param dialogTitle Title of the dialog.
+ * @param dialogText Body text of the dialog.
+ * @param icon Icon to show in the dialog.
+ */
 @Composable
 fun AlertDialogExample(
     onDismissRequest: () -> Unit,
@@ -303,7 +336,11 @@ fun AlertDialogExample(
     )
 }
 
-
+/**
+ * Preview of the CreatePrescriptionScreenContent composable.
+ *
+ * Useful during development to visualize the UI in Android Studio without launching the app.
+ */
 @Preview
 @Composable
 fun CreatePrescriptionsScreenPreview(){

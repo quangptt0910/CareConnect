@@ -48,10 +48,25 @@ import com.example.careconnect.dataclass.Surgery
 import kotlinx.coroutines.launch
 
 
+/**
+ * Enum to represent the mode of the dialog (Add or Edit).
+ */
 enum class DialogMode {
     Add, Edit
 }
 
+
+/**
+ * Composable function for the Medical History Section screen.
+ * This screen displays a list of medical history entries for a specific patient and section type (e.g., medications, allergies).
+ * It allows users to add, edit, and delete entries.
+ *
+ * @param patientId The ID of the patient whose medical history is being viewed.
+ * @param sectionType The type of medical history section to display (e.g., "medications", "allergies").
+ * @param onBack Callback function to navigate back to the previous screen.
+ * @param showSnackbar Callback function to display a snackbar message.
+ * @param viewModel The [MedicalHistorySectionViewModel] used to manage the state and logic of this screen.
+ */
 @Composable
 fun MedicalHistorySectionScreen(
     patientId: String,
@@ -108,6 +123,20 @@ fun MedicalHistorySectionScreen(
     )
 }
 
+
+/**
+ * Composable function for the content of the Medical History Section screen.
+ * This function is responsible for the UI layout and user interactions.
+ *
+ * @param sectionType The [MedicalHistoryType] being displayed.
+ * @param entries A list of [MedicalHistoryEntry] items to display.
+ * @param isLoading A boolean indicating if data is currently loading.
+ * @param onBack Callback function to navigate back.
+ * @param onAddEntry Callback function to add a new [MedicalHistoryEntry].
+ * @param onUpdateEntry Callback function to update an existing [MedicalHistoryEntry].
+ * @param onDeleteEntry Callback function to delete a [MedicalHistoryEntry].
+ * @param showSnackbar Callback function to display a snackbar message.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicalHistorySectionScreenContent(
@@ -255,6 +284,14 @@ fun MedicalHistorySectionScreenContent(
 
 }
 
+
+/**
+ * Composable function for the content displayed within the modal bottom sheet.
+ * It provides options to edit or delete a selected medical history entry.
+ *
+ * @param onEdit Callback function invoked when the "Edit" option is selected.
+ * @param onDelete Callback function invoked when the "Delete" option is selected.
+ */
 @Composable
 fun BottomSheetContent(onEdit: () -> Unit, onDelete: () -> Unit) {
     Column(modifier = Modifier.padding(16.dp)) {
@@ -269,6 +306,12 @@ fun BottomSheetContent(onEdit: () -> Unit, onDelete: () -> Unit) {
 }
 
 
+/**
+ * Composable function to display a single medical history entry in a card format.
+ *
+ * @param entry The [MedicalHistoryEntry] to display.
+ * @param onClick Callback function invoked when the card is clicked.
+ */
 @Composable
 fun MedicalHistoryCard(
     entry: MedicalHistoryEntry,

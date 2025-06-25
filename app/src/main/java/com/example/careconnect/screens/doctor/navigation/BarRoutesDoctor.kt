@@ -15,6 +15,15 @@ import com.example.careconnect.ui.navigation.Route.DOCTOR_PATIENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.DOCTOR_PROFILE_ROUTE
 import com.example.careconnect.ui.navigation.Route.HOME_DOCTOR_ROUTE
 
+
+/**
+ * Enum class representing the routes for the bottom navigation bar in the doctor's section of the app.
+ * Each route has a title, an icon, and a navigation route string.
+ *
+ * @property title The string resource ID for the title of the navigation item.
+ * @property icon The [ImageVector] for the icon of the navigation item.
+ * @property route The navigation route string associated with the item.
+ */
 enum class BarRoutesDoctor(
     @StringRes val title: Int,
     val icon: ImageVector,

@@ -10,6 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for retrieving and managing a patient's list of prescriptions.
+ *
+ * Interacts with the [PatientRepository] to fetch data and expose it as [PrescriptionUiModel]s.
+ *
+ * @property patientRepository Repository for accessing patient-related data.
+ */
 @HiltViewModel
 class PrescriptionsViewModel @Inject constructor(
     private val patientRepository: PatientRepository
@@ -17,6 +24,11 @@ class PrescriptionsViewModel @Inject constructor(
     private val _prescriptions = MutableStateFlow<List<PrescriptionUiModel>>(emptyList())
     val prescriptions: StateFlow<List<PrescriptionUiModel>> = _prescriptions
 
+    /**
+     * Fetches all prescriptions for the given patient and maps them to [PrescriptionUiModel].
+     *
+     * @param patientId ID of the patient whose prescriptions are being fetched.
+     */
     fun fetchPrescriptions(patientId: String) {
         viewModelScope.launch {
             val list = patientRepository.getPrescriptions(patientId)

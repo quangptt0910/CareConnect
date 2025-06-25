@@ -19,6 +19,19 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+
+/**
+ * ViewModel responsible for handling prescription creation logic for doctors.
+ *
+ * Handles:
+ * - Loading a specific patient's data.
+ * - Creating and uploading prescription PDFs.
+ * - Uploading to Firebase Storage and storing metadata in Firestore.
+ *
+ * @property patientRepository Repository for accessing patient data.
+ * @property authRepository Repository for accessing authentication/user ID info.
+ * @property doctorRepository Repository for accessing doctor details.
+ */
 @HiltViewModel
 class CreatePrescriptionsViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
@@ -46,6 +59,11 @@ class CreatePrescriptionsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads the patient details for the given [patientId].
+     *
+     * @param patientId The ID of the patient whose data is to be fetched.
+     */
     fun loadPatient(patientId: String) {
         viewModelScope.launch {
             val patientData = patientRepository.getPatientById(patientId)
@@ -53,6 +71,13 @@ class CreatePrescriptionsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Creates a prescription for the patient, generates a PDF, and uploads it to Firebase.
+     *
+     * @param patientId ID of the patient.
+     * @param prescription The prescription data to be created.
+     * @param context Android context for file and PDF handling.
+     */
     fun createPrescription(patientId: String, prescription: Prescription, context: Context) {
         viewModelScope.launch {
             _prescriptionCreated.value = false

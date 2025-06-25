@@ -35,6 +35,21 @@ import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
 
+
+/**
+ * Displays the detailed profile screen for a patient.
+ *
+ * This composable fetches patient data via [PatientsProfileViewModel], manages navigation events,
+ * and orchestrates displaying the patient's personal and medical information.
+ *
+ * @param patientId The unique identifier of the patient whose profile is displayed.
+ * @param viewModel The [PatientsProfileViewModel] responsible for loading patient data.
+ * @param openMedicalReportsScreen Lambda triggered to navigate to the patient's medical reports screen.
+ * @param openPrescriptionsScreen Lambda triggered to navigate to the patient's prescriptions screen.
+ * @param onBack Lambda called when the back button is pressed.
+ * @param openChatScreen Lambda to open the chat screen given a chatId, patientId, and doctorId.
+ * @param openMedicalHistoryScreen Lambda to open a specific medical history section for the patient.
+ */
 @Composable
 fun PatientsProfileScreen(
     patientId: String,
@@ -69,6 +84,21 @@ fun PatientsProfileScreen(
     )
 }
 
+/**
+ * Content composable for the patient's profile screen.
+ *
+ * Displays patient information, including personal details and categorized medical history sections.
+ * Provides UI for navigation to related screens such as medical reports, prescriptions, chat, and medical history.
+ *
+ * @param patientId The unique ID of the patient.
+ * @param onBack Callback to handle back navigation.
+ * @param patient The patient data to display, nullable until loaded.
+ * @param openMedicalReportsScreen Lambda to open medical reports for the patient.
+ * @param getChatId Suspended lambda to retrieve or create the chat room ID.
+ * @param openChatScreen Lambda invoked with chatId to open chat UI.
+ * @param openPrescriptionsScreen Lambda to open patient's prescriptions.
+ * @param openMedicalHistoryScreen Lambda to open a particular medical history section.
+ */
 @Composable
 fun PatientsProfileScreenContent(
     patientId: String,
@@ -231,6 +261,13 @@ fun PatientsProfileScreenContent(
     }
 }
 
+/**
+ * Top app bar for the patient profile screen.
+ *
+ * Displays the title "Patient Profile" and a back navigation icon.
+ *
+ * @param onBack Callback executed when the back icon is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientsProfileDoctorTopBar(
@@ -259,7 +296,11 @@ fun PatientsProfileDoctorTopBar(
     )
 }
 
-
+/**
+ * Preview composable for the PatientsProfileScreenContent.
+ *
+ * Provides a themed preview of the patient profile content layout.
+ */
 @Preview
 @Composable
 fun PatientsProfileScreenPreview(){

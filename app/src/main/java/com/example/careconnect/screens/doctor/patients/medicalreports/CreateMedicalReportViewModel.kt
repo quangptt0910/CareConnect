@@ -19,6 +19,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * ViewModel responsible for creating and uploading a medical report for a patient.
+ * It handles generating a PDF, uploading it to Firebase Storage, and storing metadata in Firestore.
+ *
+ * @property patientRepository Repository for accessing patient data.
+ * @property authRepository Repository for authentication and current user info.
+ * @property doctorRepository Repository for accessing doctor data.
+ */
 @HiltViewModel
 class CreateMedicalReportViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
@@ -46,6 +54,11 @@ class CreateMedicalReportViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads patient information by their [patientId] and sets it to [_patient].
+     *
+     * @param patientId ID of the patient to be fetched.
+     */
     fun loadPatient(patientId: String) {
         viewModelScope.launch {
             val patientData = patientRepository.getPatientById(patientId)
@@ -53,6 +66,14 @@ class CreateMedicalReportViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new medical report and saves it for a patient.
+     * Also generates a PDF, uploads it to Firebase Storage, and stores the URL.
+     *
+     * @param patientId The ID of the patient.
+     * @param medicalReport Data to be included in the medical report.
+     * @param context Android context used for file operations.
+     */
     fun createMedicalReport(patientId: String, medicalReport: MedicalReport, context: Context) {
         viewModelScope.launch {
             _medicalReportCreated.value = false

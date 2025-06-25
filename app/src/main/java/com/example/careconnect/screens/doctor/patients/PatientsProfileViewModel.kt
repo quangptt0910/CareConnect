@@ -14,6 +14,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
+/**
+ * ViewModel responsible for managing the state and business logic of the Patient Profile screen.
+ *
+ * This ViewModel interacts with repositories to load patient and doctor data, manages chat room creation,
+ * and provides state flows for UI to observe patient and doctor ID changes.
+ *
+ * @property patientRepository Repository to fetch patient data.
+ * @property addChatRoomRepository Repository to handle chat room creation and retrieval.
+ * @property doctorRepository Repository to fetch doctor data.
+ * @property authRepository Repository to access authentication data such as current user ID.
+ */
 @HiltViewModel
 class PatientsProfileViewModel @Inject constructor(
     private val patientRepository: PatientRepository,
@@ -27,6 +39,11 @@ class PatientsProfileViewModel @Inject constructor(
     private val _doctorId = MutableStateFlow<String?>(null)
     val doctorId: StateFlow<String?> = _doctorId
 
+    /**
+     * Loads the current logged-in doctor's ID asynchronously and updates [doctorId] StateFlow.
+     *
+     * @return The current value of [doctorId] StateFlow, which may be `null` if not loaded yet.
+     */
     fun loadDoctorId() : String? {
         viewModelScope.launch {
             val doctorId = authRepository.getCurrentUserId()
@@ -37,7 +54,11 @@ class PatientsProfileViewModel @Inject constructor(
         return _doctorId.value
     }
 
-
+    /**
+     * Loads the patient data by the given [patientId] asynchronously and updates [patient] StateFlow.
+     *
+     * @param patientId The unique identifier of the patient to load.
+     */
     fun loadPatient(patientId: String) {
         viewModelScope.launch {
             val patientData = patientRepository.getPatientById(patientId)
@@ -46,10 +67,22 @@ class PatientsProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Gets or creates a chat room ID for the chat between the specified [patient] and [doctor].
+     *
+     * @param patient The patient involved in the chat.
+     * @param doctor The doctor involved in the chat.
+     * @return The chat room ID as a [String].
+     */
     suspend fun getOrCreateChatRoomId(patient: Patient, doctor: Doctor): String {
         return addChatRoomRepository.getOrCreateChatRoomId(patient, doctor)
     }
 
+    /**
+     * Retrieves the currently logged-in [Doctor] asynchronously.
+     *
+     * @return The current [Doctor] instance.
+     */
     suspend fun getCurrentDoctor(): Doctor {
         return addChatRoomRepository.getCurrentDoctor()
     }

@@ -25,6 +25,16 @@ import com.example.careconnect.screens.patient.profile.prescription.Prescription
 import com.example.careconnect.screens.patient.profile.prescription.PrescriptionUiModel
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+/**
+ * Main composable for displaying the list of prescriptions for a patient.
+ *
+ * Fetches prescriptions when loaded and displays the screen content.
+ *
+ * @param viewModel ViewModel managing prescription state and retrieval.
+ * @param patientId ID of the patient whose prescriptions are shown.
+ * @param openCreatePrescriptionsScreen Lambda to open the screen to create a new prescription.
+ * @param goBack Lambda for back navigation.
+ */
 @Composable
 fun PrescriptionScreen(
     viewModel: PrescriptionsViewModel = hiltViewModel(),
@@ -46,6 +56,15 @@ fun PrescriptionScreen(
     )
 }
 
+/**
+ * UI layout for listing a patient’s prescriptions with a floating action button
+ * to create a new one.
+ *
+ * @param patientId ID of the patient whose prescriptions are displayed.
+ * @param openCreatePrescriptionsScreen Lambda to trigger navigation to the prescription creation screen.
+ * @param prescriptions List of prescription UI models to be displayed.
+ * @param goBack Lambda for back navigation from the top app bar.
+ */
 @Composable
 fun PrescriptionsScreenContent(
     patientId: String,
@@ -88,6 +107,11 @@ fun PrescriptionsScreenContent(
     }
 }
 
+/**
+ * Preview of the PrescriptionsScreenContent composable.
+ *
+ * Used for visualizing the layout in Android Studio.
+ */
 @Preview
 @Composable
 fun PrescriptionsScreenPreview(){

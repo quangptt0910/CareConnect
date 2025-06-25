@@ -12,6 +12,17 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Main screen for creating a prescription for a specific patient.
+ *
+ * - Loads patient details using the given [patientId].
+ * - Observes ViewModel states like [patient] and [prescriptionCreated].
+ * - Triggers UI feedback upon successful prescription submission.
+ *
+ * @param patientId ID of the patient for whom the prescription is being created.
+ * @param viewModel ViewModel that manages the prescription creation logic.
+ * @param navController Navigation controller used to navigate back after submission.
+ */
 fun CreatePrescriptionPdf(
     context: Context,
     patient: Patient,
