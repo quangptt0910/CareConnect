@@ -316,8 +316,6 @@ fun CareConnectNavHost(
             SettingsScreen(
                 openSplashScreen = { // Typically for logout.
                     navController.navigate(SPLASH_ROUTE) {
-                        // Example: Clear entire back stack up to the root (or specific app container)
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
