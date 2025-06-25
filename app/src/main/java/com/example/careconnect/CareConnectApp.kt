@@ -267,13 +267,11 @@ fun CareConnectNavHost(
                 },
                 openSplashScreen = { // Navigation back to splash, typically for logout or session expiry.
                     navController.navigate(SPLASH_ROUTE) {
-                        popUpTo(LOGIN_ROUTE) { inclusive = true } // Clear login from back stack
                         launchSingleTop = true
                     }
                 },
                 openProfileScreen = { // After successful login if profile is incomplete.
                     navController.navigate(PROFILE_ROUTE) {
-                        popUpTo(LOGIN_ROUTE) { inclusive = true }
                         launchSingleTop = true
                     }
                 },

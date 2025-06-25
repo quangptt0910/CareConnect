@@ -62,29 +62,27 @@ fun LoginScreen(
 ){
     val shouldRestartApp by viewModel.shouldRestartApp.collectAsStateWithLifecycle()
     val navigateToProfile by viewModel.navigateToProfile.collectAsStateWithLifecycle()
+    var hasNavigated by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     println("Debug: LoginScreen")
-    when {
-        shouldRestartApp -> {
-            viewModel.resetNavigate()
-            openSplashScreen()
-        }
 
-        navigateToProfile -> {
-            viewModel.resetNavigate()
-            openProfileScreen()
-        }
-
-        else -> {
-            LoginScreenContent(
-                openSignUpScreen = openSignUpScreen,
-                login = viewModel::login,
-                onGoogleSignInClick = { viewModel.onGoogleSignInClick(context, showSnackBar) },
-                showSnackBar = showSnackBar,
-            )
-        }
+    if (shouldRestartApp) {
+        openSplashScreen()
+        hasNavigated = true
     }
+    else if (navigateToProfile) {
+        openProfileScreen()
+        hasNavigated = true
+    } else {
+        LoginScreenContent(
+            openSignUpScreen = openSignUpScreen,
+            login = viewModel::login,
+            onGoogleSignInClick = { viewModel.onGoogleSignInClick(context, showSnackBar) },
+            showSnackBar = showSnackBar
+        )
+    }
+
 
 }
 

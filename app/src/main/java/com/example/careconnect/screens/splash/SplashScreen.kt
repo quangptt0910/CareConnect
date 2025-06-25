@@ -14,6 +14,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,6 +45,7 @@ fun SplashScreen(
 ) {
     println("Debug: SplashScreen")
     val navigateRoute by viewModel.navigationRoute.collectAsStateWithLifecycle()
+    var hasNavigated by remember { mutableStateOf(false) }
 
     LaunchedEffect(notificationData) {
         notificationData?.let { viewModel.handleNotificationData(it) }
@@ -50,14 +54,17 @@ fun SplashScreen(
     SplashScreenContent(showSnackBar = showSnackBar)
 
     LaunchedEffect(navigateRoute) {
-        delay(100L)
-        if (navigateRoute != null) {
-            when (navigateRoute) {
-                "admin" -> openAdminScreen()
-                "doctor" -> openDoctorScreen(viewModel.getNotificationForNavigation())
-                "patient" -> openPatientScreen(viewModel.getNotificationForNavigation())
-                "login" -> openLoginScreen()
-                else -> openLoginScreen()
+        if(navigateRoute != null && !hasNavigated) {
+            hasNavigated = true
+            delay(100L)
+            if (navigateRoute != null) {
+                when (navigateRoute) {
+                    "admin" -> openAdminScreen()
+                    "doctor" -> openDoctorScreen(viewModel.getNotificationForNavigation())
+                    "patient" -> openPatientScreen(viewModel.getNotificationForNavigation())
+                    "login" -> openLoginScreen()
+                    else -> openLoginScreen()
+                }
             }
         }
     }

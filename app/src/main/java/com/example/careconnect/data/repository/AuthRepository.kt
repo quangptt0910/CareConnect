@@ -67,4 +67,9 @@ class AuthRepository @Inject constructor(
 
     }
 
+    suspend fun ensureMergedPatientRecordExists() {
+        authRemoteDataSource.ensureMergedPatientRecordExists()
+
+    }
+
 }

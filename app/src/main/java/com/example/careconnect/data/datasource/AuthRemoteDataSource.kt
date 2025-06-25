@@ -148,11 +148,13 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
     suspend fun signOut() {
-        auth.signOut()
-        println("AuthRemote: SignedOut clicked")
+        try {
+            firestore.clearPersistence()
+            auth.signOut()
+            println("DEBUG: AuthRemote SignedOut clicked")
 
         // Only clear google credential of signed in with google
-        try {
+
             val currentUser = auth.currentUser
             val googleSignIn = currentUser?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true
             if (googleSignIn || currentGoogleIdToken != null) {
@@ -162,6 +164,7 @@ class AuthRemoteDataSource @Inject constructor(
             }
         } catch (e: ClearCredentialException) {
             Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
+            auth.signOut()
             currentGoogleIdToken = null
         }
     }
@@ -259,29 +262,39 @@ class AuthRemoteDataSource @Inject constructor(
         val user = auth.currentUser ?: return
         val uid = user.uid
 
-        // Check if patient record already exists
-        val patientDoc = firestore.collection("patients").document(uid).get().await()
-        if (patientDoc.exists()) {
-            Log.d(TAG, "Patient record already exists for Google user")
-            return
+        val email = user.email ?: ""
+        val patientDoc = firestore.collection("patients")
+            .whereEqualTo("email", email)
+            .get()
+            .await()
+            .documents
+            .firstOrNull()
+
+        if (patientDoc != null) {
+            // Merge auth methods
+            val currentMethods = patientDoc.get("authProviders") as? List<String> ?: emptyList()
+            val updatedMethods = (currentMethods + "google.com").distinct()
+
+            patientDoc.reference.update(
+                "id", uid,
+                "authProviders", updatedMethods
+            ).await()
+        } else {
+            // Create new record with both methods
+            val fullName = user.displayName.orEmpty().split(" ", limit = 2)
+            val name = fullName.getOrNull(0).orEmpty()
+            val surname = fullName.getOrNull(1).orEmpty()
+
+            val patient = Patient(
+                id = uid,
+                name = name,
+                surname = surname,
+                email = email,
+                authProviders = listOf("google.com")
+            )
+
+            firestore.collection("patients").document(uid).set(patient).await()
         }
-
-        // Parse display name
-        val fullName = user.displayName.orEmpty().split(" ", limit = 2)
-        val name = fullName.getOrNull(0).orEmpty()
-        val surname = fullName.getOrNull(1).orEmpty()
-
-        val patient = Patient(
-            id = uid,
-            name = name,
-            surname = surname,
-            email = user.email.orEmpty(),
-            role = Role.PATIENT
-            // Other fields remain at defaults and can be filled later
-        )
-
-        firestore.collection("patients").document(uid).set(patient).await()
-        Log.d(TAG, "Patient record created for Google user: $uid")
     }
 
     /**
@@ -298,6 +311,28 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun ensureMergedPatientRecordExists() {
+        val user = currentUser ?: return
+        val uid = user.uid
+
+        val patientRef = firestore.collection("patients").document(uid)
+        if (!patientRef.get().await().exists()) {
+            // Create merged record
+            val fullName = user.displayName.orEmpty().split(" ", limit = 2)
+            val name = fullName.getOrNull(0).orEmpty()
+            val surname = fullName.getOrNull(1).orEmpty()
+
+            val patient = Patient(
+                id = uid,
+                name = name,
+                surname = surname,
+                email = user.email ?: "",
+                authProviders = listOf("password", "google.com")
+            )
+
+            patientRef.set(patient).await()
+        }
+    }
 
     /**
      * Check user's authentication providers
@@ -305,15 +340,6 @@ class AuthRemoteDataSource @Inject constructor(
     fun getUserAuthProviders(): List<String> {
         return currentUser?.providerData?.map { it.providerId } ?: emptyList()
     }
-
-    /**
-     * Check if user has both email and Google authentication
-     */
-    fun hasMultipleAuthMethods(): Boolean {
-        val providers = getUserAuthProviders()
-        return providers.contains("password") && providers.contains("google.com")
-    }
-
 
     suspend fun patientRecord(): Boolean {
         val user = auth.currentUser!!

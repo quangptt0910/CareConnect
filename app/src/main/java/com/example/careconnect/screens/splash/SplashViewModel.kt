@@ -1,5 +1,6 @@
 package com.example.careconnect.screens.splash
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,9 +10,12 @@ import com.example.careconnect.data.datasource.AuthRemoteDataSource
 import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.notifications.FCMTokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 
@@ -34,18 +38,46 @@ class SplashViewModel @Inject constructor(
     init {
         launchCatching {
             fcmTokenManager.debugFCMToken()
-            val userData = authRepository.currentUserFlow.first()
-            determineNavigationRoute(userData)
+            delay(300)
+            try {
+                val userData = withTimeout(8000) { // 5 second timeout
+                    authRepository.currentUserFlow.first { userData ->
+                        // Wait for a definitive state (not just first emission)
+                        userData != AuthRemoteDataSource.UserData.Error ||
+                                authRepository.currentUser == null
+                    }
+                }
+                Log.d("SplashViewModel", "Auth state received: $userData")
+                determineNavigationRoute(userData)
+            } catch (e: TimeoutCancellationException) {
+                Log.e("SplashViewModel", "Timeout waiting for auth state, defaulting to login")
+                determineNavigationRoute(AuthRemoteDataSource.UserData.NoUser)
+            }
         }
     }
 
     private fun determineNavigationRoute(userData: AuthRemoteDataSource.UserData) {
         val route = when (userData) {
-            is AuthRemoteDataSource.UserData.AdminData -> "admin"
-            is AuthRemoteDataSource.UserData.DoctorData -> "doctor"
-            AuthRemoteDataSource.UserData.Error -> "login"
-            AuthRemoteDataSource.UserData.NoUser -> "login"
-            is AuthRemoteDataSource.UserData.PatientData -> "patient"
+            is AuthRemoteDataSource.UserData.AdminData -> {
+                Log.d("SplashViewModel", "Navigating to admin")
+                "admin"
+            }
+            is AuthRemoteDataSource.UserData.DoctorData -> {
+                Log.d("SplashViewModel", "Navigating to doctor")
+                "doctor"
+            }
+            AuthRemoteDataSource.UserData.Error -> {
+                Log.d("SplashViewModel", "Auth error, navigating to login")
+                "login"
+            }
+            AuthRemoteDataSource.UserData.NoUser -> {
+                Log.d("SplashViewModel", "No user, navigating to login")
+                "login"
+            }
+            is AuthRemoteDataSource.UserData.PatientData -> {
+                Log.d("SplashViewModel", "Navigating to patient")
+                "patient"
+            }
         }
         _navigationRoute.value = route
     }
@@ -58,66 +90,4 @@ class SplashViewModel @Inject constructor(
     fun getNotificationForNavigation(): NotificationData? {
         return pendingNotificationData?.also { pendingNotificationData = null }
     }
-
-//    init {
-//        launchCatching {
-//            fcmTokenManager.debugFCMToken()
-//            val userData = authRepository.currentUserFlow.first()
-//            println("Debug Splash: $userData")
-//
-//            val route = if (pendingNotificationData != null && userData != AuthRemoteDataSource.UserData.NoUser) {
-//                // User is authenticated and we have notification data
-//                when (pendingNotificationData!!.userType.lowercase()) {
-//                    "doctor" -> {
-//                        if (userData is AuthRemoteDataSource.UserData.DoctorData) "doctor"
-//                        else getDefaultRoute(userData) // Fallback if user type doesn't match
-//                    }
-//                    "patient" -> {
-//                        if (userData is AuthRemoteDataSource.UserData.PatientData) "patient"
-//                        else getDefaultRoute(userData) // Fallback if user type doesn't match
-//                    }
-//                    else -> getDefaultRoute(userData)
-//                }
-//            } else {
-//                getDefaultRoute(userData)
-//            }
-//
-//            println("Debug Splash route: $route")
-//            _navigationRoute.value = route
-//        }
-//    }
-//
-//    private fun getDefaultRoute(userData: AuthRemoteDataSource.UserData): String {
-//        return when (userData) {
-//            is AuthRemoteDataSource.UserData.AdminData -> "admin"
-//            is AuthRemoteDataSource.UserData.DoctorData -> "doctor"
-//            AuthRemoteDataSource.UserData.Error -> "login"
-//            AuthRemoteDataSource.UserData.NoUser -> "login"
-//            is AuthRemoteDataSource.UserData.PatientData -> "patient"
-//        }
-//    }
-//
-//    fun handleNotificationData(notificationData: NotificationData) {
-//        println("Debug: Handling notification data: $notificationData")
-//        this.pendingNotificationData = notificationData
-//
-//        launchCatching {
-//            val userData = authRepository.currentUserFlow.first()
-//            if (userData != AuthRemoteDataSource.UserData.NoUser) {
-//                val route = when (notificationData.userType.lowercase()) {
-//                    "doctor" -> {
-//                        if (userData is AuthRemoteDataSource.UserData.DoctorData) "doctor"
-//                        else getDefaultRoute(userData)
-//                    }
-//                    "patient" -> {
-//                        if (userData is AuthRemoteDataSource.UserData.PatientData) "patient"
-//                        else getDefaultRoute(userData)
-//                    }
-//                    else -> getDefaultRoute(userData)
-//                }
-//                println("Debug: Updated route for notification: $route")
-//                _navigationRoute.value = route
-//            }
-//        }
-//    }
 }

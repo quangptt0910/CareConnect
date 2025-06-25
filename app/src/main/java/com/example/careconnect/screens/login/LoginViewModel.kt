@@ -13,6 +13,7 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,11 +36,17 @@ class LoginViewModel @Inject constructor(
     val accountLinked: StateFlow<Boolean>
         get() = _accountLinked.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean>
+        get() = _isLoading.asStateFlow()
+
     fun login(
         email: String,
         password: String,
         showSnackBar: (SnackBarMessage) -> Unit
     ) {
+        if (_isLoading.value) return
+
         if (email.isBlank() || password.isBlank()) {
             showSnackBar(SnackBarMessage.IdMessage(R.string.all_fields_required))
             return
@@ -48,7 +55,6 @@ class LoginViewModel @Inject constructor(
         launchCatching(showSnackBar) {
             try {
                 authRepository.login(email, password)
-
                 checkAuthProviders(showSnackBar)
                 _shouldRestartApp.value = true
             } catch (e: Exception) {
@@ -62,7 +68,9 @@ class LoginViewModel @Inject constructor(
 
 
     fun onGoogleSignInClick(context: Context, showSnackBar: (SnackBarMessage) -> Unit) {
+        if (_isLoading.value) return // Prevent multiple sign-in attempts
         launchCatching(showSnackBar) {
+            _isLoading.value = true
             try {
                 authRepository.signInWithGoogle(context)
                 println("Debug: Google sign-in clicked")
@@ -73,6 +81,8 @@ class LoginViewModel @Inject constructor(
                 }
 
                 val isNewUser = authRepository.patientRecord()
+
+                delay(500)
 
                 if (isNewUser) {
                     _navigateToProfile.value = true
@@ -95,13 +105,14 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun checkAuthProviders(showSnackBar: (SnackBarMessage) -> Unit) {
+    private suspend fun checkAuthProviders(showSnackBar: (SnackBarMessage) -> Unit) {
         try {
             val authProviders = authRepository.checkUserAuthProviders()
 
             when (authProviders) {
                 AuthProvider.BOTH_LINKED -> {
                     Log.d("LoginViewModel", "User has both email and Google authentication")
+                    authRepository.ensureMergedPatientRecordExists()
                 }
                 AuthProvider.EMAIL_ONLY -> {
                     Log.d("LoginViewModel", "User has only email authentication")
@@ -121,6 +132,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun resetNavigate() {
+        Log.d("LoginViewModel", "Resetting navigation flags")
         _shouldRestartApp.value = false
         _navigateToProfile.value = false
         _accountLinked.value = false
