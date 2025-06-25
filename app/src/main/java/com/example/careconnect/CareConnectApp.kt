@@ -328,7 +328,6 @@ fun CareConnectNavHost(
             PatientApp(
                 openSplashScreen = { // Typically for logout.
                     navController.navigate(SPLASH_ROUTE) {
-                        popUpTo(PATIENT_APP) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
@@ -342,7 +341,6 @@ fun CareConnectNavHost(
             AdminApp(
                 openSplashScreen = { // Typically for logout.
                     navController.navigate(SPLASH_ROUTE) {
-                        popUpTo(ADMIN_APP) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
@@ -355,7 +353,6 @@ fun CareConnectNavHost(
             DoctorApp(
                 openSplashScreen = { // Typically for logout.
                     navController.navigate(SPLASH_ROUTE) {
-                        popUpTo(DOCTOR_APP) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
