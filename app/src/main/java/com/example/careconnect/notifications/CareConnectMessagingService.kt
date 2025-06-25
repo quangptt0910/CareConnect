@@ -1,6 +1,5 @@
 package com.example.careconnect.notifications
 
-
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -17,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -24,6 +24,9 @@ class CareConnectMessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var fcmTokenManager: FCMTokenManager
+
+    @Inject
+    lateinit var notificationSettingsManager: NotificationSettingsManager
 
     companion object {
         private const val TAG = "FCMService"
@@ -51,16 +54,33 @@ class CareConnectMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
+        // Get user settings before processing notification
+        val settings = runBlocking {
+            notificationSettingsManager.getSettings()
+        }
+
         val notificationType = remoteMessage.data["type"] ?: ""
 
         when (notificationType) {
-            "CHAT_MESSAGE" -> handleChatNotification(remoteMessage)
-            else -> handleAppointmentNotification(remoteMessage)
+            "CHAT_MESSAGE" -> {
+                if (settings.chatNotifications.enabled) {
+                    handleChatNotification(remoteMessage, settings.chatNotifications)
+                } else {
+                    Log.d(TAG, "Chat notifications disabled - skipping")
+                }
+            }
+            else -> {
+                if (settings.appointmentNotifications.enabled) {
+                    handleAppointmentNotification(remoteMessage, settings.appointmentNotifications)
+                } else {
+                    Log.d(TAG, "Appointment notifications disabled - skipping")
+                }
+            }
         }
     }
 
     // CHAT NOTIFICATION
-    private fun handleChatNotification(remoteMessage: RemoteMessage) {
+    private fun handleChatNotification(remoteMessage: RemoteMessage, chatSettings: ChatNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "New Message"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
         val chatId = remoteMessage.data["chatId"] ?: ""
@@ -68,9 +88,18 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         val senderName = remoteMessage.data["senderName"] ?: ""
         val recipientId = remoteMessage.data["recipientId"] ?: ""
 
-        showChatNotification(title, body, chatId, senderId, senderName, recipientId)
+        showChatNotification(title, body, chatId, senderId, senderName, recipientId, chatSettings)
     }
-    private fun showChatNotification(title: String, body: String, chatId: String, senderId: String, senderName: String, recipientId: String ) {
+
+    private fun showChatNotification(
+        title: String,
+        body: String,
+        chatId: String,
+        senderId: String,
+        senderName: String,
+        recipientId: String,
+        chatSettings: ChatNotificationSettings
+    ) {
         createNotificationChannel(CHAT_CHANNEL_ID, CHAT_CHANNEL_NAME, CHAT_CHANNEL_DESCRIPTION)
 
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -98,26 +127,50 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-            .setVibrate(longArrayOf(0, 250, 250, 250))
+
+        // Apply user settings
+        if (chatSettings.showPreview) {
+            // Keep title and body as is
+        } else {
+            // Hide message content
+            notificationBuilder
+                .setContentTitle("New Message")
+                .setContentText("You have a new message")
+                .setStyle(NotificationCompat.BigTextStyle().bigText("You have a new message"))
+        }
+
+        if (chatSettings.sound) {
+            notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        }
+
+        if (chatSettings.vibration) {
+            notificationBuilder.setVibrate(longArrayOf(0, 250, 250, 250))
+        }
 
         val notification = notificationBuilder.build()
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(chatId.hashCode(), notification)
-
     }
 
     // APPOINTMENT NOTIFICATION
-    private fun handleAppointmentNotification(remoteMessage: RemoteMessage) {
+    private fun handleAppointmentNotification(remoteMessage: RemoteMessage, appointmentSettings: AppointmentNotificationSettings) {
         val title = remoteMessage.notification?.title ?: remoteMessage.data["title"] ?: "CareConnect"
         val body = remoteMessage.notification?.body ?: remoteMessage.data["body"] ?: ""
         val notificationType = remoteMessage.data["type"] ?: ""
         val appointmentId = remoteMessage.data["appointmentId"] ?: ""
         val userType = remoteMessage.data["userType"] ?: ""
 
-        showAppointmentNotification(title, body, notificationType, appointmentId, userType)
+        showAppointmentNotification(title, body, notificationType, appointmentId, userType, appointmentSettings)
     }
 
-    private fun showAppointmentNotification(title: String, body: String, type: String, appointmentId: String, userType: String) {
+    private fun showAppointmentNotification(
+        title: String,
+        body: String,
+        type: String,
+        appointmentId: String,
+        userType: String,
+        appointmentSettings: AppointmentNotificationSettings
+    ) {
         createNotificationChannel(APPOINTMENT_CHANNEL_ID, APPOINTMENT_CHANNEL_NAME, APPOINTMENT_CHANNEL_DESCRIPTION)
 
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -145,24 +198,32 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
+        // Apply user settings
+        if (appointmentSettings.sound) {
+            notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        }
+
+        if (appointmentSettings.vibration) {
+            notificationBuilder.setVibrate(longArrayOf(0, 1000, 500, 1000))
+        }
+
         val notification = notificationBuilder.build()
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = appointmentId.hashCode()
         notificationManager.notify(notificationId, notification)
     }
 
-
     private fun createNotificationChannel(channelId: String, channelName: String, channelDescription: String) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             // Check if channel already exists
             val existingChannel = notificationManager.getNotificationChannel(channelId)
             if (existingChannel != null) {
                 Log.d(TAG, "📱 channel $channelId already exists")
                 return
             }
+
             val channel = NotificationChannel(
                 channelId,
                 channelName,
@@ -173,8 +234,8 @@ class CareConnectMessagingService : FirebaseMessagingService() {
                 lightColor = android.graphics.Color.BLUE
                 enableVibration(true)
                 vibrationPattern = when (channelId) {
-                    APPOINTMENT_CHANNEL_ID -> longArrayOf(0, 1000, 500, 1000) // Longer pattern for appointments
-                    CHAT_CHANNEL_ID -> longArrayOf(0, 250, 250, 250) // Short bursts for messages
+                    APPOINTMENT_CHANNEL_ID -> longArrayOf(0, 1000, 500, 1000)
+                    CHAT_CHANNEL_ID -> longArrayOf(0, 250, 250, 250)
                     else -> longArrayOf(0, 500)
                 }
                 setSound(

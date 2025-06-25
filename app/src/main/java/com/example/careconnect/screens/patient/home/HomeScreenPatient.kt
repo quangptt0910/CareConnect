@@ -53,7 +53,6 @@ import com.example.careconnect.dataclass.Appointment
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Specialization
 import com.example.careconnect.ui.theme.CareConnectTheme
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 
@@ -75,7 +74,8 @@ fun HomeScreenPatient(
     openDoctorsOverviewScreen: (specialty: String) -> Unit,
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
-    openMedicalHistoryScreen: (type: String) -> Unit = {}
+    openMedicalHistoryScreen: (type: String) -> Unit = {},
+    openNotificationsScreen: () -> Unit = {}
 ) {
 
     val doctorList by viewModel.doctorList.collectAsState()
@@ -90,7 +90,8 @@ fun HomeScreenPatient(
         openDoctorProfileScreen = openDoctorProfileScreen,
         doctorList = doctorList,
         upcomingAppointments = upcomingAppointments,
-        openMedicalHistoryScreen = openMedicalHistoryScreen
+        openMedicalHistoryScreen = openMedicalHistoryScreen,
+        openNotificationsScreen = openNotificationsScreen
     )
 }
 
@@ -106,7 +107,8 @@ fun HomeScreenPatientContent(
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     doctorList: List<Doctor>,
     upcomingAppointments: List<Appointment> = emptyList(),
-    openMedicalHistoryScreen: (type: String) -> Unit = {}
+    openMedicalHistoryScreen: (type: String) -> Unit = {},
+    openNotificationsScreen: () -> Unit = {}
 ) {
     val randomDoctors = remember(doctorList) {
         doctorList.shuffled().take(5)
@@ -191,7 +193,7 @@ fun HomeScreenPatientContent(
 
                         Row {
                             IconButton(
-                                onClick = { scope.launch { sheetState.expand() } },
+                                onClick = { openNotificationsScreen() },
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             ) {
                                 Icon(Icons.Filled.Notifications, contentDescription = "Notifications")

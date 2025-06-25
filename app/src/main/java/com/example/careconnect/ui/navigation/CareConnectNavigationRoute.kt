@@ -10,6 +10,7 @@ object Route {
     const val SIGNUP_ROUTE = "signup"
     const val PROFILE_ROUTE = "profile"
     const val SETTINGS_ROUTE = "settings"
+    const val NOTIFICATION_ROUTE = "notification"
 
     // Role-based Home Routes
     const val HOME_PATIENT_ROUTE = "patient/home/{specialty}"

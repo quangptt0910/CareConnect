@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,7 +54,8 @@ import java.time.ZoneId
 fun BookAppointmentScreen(
     doctorId: String,
     viewModel: BookAppointmentViewModel = hiltViewModel(),
-    showSnackBar: (SnackBarMessage) -> Unit
+    showSnackBar: (SnackBarMessage) -> Unit,
+    goBack: () -> Unit = {}
 ){
 
     LaunchedEffect(doctorId) {
@@ -78,6 +77,7 @@ fun BookAppointmentScreen(
         onBookAppointment = {
             viewModel.bookAppointment(showSnackBar)
         },
+        goBack = goBack
     )
 }
 
@@ -89,18 +89,17 @@ fun BookAppointmentScreenContent(
     onDateSelected: (LocalDate) -> Unit,
     onTimeSelected: (TimeSlot) -> Unit,
     onBookAppointment: () -> Unit,
+    goBack: () -> Unit = {}
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-
-        SmallTopAppBarExample()
-
+    Scaffold(
+        topBar = {
+            BookAppointmentTopBar(
+                goBack = goBack
+            )
+        }
+    ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(top = 80.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.padding(paddingValues).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             doctor?.let {
@@ -109,7 +108,7 @@ fun BookAppointmentScreenContent(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
                         .align(Alignment.Start)
-                        .padding(start = 20.dp)
+                        .padding(start = 20.dp, top = 16.dp)
                 )
 
                 Text(
@@ -197,9 +196,10 @@ private fun NoSlotsMessage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SmallTopAppBarExample() {
-    Scaffold(
-        topBar = {
+fun BookAppointmentTopBar(
+    goBack: () -> Unit
+) {
+
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -221,10 +221,6 @@ fun SmallTopAppBarExample() {
                     }
                 },
             )
-        },
-    ){
-        Box(modifier = Modifier.padding(it))
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

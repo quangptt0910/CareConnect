@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -80,6 +81,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// Data classes for selected media
+data class SelectedMedia(
+    val uri: Uri,
+    val type: MediaType,
+    val name: String = ""
+)
+
+enum class MediaType {
+    IMAGE, DOCUMENT
+}
+
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
@@ -107,7 +119,6 @@ fun ChatScreen(
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(chatId.hashCode())
     }
-
 
     val chatRoom = viewModel.chatRoom
 
@@ -140,7 +151,6 @@ fun ChatScreenContent(
     val messages by model.messages.collectAsStateWithLifecycle()
 
     println("🟡 Composable sees ${messages.size} messages")
-
 
     LaunchedEffect(messages){
         println("🟢 LaunchedEffect triggered with ${messages.size} messages")
@@ -180,9 +190,7 @@ fun ChatScreenContent(
                 DoctorReferralDialog(
                     onDismiss = { model.showReferralDialog = false },
                     onDoctorSelected = { selectedDoctor ->
-
                         model.sendReferralMessage(selectedDoctor)
-
                         model.showReferralDialog = false
                     },
                     viewModel = model
@@ -202,21 +210,20 @@ fun ChatScreenContent(
                         height = Dimension.fillToConstraints
                     },
                 state = listState
-                //reverseLayout = true // Makes chat scroll from bottom up
             ) {
                 items(messages) { message ->
                     ChatItem(
                         message = message,
                         openNewChat = { newChatId, doctorId ->
-                             openChatScreen(newChatId, patient.id, doctorId)
+                            openChatScreen(newChatId, patient.id, doctorId)
                         },
                         handleReferralClick = { referredDoctorId -> model.handleReferralClick(referredDoctorId) }
                     )
                 }
             }
 
-            // ChatBox
-            ChatBox(
+            // ChatBox with media preview
+            ChatBoxWithPreview(
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(chatBox) {
@@ -224,9 +231,238 @@ fun ChatScreenContent(
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
-                onSend = { text -> model.sendMessage(text, chatRoom.chatId) }
+                onSend = { text -> model.sendMessage(text, chatRoom.chatId) },
+                onSendWithMedia = { text, media ->
+                    when (media.type) {
+                        MediaType.IMAGE -> {
+                            model.sendImage(
+                                media.uri,
+                                message = Message(
+                                    text = text.ifEmpty { "Image" },
+                                    author = model.me,
+                                    imageUrl = null
+                                ),
+                                chatId = chatRoom.chatId
+                            )
+                        }
+                        MediaType.DOCUMENT -> {
+                            model.sendDocument(
+                                media.uri,
+                                message = Message(
+                                    text = text.ifEmpty { "Document" },
+                                    author = model.me,
+                                    documentUrl = null,
+                                    documentName = media.name
+                                ),
+                                chatId = chatRoom.chatId
+                            )
+                        }
+                    }
+                },
+                viewModel = model
             )
         }
+    }
+}
+
+@Composable
+fun ChatBoxWithPreview(
+    modifier: Modifier = Modifier,
+    onSend: (String) -> Unit,
+    onSendWithMedia: (String, SelectedMedia) -> Unit,
+    viewModel: ChatViewModel = viewModel()
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf("") }
+    var selectedMedia by remember { mutableStateOf<SelectedMedia?>(null) }
+
+    val context = LocalContext.current
+
+    // Image launcher
+    val imageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedMedia = SelectedMedia(
+                uri = it,
+                type = MediaType.IMAGE
+            )
+        }
+        expanded = false
+    }
+
+    // Document launcher
+    val documentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val documentName = getDocumentName(context, it) ?: "Document"
+            selectedMedia = SelectedMedia(
+                uri = it,
+                type = MediaType.DOCUMENT,
+                name = documentName
+            )
+        }
+        expanded = false
+    }
+
+    Column(modifier = modifier) {
+        // Media Preview Section
+        selectedMedia?.let { media ->
+            MediaPreviewCard(
+                media = media,
+                onRemove = { selectedMedia = null }
+            )
+        }
+
+        // Chat Input Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Plus (+) button for dropdown menu
+            Box {
+                IconButton(
+                    onClick = { expanded = true }
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Attachments")
+                }
+
+                MinimalDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    onImageSend = { imageLauncher.launch("image/*") },
+                    onDocumentSend = { documentLauncher.launch("application/*") },
+                    onReferralSend = if (viewModel.me.role == Role.DOCTOR) {
+                        { viewModel.showReferralDialog = true }
+                    } else null
+                )
+            }
+
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.weight(1f),
+                placeholder = {
+                    Text(
+                        if (selectedMedia != null) "Add a message (optional)..."
+                        else "Type a message..."
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                )
+            )
+
+            // Send button
+            IconButton(
+                onClick = {
+                    selectedMedia?.let { media ->
+                        onSendWithMedia(text, media)
+                        selectedMedia = null
+                        text = ""
+                    } ?: run {
+                        if (text.isNotBlank()) {
+                            onSend(text)
+                            text = ""
+                        }
+                    }
+                },
+                enabled = selectedMedia != null || text.isNotBlank()
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+            }
+        }
+    }
+}
+
+@Composable
+fun MediaPreviewCard(
+    media: SelectedMedia,
+    onRemove: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            when (media.type) {
+                MediaType.IMAGE -> {
+                    AsyncImage(
+                        model = media.uri,
+                        contentDescription = "Selected Image",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Image selected",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                MediaType.DOCUMENT -> {
+                    Icon(
+                        imageVector = Icons.Default.Description,
+                        contentDescription = "Document",
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = media.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "Document selected",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            IconButton(onClick = onRemove) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Remove",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+// Helper function to get document name from URI
+fun getDocumentName(context: Context, uri: Uri): String? {
+    return try {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && cursor.moveToFirst()) {
+                cursor.getString(nameIndex)
+            } else null
+        }
+    } catch (e: Exception) {
+        uri.lastPathSegment
     }
 }
 
@@ -244,15 +480,14 @@ fun ChatItem(
             .fillMaxWidth()
             .padding(8.dp),
         horizontalArrangement = if (message.isFromMe) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Bottom // Ensures timestamp is aligned at bottom
+        verticalAlignment = Alignment.Bottom
     ) {
         if (message.isFromMe) {
-            // Left-aligned timestamp (Other User)
             Text(
                 text = formatTimestamp(message.timestamp),
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(end = 4.dp) // Spacing from bubble
+                modifier = Modifier.padding(end = 4.dp)
             )
         }
 
@@ -269,10 +504,8 @@ fun ChatItem(
                 .background(if (message.isFromMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                 .padding(12.dp)
         ) {
-            // Display text if it's not null or empty
             when (message.metadata?.get("messageType")) {
                 "referral" -> {
-                    // Original chat - clickable referral message
                     ReferralMessageItem(
                         message = message,
                         onReferralClick = { referralDoctorId ->
@@ -286,47 +519,45 @@ fun ChatItem(
                     )
                 }
                 "referral_intro" -> {
-                    // New chat - non-clickable intro message
                     ReferralIntroMessageItem(message = message)
                 }
                 else -> {
-                    // Regular text message
-                    if (message.text.isNotEmpty()) {
-                        Text(
-                            text = message.text,
-                            color = if (message.isFromMe) Color.White else Color.Black
-                        )
+                    Column {
+                        if (message.text.isNotEmpty()) {
+                            Text(
+                                text = message.text,
+                                color = if (message.isFromMe) Color.White else Color.Black
+                            )
+                        }
+
+                        message.imageUrl?.let { url ->
+                            if (message.text.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            ImagePreview(model = url)
+                        }
+
+                        message.documentUrl?.let { url ->
+                            if (message.text.isNotEmpty() || message.imageUrl != null) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            DocumentPreview(
+                                documentName = message.documentName ?: "Document",
+                                documentUrl = url,
+                                isFromMe = message.isFromMe
+                            )
+                        }
                     }
                 }
             }
-
-            // Display image if the message contains an image URI
-            message.imageUrl?.let { url ->
-                Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
-                ImagePreview(
-                    model = url
-                )
-            }
-
-            message.documentUrl?.let { url ->
-                Spacer(modifier = Modifier.height(8.dp)) // Spacing between text and image
-                DocumentPreview(
-                    documentName = message.documentName ?: "Document",
-                    documentUrl = url,
-                    isFromMe = message.isFromMe
-                )
-            }
         }
 
-
-
         if (!message.isFromMe) {
-            // Right-aligned timestamp (You)
             Text(
                 text = formatTimestamp(message.timestamp),
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 4.dp) // Spacing from bubble
+                modifier = Modifier.padding(start = 4.dp)
             )
         }
     }
@@ -349,7 +580,6 @@ fun ImagePreview(model : String){
                 }
                 context.startActivity(intent)
             },
-
         contentScale = ContentScale.Crop,
     )
 }
@@ -398,11 +628,8 @@ fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean
     }
 }
 
-
-
-// ✅ Helper function to format timestamp
 fun formatTimestamp(timestamp: Long): String {
-    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault()) // e.g., "12:45 PM"
+    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
     return sdf.format(Date(timestamp))
 }
 
@@ -442,104 +669,6 @@ fun SmallTopAppBarExample(
     }
 }
 
-
-@Composable
-fun ChatBox(
-    modifier: Modifier = Modifier,
-    onSend: (String) -> Unit,
-    viewModel: ChatViewModel = viewModel()
-) {
-    var expanded by remember { mutableStateOf(false) } // Controls dropdown visibility
-    var text by remember { mutableStateOf("") }
-
-    // for image
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { viewModel.sendImage(
-            it,
-            message = Message(
-                text = "",
-                author = viewModel.me,
-                imageUrl = null
-            ),
-            chatId = viewModel.chatRoom?.chatId ?: ""
-        ) }
-    }
-
-    // for document
-
-    val launcher2 = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        val documentName = uri?.lastPathSegment ?: "Document"
-        uri?.let { viewModel.sendDocument(
-            it,
-            message = Message(
-                text = "",
-                author = viewModel.me,
-                documentUrl = null,
-                documentName = documentName
-            ),
-            chatId = viewModel.chatRoom?.chatId ?: ""
-        ) }
-    }
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Plus (+) button for dropdown menu
-        Box {
-            IconButton(
-                onClick = { expanded = true } // Open dropdown
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Attachments")
-            }
-
-
-
-            MinimalDropdownMenu(
-                expanded,
-                onDismissRequest = { expanded = false },
-                onImageSend = { launcher.launch("image/*") },
-                onDocumentSend = { launcher2.launch("application/*") },
-                onReferralSend = if (viewModel.me.role == Role.DOCTOR) {
-                    { viewModel.showReferralDialog = true }
-                } else null
-            )
-        }
-
-        TextField(
-            value = text,
-            onValueChange = { text = it },
-            modifier = Modifier.weight(1f),
-            placeholder = { Text("Type a message...") },
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
-            )
-        )
-
-        //Send button
-        IconButton(
-            onClick = {
-                if (text.isNotBlank()) {
-                    onSend(text)
-                    text = ""
-                }
-            }
-        ) {
-            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
-        }
-    }
-}
-
 @Composable
 fun DoctorReferralDialog(
     onDismiss: () -> Unit,
@@ -572,7 +701,6 @@ fun DoctorReferralDialog(
     )
 }
 
-
 @Composable
 fun MinimalDropdownMenu(
     expanded: Boolean,
@@ -580,11 +708,9 @@ fun MinimalDropdownMenu(
     onImageSend: () -> Unit,
     onDocumentSend: () -> Unit,
     onReferralSend: (() -> Unit)? = null
-    ) {
-    //var expanded by remember { mutableStateOf(false) }
+) {
     Box(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
         DropdownMenu(
             expanded = expanded,
@@ -592,22 +718,21 @@ fun MinimalDropdownMenu(
         ) {
             DropdownMenuItem(
                 text = { Text("Send image") },
-                onClick = { onImageSend() }
+                onClick = onImageSend
             )
             DropdownMenuItem(
                 text = { Text("Send document") },
-                onClick = {  onDocumentSend() }
+                onClick = onDocumentSend
             )
             onReferralSend?.let {
                 DropdownMenuItem(
                     text = { Text("Send referral") },
-                    onClick = { it() }
+                    onClick = it
                 )
             }
         }
     }
 }
-
 
 @Preview
 @Composable
@@ -619,11 +744,9 @@ fun ChatScreenPreview() {
             chatRoom = ChatRoom(),
             doctor = Doctor(),
             patient = Patient(),
-            openChatScreen = {
-                doctorId, patientId, chatId ->
+            openChatScreen = { doctorId, patientId, chatId ->
                 println("Opening chat with doctor ID: $doctorId and chat ID: $chatId")
             }
         )
-
     }
 }

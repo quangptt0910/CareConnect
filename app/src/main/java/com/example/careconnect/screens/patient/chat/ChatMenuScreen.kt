@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Role
@@ -40,6 +41,7 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 fun ChatMenuScreen(
     openChatScreen : (doctorId: String, patientId: String, chatId: String) -> Unit,
     onBack: () -> Unit,
+    openNotificationsScreen: () -> Unit = {},
     viewModel: ChatMenuViewModel = hiltViewModel()
 ){
 
@@ -73,7 +75,8 @@ fun ChatMenuScreen(
         chatRoom = chatRooms,
         chatPartners = chatPartners,
         userRole = userRole,
-        onBack = onBack
+        onBack = onBack,
+        openNotificationsScreen = openNotificationsScreen
     )
 }
 
@@ -85,7 +88,8 @@ fun ChatMenuScreenContent(
     chatPartners: Map<String, Any>,
     userRole: Role,
     onSearchQueryChange: (String) -> Unit,
-    openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit
+    openChatScreen: (doctorId: String, patientId: String, chatId: String) -> Unit,
+    openNotificationsScreen: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -93,7 +97,8 @@ fun ChatMenuScreenContent(
     ) {
 
         ChatMenuTopBar(
-            onBack = onBack
+            onBack = onBack,
+            openNotificationsScreen = openNotificationsScreen
         )
         Column(
             modifier = Modifier.padding(top = 90.dp).fillMaxSize()
@@ -114,7 +119,9 @@ fun ChatMenuScreenContent(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            val filteredChats = chatRoom.filter { chat ->
+            val filteredChats = chatRoom
+                .sortedByDescending { it.lastUpdated }
+                .filter { chat ->
                 val chatPartner = when (userRole) {
                     Role.PATIENT -> chatPartners[chat.doctorId] as? Doctor
                     Role.DOCTOR -> chatPartners[chat.patientId] as? Patient
@@ -150,7 +157,7 @@ fun ChatMenuScreenContent(
 
                         val profilePhoto = when (userRole) {
                             Role.PATIENT -> (it as Doctor).profilePhoto
-                            Role.DOCTOR -> ""  // Patient may not have profile photo in your data model
+                            Role.DOCTOR -> R.drawable.ic_launcher_background.toString()
                             else -> ""
                         }
 
@@ -177,7 +184,8 @@ fun ChatMenuScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatMenuTopBar(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    openNotificationsScreen: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -202,9 +210,9 @@ fun ChatMenuTopBar(
                         )
                     }
                 },
-                actions = {  // <-- Add actions here (right side of the TopAppBar)
+                actions = {
                     Spacer(modifier = Modifier.width(100.dp))  // Add spacing before the icon
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { openNotificationsScreen() }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.onPrimary,
                             imageVector = Icons.Outlined.Notifications,

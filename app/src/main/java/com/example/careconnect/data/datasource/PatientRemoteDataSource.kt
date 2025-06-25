@@ -262,6 +262,13 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun updatePatient(patient: Patient) {
+        firestore.collection("patients")
+            .document(patient.id)
+            .set(patient)
+            .await()
+    }
+
     /*
      * GET medical history entries
      */

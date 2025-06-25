@@ -32,7 +32,9 @@ import com.example.careconnect.screens.patient.profile.PatientProfileScreen
 import com.example.careconnect.screens.patient.profile.medicalhistory.PatientMedicalHistoryScreen
 import com.example.careconnect.screens.patient.profile.medicalreport.MedicalReportScreen
 import com.example.careconnect.screens.patient.profile.prescription.PrescriptionScreen
+import com.example.careconnect.screens.settings.NotificationSettingsScreen
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route.NOTIFICATION_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
@@ -110,7 +112,8 @@ fun PatientApp(
                         navController.navigate(getPatientDoctorsProfileRoute(doctorId)) },
                     openMedicalHistoryScreen = { type ->
                         navController.navigate(getPatientProfileMedicalHistoryRoute(type))
-                    }
+                    },
+                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) }
                 )
             }
             composable(BarRoutes.CHAT.route) {
@@ -153,7 +156,8 @@ fun PatientApp(
                     openChatScreen = { doctorId, patientId, chatId ->
                         navController.navigate(getPatientChatRoute(doctorId, patientId, chatId))
                     },
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) }
                 )
             }
 
@@ -193,7 +197,8 @@ fun PatientApp(
             composable(PATIENT_BOOKING_APPOINTMENTS_ROUTE){backStackEntry ->
                 BookAppointmentScreen(
                     doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
-                    showSnackBar = showSnackBar
+                    showSnackBar = showSnackBar,
+                    goBack = { navController.popBackStack() }
                 )
             }
 
@@ -213,6 +218,12 @@ fun PatientApp(
                 PatientMedicalHistoryScreen(
                     goBack = { navController.popBackStack() },
                     type = backStackEntry.arguments?.getString("type") ?: "",
+                )
+            }
+
+            composable(NOTIFICATION_ROUTE){
+                NotificationSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

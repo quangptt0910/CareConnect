@@ -124,4 +124,7 @@ dependencies {
 
     // qr code qrkit
     implementation("network.chaintech:qr-kit:3.0.6")
+
+    //for notification settings
+    implementation("com.google.code.gson:gson:2.10.1")
 }
