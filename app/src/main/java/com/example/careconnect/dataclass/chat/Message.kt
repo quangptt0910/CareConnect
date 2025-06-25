@@ -21,7 +21,8 @@ data class Message(
     val timestamp: Long = System.currentTimeMillis(),
     val imageUrl: String? = null,
     val documentUrl: String? = null,
-    val documentName: String? = null
+    val documentName: String? = null,
+    val metadata: Map<String, String>? = null
 ) {
     // Empty constructor for Firebase
     constructor() : this("", "", Author(), System.currentTimeMillis(), null)

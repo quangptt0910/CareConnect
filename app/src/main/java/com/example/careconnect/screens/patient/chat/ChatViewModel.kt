@@ -8,17 +8,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import com.example.careconnect.MainViewModel
+import com.example.careconnect.data.repository.AddChatRoomRepository
+import com.example.careconnect.data.repository.AuthRepository
 import com.example.careconnect.data.repository.ChatMessagesRepository
 import com.example.careconnect.data.repository.DoctorRepository
 import com.example.careconnect.data.repository.PatientRepository
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.chat.Author
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
 import com.example.careconnect.notifications.NotificationManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +39,9 @@ class ChatViewModel @Inject constructor(
     private val notificationManager: NotificationManager,
     private val chatMessagesRepository: ChatMessagesRepository,
     private val doctorRepository: DoctorRepository,
-    private val patientRepository: PatientRepository
+    private val patientRepository: PatientRepository,
+    private val addChatRoomRepository: AddChatRoomRepository,
+    private val authRepository: AuthRepository
 ): MainViewModel() {
     private val _messages = MutableStateFlow<List<Message>>(emptyList())
     var messages: StateFlow<List<Message>> = _messages
@@ -52,6 +58,8 @@ class ChatViewModel @Inject constructor(
     val chatId: String get() = _chatId.value
     val patientId: String get() = _patientId.value
     val doctorId: String get() = _doctorId.value
+
+    var showReferralDialog by mutableStateOf(false)
 
     val me: Author
         get() = currentUser.value ?: Author()
@@ -83,19 +91,25 @@ class ChatViewModel @Inject constructor(
         messageListenerRegistration?.remove()
     }
 
+    suspend fun getAllDoctors(): List<Doctor> {
+        return doctorRepository.getAllDoctors()
+    }
+
 
     fun initializeCurrentUser() {
         Firebase.auth.currentUser?.let { user ->
             val name = if (user.uid == patientId) "Patient" else "Doctor"
-            setCurrentUser(user.uid, name)
+
+            val role = if (user.uid == patientId) Role.PATIENT else Role.DOCTOR
+            setCurrentUser(user.uid, name, role)
         }
     }
 
     var chatRoom by mutableStateOf<ChatRoom?>(null)
         private set
 
-    fun setCurrentUser(id: String, name: String) {
-        _currentUser.value = Author(id = id, name = name)
+    fun setCurrentUser(id: String, name: String, role: Role) {
+        _currentUser.value = Author(id = id, name = name, role = role)
     }
 
     suspend fun getDoctor(doctorId: String): Doctor? {
@@ -203,4 +217,67 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun handleReferralClick(referredDoctorId: String): Pair<String, String>? {
+        val patient = getPatient(patientId) ?: return null
+        val referredDoctor = getDoctor(referredDoctorId) ?: return null
+
+        val newChatId = addChatRoomRepository.getOrCreateChatRoomId(patient, referredDoctor)
+
+        val chatRoomRef = FirebaseFirestore.getInstance().collection("chatrooms").document(newChatId)
+        chatRoomRef.update("referrerDoctorId", doctorId).await()
+
+        val introMessage = Message(
+            text = "Hi, I've been referred to you by Dr. ${getDoctor(doctorId)?.name}.",
+            author = Author(patient.id, "Patient"),
+            timestamp = System.currentTimeMillis(),
+            metadata = mapOf(
+                "type" to "referral_intro",
+                "referralDoctorId" to doctorId,
+                "referralDoctorName" to getDoctor(doctorId)?.name.orEmpty(),
+                "referralSpecialization" to getDoctor(doctorId)?.specialization.orEmpty()
+            )
+        )
+        chatMessagesRepository.sendMessage(newChatId, introMessage)
+
+        return newChatId to referredDoctor.id
+    }
+
+    fun sendReferralMessage(selectedDoctor: Doctor) {
+        val referralMessage = Message(
+            text = "Patient referred to Dr. ${selectedDoctor.name} (${selectedDoctor.specialization})",
+            author = me, // Use the existing me property
+            timestamp = System.currentTimeMillis(),
+            metadata = mapOf(
+                "referralDoctorId" to selectedDoctor.id,
+                "referralDoctorName" to selectedDoctor.name,
+                "referralSpecialization" to (selectedDoctor.specialization ?: "Specialist"),
+                "messageType" to "referral"
+            )
+        )
+
+        // Add to local messages first
+        _messages.value += referralMessage
+
+        launchCatching {
+            // Send to Firebase
+            chatMessagesRepository.sendMessage(chatId, referralMessage)
+
+            // Send notification
+            val recipientId = if (me.id == patientId) doctorId else patientId
+            notificationManager.triggerChatNotification(
+                chatId = chatId,
+                message = "You've been referred to Dr. ${selectedDoctor.name}",
+                senderId = me.id,
+                senderName = me.name,
+                recipientId = recipientId
+            )
+            Log.d("ChatViewModel", "Sent referral message for Dr. ${selectedDoctor.name}")
+        }
+
+        // Refresh the chat
+        loadChat(chatId)
+    }
+
+
 }

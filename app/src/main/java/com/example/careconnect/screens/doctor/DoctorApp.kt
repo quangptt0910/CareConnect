@@ -170,7 +170,11 @@ fun DoctorApp(
                 ChatScreen(
                     chatId = backStackEntry.arguments?.getString("chatId") ?: "",
                     patientId = backStackEntry.arguments?.getString("patientId") ?: "",
-                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                    doctorId = backStackEntry.arguments?.getString("doctorId") ?: "",
+                    openChatScreen = { chatId, patientId, doctorId ->
+                        navController.navigate(getDoctorChatRoute(chatId, patientId, doctorId))
+                    },
+                    goBack = { navController.popBackStack() }
                 )
             }
 
