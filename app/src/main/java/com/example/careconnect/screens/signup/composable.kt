@@ -47,12 +47,16 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.R.string as AppText
 
 /**
- * A password field with visibility toggle and strength validation.
- * @param value The current password value.
- * @param onValueChange Callback when the password value changes.
- * @param modifier Modifier for styling.
- * @param textFieldLabel The label text for the field.
- * @param onHasStrongPassword Callback to indicate if the password is strong.
+ * Password input field with toggleable visibility and strength validation.
+ *
+ * Displays a label, a password input box, password strength message,
+ * and a trailing icon to toggle password visibility.
+ *
+ * @param value Current password string.
+ * @param onValueChange Callback invoked when password text changes.
+ * @param modifier Modifier applied to the root composable.
+ * @param textFieldLabel Label text for the input field.
+ * @param onHasStrongPassword Callback to indicate whether the current password is strong.
  */
 @Composable
 fun PasswordSignUpTextField(
@@ -167,13 +171,15 @@ fun PasswordSignUpTextField(
 }
 
 /**
- * A composable function that creates an outlined text field with a label and an optional trailing icon.
+ * Outlined text field composable with customizable label and optional trailing icon.
  *
- * @param value The current text value of the text field.
- * @param onValueChange Callback invoked when the text value changes.
- * @param modifier Modifier to be applied to the text field.
- * @param label The label text displayed inside the text field.
- * @param trailing An optional composable function for the trailing icon.
+ * Useful for fields like name, surname, email, etc.
+ *
+ * @param value Current text value.
+ * @param onValueChange Callback when text changes.
+ * @param modifier Modifier applied to the text field.
+ * @param label Label text displayed inside the text field.
+ * @param trailing Optional trailing icon or composable inside the text field.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -238,9 +244,12 @@ fun LabelTextField(
 }
 
 /**
- * A button to toggle password visibility.
- * @param showPassword Whether the password is currently visible.
- * @param onTogglePasswordVisibility Callback to toggle visibility.
+ * Icon button to toggle visibility of password input field.
+ *
+ * Shows either visibility or visibility-off icon depending on current state.
+ *
+ * @param showPassword True if password is visible, false otherwise.
+ * @param onTogglePasswordVisibility Callback triggered when toggle is clicked.
  */
 @Composable
 fun PasswordVisibilityToggleIcon(
@@ -261,7 +270,10 @@ fun PasswordVisibilityToggleIcon(
     }
 }
 
-
+/**
+ * Preview composable demonstrating usage of sign-up form fields including
+ * name, surname, email, and password fields with appropriate styling.
+ */
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun SignUpFieldPreview() {

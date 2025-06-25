@@ -32,7 +32,23 @@ import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.delay
 
-
+/**
+ * Composable that represents the splash screen of the app.
+ *
+ * This screen shows the app logo, name, a catchphrase, and a loading indicator.
+ * It listens to navigation route changes from [SplashViewModel] and triggers
+ * navigation callbacks accordingly.
+ *
+ * It also handles incoming [notificationData] to pass along to subsequent screens.
+ *
+ * @param openAdminScreen Callback to navigate to the Admin screen.
+ * @param openDoctorScreen Callback to navigate to the Doctor screen, optionally with notification data.
+ * @param openPatientScreen Callback to navigate to the Patient screen, optionally with notification data.
+ * @param openLoginScreen Callback to navigate to the Login screen.
+ * @param showSnackBar Callback to show snack bar messages.
+ * @param notificationData Optional notification data passed from outside (e.g. push notification).
+ * @param viewModel The [SplashViewModel] providing navigation state and logic.
+ */
 @Composable
 fun SplashScreen(
     openAdminScreen: () -> Unit,
@@ -70,7 +86,13 @@ fun SplashScreen(
     }
 }
 
-
+/**
+ * Private composable that renders the content of the splash screen.
+ *
+ * Displays the app icon, name, catchphrase, and a circular progress indicator.
+ *
+ * @param showSnackBar Callback to show snack bar messages (currently unused in UI).
+ */
 @Composable
 private fun SplashScreenContent(
     showSnackBar: (SnackBarMessage) -> Unit
@@ -110,6 +132,9 @@ private fun SplashScreenContent(
     }
 }
 
+/**
+ * Preview of [SplashScreenContent] for UI design tools.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SplashScreenPreview() {

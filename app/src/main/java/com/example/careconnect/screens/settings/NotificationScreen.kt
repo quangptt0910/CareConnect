@@ -54,6 +54,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
+/**
+ * Displays the Notification Settings screen where users can configure
+ * notification preferences for chat messages and appointments.
+ *
+ * This screen allows toggling notification enabling, sounds, vibrations,
+ * previews, and specific appointment notification types such as confirmations,
+ * reminders, cancellations, and completions. It also allows setting the
+ * reminder time before appointments and sending a test notification.
+ *
+ * @param onNavigateBack Callback to handle navigation back action.
+ * @param viewModel The [NotificationViewModel] that holds UI state and handles
+ * updates to notification settings.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettingsScreen(
@@ -289,6 +302,17 @@ fun NotificationSettingsScreen(
     }
 }
 
+/**
+ * Represents a notification settings section with a title, icon, and
+ * an enable/disable switch. If enabled, the detailed settings content
+ * will be displayed.
+ *
+ * @param title The title of the notification section (e.g., "Chat Messages").
+ * @param icon The icon representing the section.
+ * @param enabled Whether the section's notifications are enabled.
+ * @param onEnabledChange Callback invoked when the enabled state changes.
+ * @param content The detailed settings composable content displayed if enabled.
+ */
 @Composable
 fun NotificationSection(
     title: String,
@@ -338,6 +362,20 @@ fun NotificationSection(
     }
 }
 
+/**
+ * Displays a single notification setting item with a title, subtitle,
+ * icon, and a toggle switch.
+ *
+ * This composable reflects the enabled state and disables interaction
+ * when the parent notification section is disabled.
+ *
+ * @param title The setting title (e.g., "Sound").
+ * @param subtitle A description or explanation of the setting.
+ * @param icon Icon representing the setting.
+ * @param checked Whether the setting is enabled.
+ * @param enabled Whether the setting is interactable (typically the parent section's enabled state).
+ * @param onCheckedChange Callback triggered when the toggle state changes.
+ */
 @Composable
 fun SettingItem(
     title: String,
@@ -389,6 +427,18 @@ fun SettingItem(
     }
 }
 
+
+/**
+ * Provides a dropdown selector for choosing the reminder timing before
+ * an appointment notification.
+ *
+ * The dropdown is enabled only if reminders and appointment notifications
+ * are enabled.
+ *
+ * @param selectedMinutes The currently selected reminder time in minutes.
+ * @param enabled Whether the selector is enabled for user interaction.
+ * @param onTimeSelected Callback invoked when a new time is selected.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReminderTimingSelector(
@@ -474,6 +524,10 @@ fun ReminderTimingSelector(
     }
 }
 
+/**
+ * Preview composable for [NotificationSettingsScreen] to visualize the UI
+ * during development.
+ */
 @Preview(showBackground = true)
 @Composable
 fun NotificationSettingsScreenPreview() {

@@ -10,6 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+/**
+ * ViewModel responsible for handling the Sign-Up screen logic.
+ *
+ * This ViewModel interacts with the [AuthRepository] to perform user sign-up operations,
+ * manages navigation state, and validates input fields before submission.
+ *
+ * @property authRepository Repository used to perform authentication-related operations.
+ */
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -18,6 +26,18 @@ class SignUpViewModel @Inject constructor(
     val navigateToProfile: StateFlow<Boolean>
         get() = _navigateToProfile.asStateFlow()
 
+    /**
+     * Performs sign-up operation with the provided user details.
+     *
+     * Validates input fields and shows appropriate snack bar messages on validation errors.
+     * On successful sign-up, updates [_navigateToProfile] to trigger navigation.
+     *
+     * @param name The user's first name.
+     * @param surname The user's surname.
+     * @param email The user's email address.
+     * @param password The user's password.
+     * @param showSnackbar Callback to display snack bar messages.
+     */
     fun signUp(
         name: String,
         surname: String,

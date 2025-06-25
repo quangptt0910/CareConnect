@@ -19,10 +19,16 @@ import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 
-/*
+/**
  * ViewModel for the Splash screen.
- * Used to determine the next screen to navigate to based on the user's authentication status and role
- * navigationRoute is a StateFlow that represents the route to navigate to.
+ *
+ * Responsible for determining the next screen to navigate to based on the user's authentication status and role.
+ * Exposes a [navigationRoute] [StateFlow] that represents the destination route as a String.
+ *
+ * It also manages Firebase Cloud Messaging token debugging and handles incoming notification data for navigation.
+ *
+ * @property authRepository Repository to get user authentication state.
+ * @property fcmTokenManager Manager for handling Firebase Cloud Messaging tokens.
  */
 @HiltViewModel
 class SplashViewModel @Inject constructor(
@@ -56,6 +62,11 @@ class SplashViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sets the navigation route based on the authenticated user data.
+     *
+     * @param userData The user authentication data obtained from the repository.
+     */
     private fun determineNavigationRoute(userData: AuthRemoteDataSource.UserData) {
         val route = when (userData) {
             is AuthRemoteDataSource.UserData.AdminData -> {
@@ -82,11 +93,22 @@ class SplashViewModel @Inject constructor(
         _navigationRoute.value = route
     }
 
+    /**
+     * Handles incoming notification data, storing it to be used during navigation.
+     *
+     * @param notificationData The notification data received (e.g., from a push notification).
+     */
     fun handleNotificationData(notificationData: NotificationData) {
         this.pendingNotificationData = notificationData
     }
 
     // New function to get notification data for navigation
+    /**
+     * Returns the stored notification data to be used during navigation,
+     * and clears the stored data.
+     *
+     * @return The notification data if available, otherwise null.
+     */
     fun getNotificationForNavigation(): NotificationData? {
         return pendingNotificationData?.also { pendingNotificationData = null }
     }

@@ -29,6 +29,15 @@ import com.example.careconnect.screens.admin.doctormanage.DialogCancelButton
 import com.example.careconnect.screens.admin.doctormanage.DialogConfirmButton
 import com.example.careconnect.ui.theme.CareConnectTheme
 
+/**
+ * Composable representing the Settings screen.
+ *
+ * Displays user settings and handles app restart on sign out.
+ *
+ * @param openSplashScreen Callback to open the splash screen when app needs to restart.
+ * @param showSnackBar Function to display snack bar messages.
+ * @param viewModel ViewModel to manage settings logic, defaults to [SettingsViewModel].
+ */
 @Composable
 fun SettingsScreen(
     openSplashScreen: () -> Unit,
@@ -52,7 +61,14 @@ fun SettingsScreen(
 
 }
 
-
+/**
+ * Composable displaying the content of the Settings screen.
+ *
+ * Shows profile info and sign-out option.
+ *
+ * @param signOut Callback invoked when user chooses to sign out.
+ * @param showSnackBar Function to display snack bar messages.
+ */
 @Composable
 fun SettingsContent(
     signOut: () -> Unit,
@@ -71,12 +87,13 @@ fun SettingsContent(
     }
 }
 
-///**
-// * Composable function for displaying a sign-out card with a confirmation dialog.
-// *
-// * @param signOut Function triggered when the user confirms sign-out.
-// */
-
+/**
+ * Composable showing a card with a sign-out option.
+ *
+ * Displays a confirmation dialog when triggered.
+ *
+ * @param signOut Lambda invoked when user confirms sign out.
+ */
 @Composable
 private fun SignOutCard(signOut: () -> Unit) {
     var showWarningDialog by remember { mutableStateOf(false) }
@@ -105,6 +122,9 @@ private fun SignOutCard(signOut: () -> Unit) {
     }
 }
 
+/**
+ * Preview for SettingsContent composable.
+ */
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {

@@ -18,6 +18,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Represents the UI state for notification settings screen.
+ *
+ * @property settings The current notification settings.
+ * @property isLoading True if settings are being loaded.
+ * @property isSaving True if settings are being saved.
+ * @property error Error message to display, if any.
+ */
 data class NotificationSettingsUiState(
     val settings: NotificationSettings = NotificationSettings(),
     val isLoading: Boolean = false,
@@ -25,6 +33,16 @@ data class NotificationSettingsUiState(
     val error: String? = null
 )
 
+/**
+ * ViewModel responsible for managing notification settings.
+ *
+ * It loads notification settings based on the current user role, allows updating chat and appointment
+ * notification settings, saving changes, sending test notifications, and handling errors.
+ *
+ * @property repository Repository to load/save notification settings.
+ * @property authRepository Repository to get current user role.
+ * @property testNotificationHelper Helper to send test notifications.
+ */
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
     private val repository: NotificationSettingsRepository,
@@ -48,6 +66,11 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads notification settings for a given user role.
+     *
+     * @param role The user role for which settings should be loaded.
+     */
     private fun loadSettingsForRole(role: Role) {
         viewModelScope.launch {
             repository.getNotificationSettingsFlow(role).collect { result ->
@@ -73,16 +96,33 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the chat notification settings and persists the changes.
+     *
+     * @param chatSettings New chat notification settings.
+     */
     fun updateChatSettings(chatSettings: ChatNotificationSettings) {
         val updatedSettings = _uiState.value.settings.copy(chatNotifications = chatSettings)
         saveSettings(updatedSettings)
     }
 
+    /**
+     * Updates the appointment notification settings and persists the changes.
+     *
+     * @param appointmentSettings New appointment notification settings.
+     */
     fun updateAppointmentSettings(appointmentSettings: AppointmentNotificationSettings) {
         val updatedSettings = _uiState.value.settings.copy(appointmentNotifications = appointmentSettings)
         saveSettings(updatedSettings)
     }
 
+    /**
+     * Saves the provided notification settings to the repository.
+     *
+     * Handles loading and error states accordingly.
+     *
+     * @param settings Notification settings to save.
+     */
     private fun saveSettings(settings: NotificationSettings) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, error = null)
@@ -106,6 +146,11 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sends a test notification to the device to verify the current notification settings.
+     *
+     * @param context Android context needed to send the notification.
+     */
     fun sendTestNotification(context: Context) {
         viewModelScope.launch {
             try {
@@ -118,6 +163,9 @@ class NotificationViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Clears any current error message in the UI state.
+     */
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }

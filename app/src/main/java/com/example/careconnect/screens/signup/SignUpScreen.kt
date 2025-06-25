@@ -48,9 +48,15 @@ import com.example.careconnect.ui.theme.CareConnectTheme
 
 
 /**
- * Composable function for the Sign-Up screen.
+ * Screen composable handling user sign-up.
  *
- * @param viewModel ViewModel responsible for handling Sign-Up logic.
+ * Collects input data, triggers sign-up logic in [viewModel],
+ * and navigates to profile screen upon success.
+ *
+ * @param openProfileScreen Lambda to navigate to profile screen after sign-up.
+ * @param openLoginScreen Lambda to navigate to login screen.
+ * @param showSnackBar Lambda to display snackbar messages.
+ * @param viewModel ViewModel that manages sign-up logic (defaulted via Hilt).
  */
 @Composable
 fun SignUpScreen(
@@ -72,11 +78,15 @@ fun SignUpScreen(
     }
 }
 
-/**
- * Composable function that represents the content of the Sign-Up screen.
- *
- */
 
+/**
+ * The main content of the Sign-Up screen displaying input fields, sign-up button,
+ * error messages, and navigation link to login screen.
+ *
+ * @param signUp Function invoked to perform sign-up with input data and snackbar callback.
+ * @param openLoginScreen Lambda to navigate to login screen.
+ * @param showSnackBar Lambda to show snackbar messages.
+ */
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun SignUpScreenContent(
@@ -195,7 +205,8 @@ fun SignUpScreenContent(
 
 
 /**
- * Composable function that represents the top section of the Sign-Up screen, including the logo and app name.
+ * Composable representing the top section of the sign-up screen,
+ * displaying the app logo and the title "Sign Up".
  */
 @Composable
 fun SignUpTopSection() {
@@ -236,7 +247,10 @@ fun SignUpTopSection() {
 }
 
 
-
+/**
+ * Preview composable for the sign-up screen content to visualize
+ * the UI in Android Studio preview.
+ */
 @Composable
 @Preview(showSystemUi = true)
 fun SignUpScreenPreview() {

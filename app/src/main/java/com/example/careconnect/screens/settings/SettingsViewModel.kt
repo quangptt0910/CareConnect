@@ -10,6 +10,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 
+/**
+ * ViewModel responsible for general user settings such as signing out.
+ *
+ * Exposes state indicating when the app should restart (e.g., after sign out).
+ *
+ * @property authRepository Repository for authentication-related operations.
+ */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -19,6 +26,9 @@ class SettingsViewModel @Inject constructor(
     val shouldRestartApp: StateFlow<Boolean>
         get() = _shouldRestartApp.asStateFlow()
 
+    /**
+     * Signs out the current user and triggers app restart.
+     */
     fun signOut() {
         launchCatching {
             authRepository.signOut()
@@ -28,6 +38,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Resets the restart app state after navigation to splash screen.
+     */
     fun onRestart() {
         _shouldRestartApp.value = false
     }
