@@ -19,7 +19,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-
+/**
+ * ViewModel responsible for managing the login screen's UI state and
+ * handling user authentication logic, including email/password login,
+ * Google sign-in, navigation state, and error handling.
+ *
+ * @property shouldRestartApp A [StateFlow] indicating whether the app should restart (navigate to splash).
+ * @property navigateToProfile A [StateFlow] indicating whether navigation to profile screen should occur.
+ * @property accountLinked A [StateFlow] indicating if email and Google accounts are linked.
+ * @property isLoading A [StateFlow] representing the loading state during authentication attempts.
+ *
+ * @constructor Injects the [AuthRepository] for authentication operations.
+ */
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository
@@ -40,6 +51,16 @@ class LoginViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean>
         get() = _isLoading.asStateFlow()
 
+    /**
+     * Attempts to log in the user with provided [email] and [password].
+     *
+     * Shows snack bar messages via [showSnackBar] for validation errors or authentication failures.
+     * Prevents concurrent login attempts while already loading.
+     *
+     * @param email User's email address.
+     * @param password User's password.
+     * @param showSnackBar Callback to display snack bar messages.
+     */
     fun login(
         email: String,
         password: String,
@@ -66,7 +87,16 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-
+    /**
+     * Initiates Google Sign-In flow.
+     *
+     * Handles authentication, linking accounts if needed,
+     * navigates to profile screen if user is new, or restarts app on success.
+     * Displays error messages using [showSnackBar].
+     *
+     * @param context Android [Context] used for sign-in.
+     * @param showSnackBar Callback to display snack bar messages.
+     */
     fun onGoogleSignInClick(context: Context, showSnackBar: (SnackBarMessage) -> Unit) {
         if (_isLoading.value) return // Prevent multiple sign-in attempts
         launchCatching(showSnackBar) {
@@ -131,6 +161,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Resets navigation-related flags to allow repeated navigation actions.
+     */
     fun resetNavigate() {
         Log.d("LoginViewModel", "Resetting navigation flags")
         _shouldRestartApp.value = false

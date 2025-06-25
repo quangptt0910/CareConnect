@@ -29,10 +29,28 @@ import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 
+
+/**
+ * Remote data source for managing doctor-related data using Firebase Firestore and Firebase Functions.
+ *
+ * This class handles operations such as creating doctor accounts, managing doctor schedules,
+ * handling patient lists, managing available time slots, and working with tasks associated with doctors.
+ *
+ * @property firestore Firestore database instance
+ * @property functions Firebase Functions instance
+ */
 class DoctorRemoteDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val functions: FirebaseFunctions
 ) {
+    /**
+     * Creates a new doctor using a Firebase Cloud Function.
+     *
+     * @param email Doctor's email address
+     * @param password Initial password
+     * @param doctorData Additional profile data
+     * @return A pair of (message, doctorId)
+     */
     suspend fun createDoctor(email: String, password: String, doctorData: Map<String, Any>): Pair<String, String> {
         val data = mapOf(
             "email" to email,
@@ -53,6 +71,11 @@ class DoctorRemoteDataSource @Inject constructor(
         return message to doctorId
     }
 
+    /**
+     * Retrieves the list of doctors scheduled to work today.
+     *
+     * @return List of doctors working today
+     */
     suspend fun getDoctorsWorkingToday(): List<Doctor> {
         val todayString = LocalDate.now().toDateString()
         val allDoctors = getAllDoctors()
@@ -76,6 +99,12 @@ class DoctorRemoteDataSource @Inject constructor(
         return availableDoctors
     }
 
+    /**
+     * Fetches doctors added in the last [daysAgo] days.
+     *
+     * @param daysAgo Number of days to look back (default is 7)
+     * @return List of recently added doctors
+     */
     suspend fun getRecentlyAddedDoctors(daysAgo: Long = 7): List<Doctor> {
         val now = Date()
         val calendar = Calendar.getInstance()
@@ -92,10 +121,20 @@ class DoctorRemoteDataSource @Inject constructor(
         return snapshot.toObjects(Doctor::class.java)
     }
 
+    /**
+     * Updates doctor information in Firestore.
+     *
+     * @param doctor The doctor to update
+     */
     suspend fun updateDoctor(doctor: Doctor) {
         firestore.collection(DOCTORS_COLLECTION).document(doctor.id).set(doctor).await()
     }
 
+    /**
+     * Returns a list of all doctors in the system.
+     *
+     * @return List of all doctors
+     */
     suspend fun getAllDoctors(): List<Doctor> {
         val snapshot = firestore.collection(DOCTORS_COLLECTION)
             .orderBy("name", Query.Direction.ASCENDING)
@@ -111,18 +150,32 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Provides a real-time stream of all doctors.
+     *
+     * @return Flow of doctor list
+     */
     fun getAllDoctorsFlow(): Flow<List<Doctor>> {
         return firestore.collection(DOCTORS_COLLECTION)
             .orderBy("name", Query.Direction.ASCENDING)
             .dataObjects()
     }
 
+    /**
+     * Gets doctor details by their ID.
+     *
+     * @param doctorId Doctor's ID
+     * @return The doctor if found, otherwise null
+     */
     suspend fun getDoctorById(doctorId: String): Doctor? {
         return firestore.collection(DOCTORS_COLLECTION).document(doctorId).get().await().toObject(Doctor::class.java)
     }
 
     /**
-     * Save working days for a doctor with default time slots
+     * Saves selected working days with default time slots for a doctor.
+     *
+     * @param doctorId ID of the doctor
+     * @param selectedDates Set of selected working dates
      */
     suspend fun saveWorkingDays(doctorId: String, selectedDates: Set<LocalDate>) {
         try {
@@ -163,6 +216,13 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves schedule time slots for a given doctor and date.
+     *
+     * @param doctorId ID of the doctor
+     * @param date Date to retrieve schedule for
+     * @return List of available time slots
+     */
     suspend fun getScheduleForDate(doctorId: String, date: LocalDate): List<TimeSlot> {
         if (doctorId.isBlank()) return emptyList()
         val dateKey = date.toDateString()      // e.g. "2025-06-22"
@@ -178,6 +238,12 @@ class DoctorRemoteDataSource @Inject constructor(
 
     /**
      * https://firebase.google.com/docs/firestore/query-data/listen#kotlin
+     */
+    /**
+     * Observes the set of working days for a doctor.
+     *
+     * @param doctorId ID of the doctor
+     * @return Flow emitting sets of working dates
      */
     fun getWorkingDays(doctorId: String): Flow<Set<LocalDate>> = callbackFlow {
         val db = firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(SCHEDULES_COLLECTION)
@@ -210,6 +276,12 @@ class DoctorRemoteDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
+    /**
+     * Adds a patient to a doctor's list.
+     *
+     * @param doctorId Doctor's ID
+     * @param patientId Patient's ID
+     */
     fun addPatient(doctorId: String, patientId: String) {
         Log.d("DoctorRemoteDataSource", "DEBUG Adding patient with ID $patientId to doctor with ID $doctorId")
         val patientRef = mapOf("addedAt" to FieldValue.serverTimestamp())
@@ -217,6 +289,12 @@ class DoctorRemoteDataSource @Inject constructor(
     }
 
     // Get full patient details for a doctor
+    /**
+     * Provides a real-time stream of full patient details for a doctor.
+     *
+     * @param doctorId Flow of doctor ID
+     * @return Flow emitting list of patients
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getPatientsList(doctorId: Flow<String?>): Flow<List<Patient>> {
         Log.d("DoctorRemoteDataSource", "Getting patients list for doctor with ID $doctorId")
@@ -254,6 +332,15 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates the availability of a specific time slot.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date string
+     * @param targetTimeSlot Time slot to update
+     * @param newAvailability New availability status
+     * @return True if update was successful
+     */
     suspend fun updateTimeSlotAvailability(
         doctorId: String,
         date: String,
@@ -311,7 +398,12 @@ class DoctorRemoteDataSource @Inject constructor(
 
 
     /**
-     * Add time slots to a specific date
+     * Adds new time slots to a schedule for a specific date.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date to add slots to
+     * @param newTimeSlots List of time slots to add
+     * @return True if successful
      */
     suspend fun addTimeSlots(
         doctorId: String,
@@ -355,6 +447,13 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a specific time slot from a doctor's schedule.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date of the slot
+     * @param slot Time slot to delete
+     */
     suspend fun deleteSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         if (doctorId.isEmpty()) return
 
@@ -372,6 +471,14 @@ class DoctorRemoteDataSource @Inject constructor(
         }.await()
     }
 
+    /**
+     * Deletes all time slots within a given time range.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date of the schedule
+     * @param startTime Start of the range
+     * @param endTime End of the range
+     */
     suspend fun deleteSlotInRange(doctorId: String, date: LocalDate, startTime: String, endTime: String) {
         if (doctorId.isEmpty()) return
 
@@ -389,6 +496,13 @@ class DoctorRemoteDataSource @Inject constructor(
         }.await()
     }
 
+    /**
+     * Saves or updates a single time slot in the schedule.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date to update
+     * @param slot Time slot to save
+     */
     suspend fun saveSlot(doctorId: String, date: LocalDate, slot: TimeSlot) {
         if (doctorId.isEmpty()) return
         val dateKey = date.toDateString()
@@ -417,6 +531,11 @@ class DoctorRemoteDataSource @Inject constructor(
     private val cachedSchedules = mutableMapOf<String, MutableMap<String, List<TimeSlot>>>()
 
     // Add clearing cache function
+    /**
+     * Clears the cached schedules for a specific doctor or all if null.
+     *
+     * @param doctorId Optional doctor ID to clear specific cache
+     */
     fun clearCache(doctorId: String? = null) {
         if (doctorId != null) {
             cachedSchedules.remove(doctorId)
@@ -425,6 +544,13 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves available time slots for a doctor on a specific date.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date to check
+     * @return List of available time slots
+     */
     suspend fun getAvailableSlots(doctorId: String, date: LocalDate): List<TimeSlot> {
         return try {
             val dateString = date.toDateString()
@@ -449,6 +575,13 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Provides a stream of available time slots for a doctor on a specific date.
+     *
+     * @param doctorId Doctor's ID
+     * @param date Date to observe
+     * @return Flow emitting list of available slots
+     */
     fun getAvailableSlotsFlow(doctorId: String, date: LocalDate): Flow<List<TimeSlot>> = callbackFlow {
         val dateString = date.toDateString()
         val scheduleRef = firestore
@@ -481,6 +614,12 @@ class DoctorRemoteDataSource @Inject constructor(
         awaitClose { registration.remove() }
     }
 
+    /**
+     * Provides a stream of tasks assigned to the doctor.
+     *
+     * @param doctorIdFlow Flow of doctor ID
+     * @return Flow emitting list of tasks
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getTasksFlow(doctorIdFlow: Flow<String?>): Flow<List<Task>> {
         return doctorIdFlow.flatMapLatest { doctorId ->
@@ -492,6 +631,12 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Gets all tasks assigned to a doctor.
+     *
+     * @param doctorId Doctor's ID
+     * @return List of tasks
+     */
     suspend fun getTasks(doctorId: String): List<Task> {
         return firestore.collection(DOCTORS_COLLECTION)
             .document(doctorId)
@@ -501,6 +646,13 @@ class DoctorRemoteDataSource @Inject constructor(
             .toObjects(Task::class.java)
     }
 
+    /**
+     * Adds a new task to a doctor's task list.
+     *
+     * @param doctorId Doctor's ID
+     * @param task Task to add
+     * @return The ID of the created task
+     */
     suspend fun addTask(doctorId: String, task: Task): String {
         return firestore.collection(DOCTORS_COLLECTION)
             .document(doctorId)
@@ -510,10 +662,22 @@ class DoctorRemoteDataSource @Inject constructor(
             .id
     }
 
+    /**
+     * Deletes a task from a doctor's task list.
+     *
+     * @param doctorId Doctor's ID
+     * @param task Task to delete
+     */
     fun deleteTask(doctorId: String, task: Task) {
         firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).delete()
     }
 
+    /**
+     * Updates a task in a doctor's task list.
+     *
+     * @param doctorId Doctor's ID
+     * @param task Task to update
+     */
     fun updateTask(doctorId: String, task: Task) {
         firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(TASKS_COLLECTION).document(task.id).set(task)
     }

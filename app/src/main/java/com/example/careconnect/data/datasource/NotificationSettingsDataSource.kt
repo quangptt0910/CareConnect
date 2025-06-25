@@ -15,6 +15,13 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Data source responsible for managing notification settings in Firestore
+ * for both patients and doctors, supporting real-time updates and persistence.
+ *
+ * @property firestore Firestore database instance.
+ * @property auth Firebase authentication instance used to get the current user.
+ */
 @Singleton
 class NotificationSettingsDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
@@ -28,6 +35,13 @@ class NotificationSettingsDataSource @Inject constructor(
         private const val DOCUMENT_SETTINGS = "settings"
     }
 
+    /**
+     * Saves the given [NotificationSettings] to Firestore for the specified [role].
+     *
+     * @param role The role of the current user (PATIENT or DOCTOR).
+     * @param settings The settings object to persist.
+     * @throws Exception if the user is not authenticated.
+     */
     suspend fun saveNotificationSettings(role: Role, settings: NotificationSettings) {
         val currentUser = auth.currentUser ?: throw Exception("User not authenticated")
 
@@ -66,6 +80,12 @@ class NotificationSettingsDataSource @Inject constructor(
         Log.d(TAG, "Notification settings saved for $role")
     }
 
+    /**
+     * Returns a [Flow] of [NotificationSettings] for real-time observation of settings updates.
+     *
+     * @param role The role of the current user (PATIENT or DOCTOR).
+     * @return A [Flow] emitting current or updated notification settings.
+     */
     fun getNotificationSettingsFlow(role: Role): Flow<NotificationSettings?> = callbackFlow {
         val currentUser = auth.currentUser
         if (currentUser == null) {
@@ -118,6 +138,12 @@ class NotificationSettingsDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Fetches the current [NotificationSettings] for the given user role from Firestore.
+     *
+     * @param role The role of the current user.
+     * @return The [NotificationSettings] object or null if not found.
+     */
     suspend fun getNotificationSettings(role: Role): NotificationSettings? {
         val currentUser = auth.currentUser ?: return null
 
@@ -147,6 +173,12 @@ class NotificationSettingsDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Parses Firestore document data into a [NotificationSettings] object.
+     *
+     * @param data The map of fields retrieved from Firestore.
+     * @return A [NotificationSettings] instance with values populated.
+     */
     private fun parseSettingsFromDocument(data: Map<String, Any>): NotificationSettings {
         val chatMap = data["chatNotifications"] as? Map<String, Any> ?: emptyMap()
         val appointmentMap = data["appointmentNotifications"] as? Map<String, Any> ?: emptyMap()

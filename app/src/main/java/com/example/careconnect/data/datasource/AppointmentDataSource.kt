@@ -21,11 +21,25 @@ import java.time.LocalTime
 import java.time.YearMonth
 import javax.inject.Inject
 
+
+/**
+ * Data source responsible for managing appointments in Firestore.
+ *
+ * Provides methods to create, update, delete, and fetch appointments with various filters and queries.
+ * Also handles transactional appointment creation along with updating doctor's schedule availability.
+ *
+ * @property firestore FirebaseFirestore instance for Firestore operations.
+ * @property notification NotificationManager to send appointment notifications.
+ */
 class AppointmentDataSource @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val notification: NotificationManager
 ){
-
+    /**
+     * Retrieves all appointments from Firestore.
+     *
+     * @return List of all appointments.
+     */
     suspend fun getAllAppointments(): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -34,6 +48,12 @@ class AppointmentDataSource @Inject constructor(
             .toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves all appointments scheduled on a specific date.
+     *
+     * @param date Date string in format YYYY-MM-DD.
+     * @return List of appointments on the specified date.
+     */
     suspend fun getAllAppointmentsByDate(date: String): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -42,6 +62,12 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves all appointments scheduled within the month of the specified date.
+     *
+     * @param date Date string used to identify the month.
+     * @return List of appointments within the month.
+     */
     suspend fun getAllAppointmentsByMonth(date: String): List<Appointment> {
         val local = date.toLocalDate()
         val ym = YearMonth.of(local.year, local.month)
@@ -56,6 +82,12 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves all appointments for a specific patient.
+     *
+     * @param patientId ID of the patient.
+     * @return List of patient's appointments.
+     */
     suspend fun getAllPatientAppointments(patientId: String): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -64,6 +96,12 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves all appointments for a specific doctor.
+     *
+     * @param doctorId ID of the doctor.
+     * @return List of doctor's appointments.
+     */
     suspend fun getAllDoctorAppointments(doctorId: String): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -72,6 +110,12 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
 
+    /**
+     * Provides a Flow stream of appointments for the patient identified by the current user ID flow.
+     *
+     * @param currentUserIdFlow Flow emitting the current patient user ID.
+     * @return Flow of list of appointments.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByPatientId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->
@@ -82,6 +126,12 @@ class AppointmentDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Provides a Flow stream of appointments for the doctor identified by the current user ID flow.
+     *
+     * @param currentUserIdFlow Flow emitting the current doctor user ID.
+     * @return Flow of list of appointments.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointmentsByDoctorId(currentUserIdFlow: Flow<String?>): Flow<List<Appointment>> {
         return currentUserIdFlow.flatMapLatest { userId ->
@@ -93,10 +143,11 @@ class AppointmentDataSource @Inject constructor(
     }
 
     /**
-     * Get appointments by patientId and doctorId
-     * @param patientIdFlow Flow of patientId
-     * @param doctorIdFlow Flow of doctorId
-     * @return Flow of list of appointments
+     * Provides a Flow stream of appointments filtered by patientId and doctorId flows.
+     *
+     * @param patientIdFlow Flow emitting patient IDs.
+     * @param doctorIdFlow Flow emitting doctor IDs.
+     * @return Flow of list of appointments matching both filters.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppointments(patientIdFlow: Flow<String?>, doctorIdFlow: Flow<String?>): Flow<List<Appointment>> {
@@ -116,6 +167,13 @@ class AppointmentDataSource @Inject constructor(
     }
 
     // Get doctor appointments by a date
+    /**
+     * Retrieves all appointments for a doctor on a given date.
+     *
+     * @param doctorId Doctor ID.
+     * @param date Date string.
+     * @return List of appointments.
+     */
     suspend fun getDoctorAppointmentsByDate(doctorId: String?, date: String): List<Appointment> {
         return if (doctorId == null) {
             emptyList()
@@ -131,6 +189,13 @@ class AppointmentDataSource @Inject constructor(
     }
 
     // Get patient appointments by a date
+    /**
+     * Retrieves all appointments for a patient on a given date.
+     *
+     * @param patientId Patient ID.
+     * @param date Date string.
+     * @return List of appointments.
+     */
     suspend fun getPatientAppointmentsByDate(patientId: String?, date: String): List<Appointment> {
         return firestore
                 .collection("appointments")
@@ -141,6 +206,13 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves patient appointments within the month of the specified date.
+     *
+     * @param patientId Patient ID.
+     * @param date Date string identifying the month.
+     * @return List of appointments.
+     */
     suspend fun getPatientAppointmentsByMonth(patientId: String?, date: String): List<Appointment> {
         val local = date.toLocalDate()
         val ym = YearMonth.of(local.year, local.month)
@@ -155,6 +227,13 @@ class AppointmentDataSource @Inject constructor(
 
     }
 
+    /**
+     * Retrieves doctor appointments within the month of the specified date.
+     *
+     * @param doctorId Doctor ID.
+     * @param date Date string identifying the month.
+     * @return List of appointments.
+     */
     suspend fun getDoctorAppointmentsByMonth(doctorId: String?, date: String): List<Appointment> {
         val local = date.toLocalDate()
         val ym = YearMonth.of(local.year, local.month)
@@ -167,6 +246,12 @@ class AppointmentDataSource @Inject constructor(
             .await().toObjects(Appointment::class.java)
     }
     // Get appointments by status
+    /**
+     * Retrieves appointments filtered by status.
+     *
+     * @param status AppointmentStatus to filter by.
+     * @return List of appointments with the specified status.
+     */
     suspend fun getAppointmentsByStatus(status: AppointmentStatus): List<Appointment> {
         return firestore
             .collection("appointments")
@@ -177,6 +262,13 @@ class AppointmentDataSource @Inject constructor(
     }
 
     // Get doctor appointments by status
+    /**
+     * Retrieves appointments for a doctor filtered by status.
+     *
+     * @param doctorId Doctor ID.
+     * @param status AppointmentStatus to filter by.
+     * @return List of doctor's appointments with the specified status.
+     */
     suspend fun getDoctorAppointmentsByStatus(doctorId: String?, status: AppointmentStatus): List<Appointment> {
         println("DEBUG: getting appt by status $status for doctor $doctorId")
         return firestore
@@ -188,6 +280,13 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves upcoming appointments for a doctor from the given date onward.
+     *
+     * @param doctorId Doctor ID.
+     * @param date Starting date string.
+     * @return List of upcoming appointments.
+     */
     suspend fun getDoctorAppointmentsUpcoming(doctorId: String?, date: String): List<Appointment> {
         return firestore
                 .collection("appointments")
@@ -198,6 +297,13 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves upcoming appointments for a patient from the given date onward.
+     *
+     * @param patientId Patient ID.
+     * @param date Starting date string.
+     * @return List of upcoming appointments.
+     */
     suspend fun getPatientAppointmentsUpcoming(patientId: String, date: String): List<Appointment> {
         println("DEBUG: Querying appointments for patientId: $patientId, date >= $date")
 
@@ -219,6 +325,11 @@ class AppointmentDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves today's appointments that are pending or confirmed.
+     *
+     * @return List of today's pending or confirmed appointments.
+     */
     suspend fun getTodayAppointments(): List<Appointment> {
         val today = LocalDate.now().toDateString()
         val snapshot = firestore.collection("appointments")
@@ -233,6 +344,11 @@ class AppointmentDataSource @Inject constructor(
         return snapshot.toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves today's appointments that have been canceled.
+     *
+     * @return List of today's canceled appointments.
+     */
     suspend fun getCanceledAppointmentsToday(): List<Appointment> {
         val today = LocalDate.now().toDateString()
         val snapshot = firestore.collection("appointments")
@@ -244,6 +360,11 @@ class AppointmentDataSource @Inject constructor(
         return snapshot.toObjects(Appointment::class.java)
     }
 
+    /**
+     * Retrieves today's upcoming appointments that start after the current time.
+     *
+     * @return List of upcoming appointments for today.
+     */
     suspend fun getUpcomingAppointmentsToday(): List<Appointment> {
         val today = LocalDate.now().toDateString()
         val nowTime = LocalTime.now().toString() // e.g., "14:35"
@@ -258,6 +379,13 @@ class AppointmentDataSource @Inject constructor(
             .filter { it.startTime > nowTime }
     }
 
+    /**
+     * Retrieves patient appointments filtered by status.
+     *
+     * @param patientId Patient ID.
+     * @param status AppointmentStatus.
+     * @return List of appointments matching status.
+     */
     suspend fun getPatientAppointmentsByStatus(patientId: String?, status: AppointmentStatus): List<Appointment> {
         return firestore
                 .collection("appointments")
@@ -268,14 +396,28 @@ class AppointmentDataSource @Inject constructor(
                 .toObjects(Appointment::class.java)
     }
 
-
+    /**
+     * Retrieves an appointment by its ID.
+     *
+     * @param appointmentId Appointment document ID.
+     * @return Appointment object or null if not found.
+     */
     suspend fun getAppointmentById(appointmentId: String): Appointment? {
         return firestore.collection("appointments").document(appointmentId).get().await().toObject(Appointment::class.java)
     }
 
     /**
-     * Creates an appointment and updates the doctor's time slot availability in a single transaction
-     * This ensures data consistency and prevents double booking
+     * Creates an appointment and updates the corresponding doctor's time slot availability atomically.
+     *
+     * Ensures no double booking by using a Firestore transaction.
+     * Also triggers notification after successful creation.
+     *
+     * @param appointment Appointment to create.
+     * @param doctorId Doctor's ID.
+     * @param date Appointment date string.
+     * @param targetTimeSlot The time slot to book.
+     * @return ID of the newly created appointment.
+     * @throws Exception if slot is unavailable or transaction fails.
      */
     suspend fun createAppointmentWithSlotUpdate(
         appointment: Appointment,
@@ -353,7 +495,13 @@ class AppointmentDataSource @Inject constructor(
         }
     }
 
-
+    /**
+     * Creates a new appointment with status set to PENDING.
+     * Triggers notification after creation.
+     *
+     * @param appointment Appointment to create.
+     * @return ID of the created appointment or empty string on failure.
+     */
     suspend fun createAppointment(appointment: Appointment): String {
        return try {
            val appointmentForSave = appointment.copy(id = "", status = AppointmentStatus.PENDING)
@@ -369,6 +517,12 @@ class AppointmentDataSource @Inject constructor(
        }
     }
 
+    /**
+     * Updates an existing appointment document in Firestore.
+     * Triggers notification based on updated status.
+     *
+     * @param appointment Appointment object with updated fields.
+     */
     suspend fun updateAppointment(appointment: Appointment) {
         try {
             firestore.collection("appointments").document(appointment.id)
@@ -396,6 +550,14 @@ class AppointmentDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates the status of an appointment by its ID.
+     * Sends notification based on new status.
+     *
+     * @param appointmentId Appointment document ID.
+     * @param newStatus New status to set.
+     * @return True if update succeeded, false otherwise.
+     */
     suspend fun updateAppointmentStatus(appointmentId: String, newStatus: AppointmentStatus): Boolean {
         return try {
             firestore.collection("appointments").document(appointmentId).update("status", newStatus).await()

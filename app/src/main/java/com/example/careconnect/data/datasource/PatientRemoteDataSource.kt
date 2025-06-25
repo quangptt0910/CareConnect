@@ -14,10 +14,27 @@ import com.google.firebase.firestore.FirebaseFirestore
 import jakarta.inject.Inject
 import kotlinx.coroutines.tasks.await
 
+
+/**
+ * A remote data source for managing patient-related data in Firestore.
+ *
+ * This class handles CRUD operations for patient profiles, medical reports, prescriptions,
+ * and various types of medical history entries such as medications, allergies, conditions,
+ * surgeries, and immunizations.
+ *
+ * @property auth FirebaseAuth instance used to access current user ID.
+ * @property firestore FirebaseFirestore instance used for Firestore operations.
+ */
 class PatientRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ){
+    /**
+     * Retrieves a [Patient] object from Firestore by their ID.
+     *
+     * @param patientId ID of the patient to fetch.
+     * @return The [Patient] object if found, or null.
+     */
     suspend fun getPatientById(patientId: String): Patient? {
         return try {
             val snapshot = firestore.collection("patients")
@@ -30,10 +47,21 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Returns the current authenticated user's ID.
+     *
+     * @return User ID or an empty string if not authenticated.
+     */
     suspend fun getPatientId(): String {
         return auth.currentUser?.uid ?: ""
     }
 
+    /**
+     * Creates a new [MedicalReport] for a patient.
+     *
+     * @param patientId ID of the patient.
+     * @param medicalReport The medical report to be added.
+     */
     suspend fun createMedicalReport(patientId: String, medicalReport: MedicalReport) {
         try {
             firestore.collection("patients")
@@ -47,6 +75,12 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new [Prescription] for a patient.
+     *
+     * @param patientId ID of the patient.
+     * @param prescription The prescription to be added.
+     */
     suspend fun createPrescription(patientId: String, prescription: Prescription) {
         try {
             Log.d("Firestore", "Creating prescription for patient: $patientId")
@@ -61,6 +95,12 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of [Prescription]s for a given patient.
+     *
+     * @param patientId ID of the patient.
+     * @return List of prescriptions.
+     */
     suspend fun getPrescriptions(patientId: String): List<Prescription> {
         val prescriptions = mutableListOf<Prescription>()
         try {
@@ -80,6 +120,12 @@ class PatientRemoteDataSource @Inject constructor(
         return prescriptions
     }
 
+    /**
+     * Retrieves a list of [MedicalReport]s for a given patient.
+     *
+     * @param patientId ID of the patient.
+     * @return List of medical reports.
+     */
     suspend fun getMedicalReports(patientId: String): List<MedicalReport> {
         val medicalReports = mutableListOf<MedicalReport>()
         try {
@@ -99,8 +145,10 @@ class PatientRemoteDataSource @Inject constructor(
         return medicalReports
     }
 
-    /*
-     * Adding Function for Medical History Entries
+    /**
+     * Adds a new [Medication] entry for a patient.
+     *
+     * @return ID of the newly added document.
      */
     suspend fun addMedication(patientId: String, medication: Medication): String {
         return try {
@@ -116,6 +164,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Adds a new [Allergy] entry for a patient.
+     *
+     * @return ID of the newly added document.
+     */
     suspend fun addAllergy(patientId: String, allergy: Allergy): String {
         return try {
             firestore.collection("patients")
@@ -129,6 +182,12 @@ class PatientRemoteDataSource @Inject constructor(
             throw e
         }
     }
+
+    /**
+     * Adds a new [Condition] entry for a patient.
+     *
+     * @return ID of the newly added document.
+     */
     suspend fun addCondition(patientId: String, condition: Condition): String {
         return try {
             firestore.collection("patients")
@@ -142,6 +201,12 @@ class PatientRemoteDataSource @Inject constructor(
             throw e
         }
     }
+
+    /**
+     * Adds a new [Surgery] entry for a patient.
+     *
+     * @return ID of the newly added document.
+     */
     suspend fun addSurgery(patientId: String, surgery: Surgery): String {
         return try {
             firestore.collection("patients")
@@ -155,6 +220,12 @@ class PatientRemoteDataSource @Inject constructor(
             throw e
         }
     }
+
+    /**
+     * Adds a new [Immunization] entry for a patient.
+     *
+     * @return ID of the newly added document.
+     */
     suspend fun addImmunization(patientId: String, immunization: Immunization): String {
         return try {
             firestore.collection("patients")
@@ -169,8 +240,10 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
-    /*
-     * Updating Function for Medical History Entries
+    /**
+     * Updates an existing [Medication] entry.
+     *
+     * @return True if successful, false otherwise.
      */
     suspend fun updateMedication(patientId: String, medication: Medication): Boolean {
         return try {
@@ -187,6 +260,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates an existing [Allergy] entry.
+     *
+     * @return True if successful, false otherwise.
+     */
     suspend fun updateAllergy(patientId: String, allergy: Allergy): Boolean {
         return try {
             firestore.collection("patients")
@@ -202,6 +280,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates an existing [Condition] entry.
+     *
+     * @return True if successful, false otherwise.
+     */
     suspend fun updateCondition(patientId: String, condition: Condition): Boolean {
         return try {
             firestore
@@ -218,6 +301,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates an existing [Surgery] entry.
+     *
+     * @return True if successful, false otherwise.
+     */
     suspend fun updateSurgery(patientId: String, surgery: Surgery): Boolean {
         return try {
             firestore
@@ -234,6 +322,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates an existing [Immunization] entry.
+     *
+     * @return True if successful, false otherwise.
+     */
     suspend fun updateImmunization(patientId: String, immunization: Immunization): Boolean {
         return try {
             firestore
@@ -250,6 +343,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves all patients from the database.
+     *
+     * @return List of all [Patient]s, or an empty list if retrieval fails.
+     */
     suspend fun getAllPatients(): List<Patient> {
         return try {
             firestore.collection("patients")
@@ -262,6 +360,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Updates the patient profile.
+     *
+     * @param patient The [Patient] object with updated data.
+     */
     suspend fun updatePatient(patient: Patient) {
         firestore.collection("patients")
             .document(patient.id)
@@ -269,8 +372,10 @@ class PatientRemoteDataSource @Inject constructor(
             .await()
     }
 
-    /*
-     * GET medical history entries
+    /**
+     * Retrieves a list of [Medication] entries for a patient.
+     *
+     * @return List of medications or empty list if an error occurs.
      */
     suspend fun getMedications(patientId: String): List<Medication> {
         return try {
@@ -286,6 +391,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of [Allergy] entries for a patient.
+     *
+     * @return List of allergies or empty list if an error occurs.
+     */
     suspend fun getAllergies(patientId: String): List<Allergy> {
         return try {
             firestore.collection("patients")
@@ -300,6 +410,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of [Condition] entries for a patient.
+     *
+     * @return List of conditions or empty list if an error occurs.
+     */
     suspend fun getConditions(patientId: String): List<Condition> {
         return try {
             firestore.collection("patients")
@@ -314,6 +429,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of [Surgery] entries for a patient.
+     *
+     * @return List of surgeries or empty list if an error occurs.
+     */
     suspend fun getSurgeries(patientId: String): List<Surgery> {
         return try {
             firestore.collection("patients")
@@ -328,6 +448,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of [Immunization] entries for a patient.
+     *
+     * @return List of immunizations or empty list if an error occurs.
+     */
     suspend fun getImmunizations(patientId: String): List<Immunization> {
         return try {
             firestore.collection("patients")
@@ -342,8 +467,10 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
-    /*
-     * Deleting Function for Medical History Entries
+    /**
+     * Deletes a [Medication] entry.
+     *
+     * @return True if deletion was successful, false otherwise.
      */
     suspend fun deleteMedication(patientId: String, medication: Medication): Boolean {
         return try {
@@ -360,6 +487,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes an [Allergy] entry.
+     *
+     * @return True if deletion was successful, false otherwise.
+     */
     suspend fun deleteAllergy(patientId: String, allergy: Allergy): Boolean {
         return try {
             firestore.collection("patients")
@@ -375,6 +507,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a [Condition] entry.
+     *
+     * @return True if deletion was successful, false otherwise.
+     */
     suspend fun deleteCondition(patientId: String, condition: Condition): Boolean {
         return try {
             firestore.collection("patients")
@@ -390,6 +527,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes a [Surgery] entry.
+     *
+     * @return True if deletion was successful, false otherwise.
+     */
     suspend fun deleteSurgery(patientId: String, surgery: Surgery): Boolean {
         return try {
             firestore.collection("patients")
@@ -405,6 +547,11 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes an [Immunization] entry.
+     *
+     * @return True if deletion was successful, false otherwise.
+     */
     suspend fun deleteImmunization(patientId: String, immunization: Immunization): Boolean {
         return try {
             firestore.collection("patients")

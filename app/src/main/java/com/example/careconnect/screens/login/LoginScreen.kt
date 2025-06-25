@@ -52,6 +52,19 @@ import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
 import com.example.careconnect.ui.theme.primaryLight
 
+
+/**
+ * Composable function for the Login screen.
+ *
+ * Handles navigation and state management by observing the [LoginViewModel].
+ * Navigates to the sign-up screen, splash screen, or profile screen based on user actions and authentication state.
+ *
+ * @param openSignUpScreen Callback invoked to navigate to the Sign Up screen.
+ * @param openSplashScreen Callback invoked to navigate to the Splash screen (used for app restart).
+ * @param openProfileScreen Callback invoked to navigate to the Profile screen.
+ * @param showSnackBar Callback to display snack bar messages with [SnackBarMessage].
+ * @param viewModel The [LoginViewModel] instance, defaulted to Hilt-injected view model.
+ */
 @Composable
 fun LoginScreen(
     openSignUpScreen: () -> Unit,
@@ -86,7 +99,18 @@ fun LoginScreen(
 
 }
 
-
+/**
+ * Composable that displays the content of the Login screen, including
+ * email/password fields, login button, social media login options, and navigation links.
+ *
+ * @param openSignUpScreen Callback invoked when user wants to open the Sign Up screen.
+ * @param login Function to perform login with email and password, accepts email, password,
+ * and a function to show snack bar messages.
+ * @param onForgotPasswordClick Optional callback invoked when "Forgot password?" is clicked.
+ * @param onGoogleSignInClick Optional callback invoked when Google Sign-In is clicked.
+ * @param onFacebookSignInClick Optional callback invoked when Facebook Sign-In is clicked.
+ * @param showSnackBar Callback to display snack bar messages.
+ */
 @Composable
 fun LoginScreenContent(
     openSignUpScreen: () -> Unit,
@@ -255,11 +279,11 @@ fun LoginScreenContent(
 
 
 /**
- * Composable function for a social media login button.
+ * Composable representing a circular social media login button.
  *
- * @param modifier The modifier to be applied to the component.
- * @param icon The resource ID of the social media icon.
- * @param onSignInClick The callback function when the button is clicked.
+ * @param icon The resource ID of the icon to display (e.g., Google or Facebook icon).
+ * @param modifier Modifier to apply to this composable.
+ * @param onSignInClick Callback invoked when the button is clicked.
  */
 @Composable
 fun SocialMediaLogIn(
@@ -293,10 +317,10 @@ fun SocialMediaLogIn(
 }
 
 /**
- * Extension function that applies styling to social media login buttons.
- * Changes the background and border depending on the system theme.
+ * Extension function to style social media login buttons with dynamic
+ * background and border depending on whether the system is in dark theme.
  *
- * @return A modified [Modifier] instance with applied styling.
+ * @return Modified [Modifier] with appropriate background and border.
  */
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
 fun Modifier.socialMedia(): Modifier = composed {

@@ -30,6 +30,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+/**
+ * A remote data source class for handling authentication and user-related operations
+ * using Firebase Authentication, Firebase Firestore, and Google Identity Services.
+ *
+ * This class supports sign-in/sign-up with email/password and Google, listens to auth state changes,
+ * manages user roles, and ensures proper user data is created or merged in Firestore.
+ *
+ * @property auth FirebaseAuth instance for authentication.
+ * @property firestore FirebaseFirestore instance for database operations.
+ * @property credentialManager CredentialManager for handling Google Sign-In credentials.
+ */
 class AuthRemoteDataSource @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
@@ -39,10 +50,19 @@ class AuthRemoteDataSource @Inject constructor(
 
     val currentUser: FirebaseUser? get() = auth.currentUser
 
+    /**
+     * Returns the UID of the currently authenticated user, or null if not signed in.
+     */
     fun getCurrentUserId(): String? {
         return auth.currentUser?.uid
     }
 
+    /**
+     * Retrieves the role of the currently authenticated user from Firestore.
+     *
+     * @return The user's [Role] (PATIENT, DOCTOR, or ADMIN).
+     * @throws Exception if user is not found in any role collection.
+     */
     suspend fun getCurrentUserRole(): Role {
         val userId = getCurrentUserId()
         val db = FirebaseFirestore.getInstance()
@@ -113,13 +133,24 @@ class AuthRemoteDataSource @Inject constructor(
             awaitClose { auth.removeAuthStateListener(listener) }
         }.distinctUntilChanged()
 
+    /**
+     * Signs in an existing user with email and password.
+     *
+     * @param email User's email.
+     * @param password User's password.
+     */
     suspend fun login(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
-    /*
-    * Link authentication with email and password account (signUp)
-    */
+    /**
+     * Registers a new user with email/password, and creates a patient document in Firestore.
+     *
+     * @param name First name of the patient.
+     * @param surname Last name of the patient.
+     * @param email User's email.
+     * @param password User's password.
+     */
     suspend fun signUp(name: String, surname: String, email: String, password: String) {
         // link authentication with email and password account
         val authResult = auth.createUserWithEmailAndPassword(email, password).await()
@@ -132,6 +163,16 @@ class AuthRemoteDataSource @Inject constructor(
         db.collection("patients").document(userId).set(patient).await()
     }
 
+    /**
+     * Adds extra patient information to an existing account.
+     *
+     * @param userId User UID.
+     * @param gender Gender enum as string.
+     * @param weight Patient's weight.
+     * @param height Patient's height.
+     * @param dob Date of birth.
+     * @param address Patient's address.
+     */
     suspend fun linkAccount(userId: String, gender: String, weight: Double, height: Double, dob: String, address: String) {
         val genderEnum = Gender.valueOf(gender)
 
@@ -147,6 +188,9 @@ class AuthRemoteDataSource @Inject constructor(
             .await()
     }
 
+    /**
+     * Signs the current user out and clears credentials if using Google sign-in.
+     */
     suspend fun signOut() {
         try {
             firestore.clearPersistence()
@@ -169,10 +213,18 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Deletes the current user's account from Firebase Auth.
+     */
     suspend fun deleteAccount() {
         auth.currentUser!!.delete().await()
     }
 
+    /**
+     * Initiates Google Sign-In flow. Falls back to unauthorized accounts if needed.
+     *
+     * @param context Android Context.
+     */
     suspend fun signInWithGoogle(context: Context) {
         try {
 
@@ -200,6 +252,13 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Creates a Google Sign-In request using the provided server client ID.
+     *
+     * @param serverClientId OAuth 2.0 server client ID from Google Developer Console.
+     * @param filterByAuthorizedAccounts Whether to only show previously authorized accounts.
+     * @return A [GetCredentialRequest] for initiating Google sign-in.
+     */
      private fun createGoogleSignInRequest(serverClientId: String, filterByAuthorizedAccounts: Boolean): GetCredentialRequest {
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder() // already approved or auth_ed
             .setFilterByAuthorizedAccounts(filterByAuthorizedAccounts)
@@ -216,6 +275,12 @@ class AuthRemoteDataSource @Inject constructor(
 
     private var currentGoogleIdToken: String? = null
 
+    /**
+     * Handles the received [Credential] from Google Sign-In and authenticates with Firebase.
+     *
+     * @param credential The credential returned by the sign-in API.
+     * @throws Exception if the credential type is invalid.
+     */
     suspend fun handleGoogleLogin(credential: Credential) {
         try {
             if(credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -232,6 +297,12 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Signs into Firebase using a Google ID token.
+     * If new user, a patient record is created. If existing, it ensures the record exists.
+     *
+     * @param idToken Google ID token received from the credential.
+     */
     suspend fun firebaseAuthWithGoogle(idToken: String) {
         try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
@@ -255,8 +326,9 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
-    /*
-     * NEW google login
+    /**
+     * Creates a patient record from Google user data in Firestore.
+     * Called for new users who signed up with Google.
      */
     private suspend fun createPatientRecordFromGoogleUser() {
         val user = auth.currentUser ?: return
@@ -298,7 +370,8 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Ensure patient record exists for current user
+     * Ensures a patient record exists for the current Firebase user.
+     * If not, it creates one using the Google user information.
      */
     private suspend fun ensurePatientRecordExists() {
         val user = auth.currentUser ?: return
@@ -311,6 +384,9 @@ class AuthRemoteDataSource @Inject constructor(
         }
     }
 
+    /**
+     * Ensures a merged patient record exists for accounts using both email and Google authentication.
+     */
     suspend fun ensureMergedPatientRecordExists() {
         val user = currentUser ?: return
         val uid = user.uid
@@ -335,12 +411,17 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Check user's authentication providers
+     * Returns a list of authentication providers linked to the current user.
      */
     fun getUserAuthProviders(): List<String> {
         return currentUser?.providerData?.map { it.providerId } ?: emptyList()
     }
 
+    /**
+     * Checks if the current user has a patient record. Creates one if missing.
+     *
+     * @return True if a new patient was created, false if already exists.
+     */
     suspend fun patientRecord(): Boolean {
         val user = auth.currentUser!!
         val uid = user.uid
@@ -367,7 +448,9 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Check authentication providers for current user
+     * Determines the current user's authentication method(s).
+     *
+     * @return [AuthProvider] indicating the method (EMAIL_ONLY, GOOGLE_ONLY, BOTH_LINKED, etc.)
      */
     fun checkUserAuthProviders(): AuthProvider {
         val user = currentUser ?: return AuthProvider.NOT_SIGNED_IN
@@ -385,7 +468,9 @@ class AuthRemoteDataSource @Inject constructor(
     }
 
 
-
+    /**
+     * Represents user data types for Admin, Doctor, Patient, or error states.
+     */
     sealed class UserData {
         data class AdminData(val admin: Admin) : UserData()
         data class DoctorData(val doctor: Doctor) : UserData()
