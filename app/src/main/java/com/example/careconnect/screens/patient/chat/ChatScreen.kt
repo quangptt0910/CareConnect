@@ -81,17 +81,39 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Data classes for selected media
+/**
+ * Data class representing a selected media item with its URI, type, and optional name.
+ *
+ * @property uri The content URI of the selected media.
+ * @property type The type of the media (IMAGE or DOCUMENT).
+ * @property name The optional name of the media, used primarily for documents.
+ */
 data class SelectedMedia(
     val uri: Uri,
     val type: MediaType,
     val name: String = ""
 )
 
+/**
+ * Enum representing supported media types for sending in chat.
+ */
 enum class MediaType {
     IMAGE, DOCUMENT
 }
 
+/**
+ * Composable that displays the chat screen UI for a conversation between a patient and a doctor.
+ *
+ * It handles loading and displaying doctor, patient, and chat room data, manages notifications,
+ * and integrates chat message list and message input UI.
+ *
+ * @param viewModel The [ChatViewModel] managing chat state and business logic.
+ * @param chatId The unique identifier for the chat room.
+ * @param patientId The ID of the patient participant in the chat.
+ * @param doctorId The ID of the doctor participant in the chat.
+ * @param openChatScreen Lambda function to open another chat screen with provided chatId, patientId, and doctorId.
+ * @param goBack Lambda function to handle back navigation.
+ */
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel(),
@@ -137,6 +159,17 @@ fun ChatScreen(
     }
 }
 
+/**
+ * Composable displaying the main content of the chat screen, including the message list,
+ * chat input box with media preview, and optional referral dialog.
+ *
+ * @param model The [ChatViewModel] containing chat data and actions.
+ * @param chatRoom The [ChatRoom] data representing the current chat.
+ * @param doctor The [Doctor] participant data.
+ * @param patient The [Patient] participant data.
+ * @param openChatScreen Lambda to open another chat screen.
+ * @param goBack Lambda to navigate back.
+ */
 @Composable
 fun ChatScreenContent(
     model: ChatViewModel,
@@ -265,6 +298,17 @@ fun ChatScreenContent(
     }
 }
 
+/**
+ * Composable that provides the chat input box with optional media attachment preview.
+ *
+ * Supports sending text messages, images, and documents. Manages media picking via
+ * activity results and dropdown menu for media selection and referrals.
+ *
+ * @param modifier Modifier to apply to this composable.
+ * @param onSend Callback invoked with the typed text when sending a plain message.
+ * @param onSendWithMedia Callback invoked with typed text and selected media when sending media.
+ * @param viewModel The [ChatViewModel] used for managing chat state and user info.
+ */
 @Composable
 fun ChatBoxWithPreview(
     modifier: Modifier = Modifier,
@@ -381,6 +425,12 @@ fun ChatBoxWithPreview(
     }
 }
 
+/**
+ * Displays a preview card for the selected media (image or document) in the chat input area.
+ *
+ * @param media The selected media to preview.
+ * @param onRemove Callback invoked when the user removes the selected media.
+ */
 @Composable
 fun MediaPreviewCard(
     media: SelectedMedia,
@@ -453,6 +503,13 @@ fun MediaPreviewCard(
 }
 
 // Helper function to get document name from URI
+/**
+ * Retrieves the display name of a document from its [Uri].
+ *
+ * @param context The context to access content resolver.
+ * @param uri The Uri of the document.
+ * @return The display name of the document if available, or the last path segment of the Uri.
+ */
 fun getDocumentName(context: Context, uri: Uri): String? {
     return try {
         context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -466,6 +523,14 @@ fun getDocumentName(context: Context, uri: Uri): String? {
     }
 }
 
+/**
+ * Displays an individual chat message item in the message list.
+ * Handles different message types including text, image, document, and referral messages.
+ *
+ * @param message The message data to display.
+ * @param openNewChat Callback to open a new chat screen with given chat and doctor IDs.
+ * @param handleReferralClick Suspend function to handle referral clicks, returning the chat and doctor IDs.
+ */
 @Composable
 fun ChatItem(
     message: Message,
@@ -563,6 +628,12 @@ fun ChatItem(
     }
 }
 
+/**
+ * Shows an image preview inside the chat message.
+ * Clicking the image opens it in an external viewer.
+ *
+ * @param model The URL or Uri string of the image to display.
+ */
 @Composable
 fun ImagePreview(model : String){
     val context = LocalContext.current
@@ -584,6 +655,14 @@ fun ImagePreview(model : String){
     )
 }
 
+/**
+ * Shows a preview card for a document attached to a chat message.
+ * Includes the document name and a button to open the document.
+ *
+ * @param documentName The display name of the document.
+ * @param documentUrl The URL or Uri string of the document.
+ * @param isFromMe Indicates if the document was sent by the current user.
+ */
 @Composable
 fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean) {
     val context = LocalContext.current
@@ -628,11 +707,23 @@ fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean
     }
 }
 
+/**
+ * Formats a timestamp (in milliseconds) into a human-readable time string.
+ *
+ * @param timestamp The timestamp to format.
+ * @return A formatted time string (e.g., "02:30 PM").
+ */
 fun formatTimestamp(timestamp: Long): String {
     val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
     return sdf.format(Date(timestamp))
 }
 
+/**
+ * A small top app bar composable with a title and back navigation button.
+ *
+ * @param name The title to display in the app bar.
+ * @param goBack Callback invoked when the back button is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmallTopAppBarExample(
@@ -669,6 +760,14 @@ fun SmallTopAppBarExample(
     }
 }
 
+/**
+ * Dialog composable that allows a doctor user to refer the patient to another doctor.
+ * Displays a list of available doctors excluding the current doctor.
+ *
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ * @param onDoctorSelected Callback invoked when a doctor is selected for referral.
+ * @param viewModel The ChatViewModel used to retrieve the doctors list.
+ */
 @Composable
 fun DoctorReferralDialog(
     onDismiss: () -> Unit,
@@ -701,6 +800,16 @@ fun DoctorReferralDialog(
     )
 }
 
+/**
+ * A minimal dropdown menu for selecting media attachment options in the chat input.
+ * Options include sending images, documents, and optionally referrals.
+ *
+ * @param expanded Whether the dropdown menu is expanded or not.
+ * @param onDismissRequest Callback invoked to dismiss the dropdown menu.
+ * @param onImageSend Callback invoked when the "Send image" option is selected.
+ * @param onDocumentSend Callback invoked when the "Send document" option is selected.
+ * @param onReferralSend Optional callback invoked when the "Send referral" option is selected.
+ */
 @Composable
 fun MinimalDropdownMenu(
     expanded: Boolean,
@@ -734,6 +843,9 @@ fun MinimalDropdownMenu(
     }
 }
 
+/**
+ * Preview composable for ChatScreenContent showcasing chat UI with dummy data.
+ */
 @Preview
 @Composable
 fun ChatScreenPreview() {

@@ -16,6 +16,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
+
+/**
+ * ViewModel responsible for managing the chat menu screen state and data.
+ *
+ * This ViewModel handles loading and updating chat rooms for the current user (patient or doctor),
+ * fetching chat partners' details, managing user roles, and search query state.
+ *
+ * @property addChatRoomRepository Repository to access chat room data.
+ * @property doctorRepository Repository to access doctor data.
+ * @property patientRepository Repository to access patient data.
+ * @property authRepository Repository to handle authentication and user info.
+ */
 @HiltViewModel
 class ChatMenuViewModel @Inject constructor(
     private val addChatRoomRepository: AddChatRoomRepository,
@@ -45,6 +57,12 @@ class ChatMenuViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ChatMenuUiState())
     val uiState = _uiState.asStateFlow()
 
+
+    /**
+     * Updates the current search query used to filter chat rooms.
+     *
+     * @param query The new search query string.
+     */
     fun updateSearchQuery(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
     }
@@ -55,6 +73,10 @@ class ChatMenuViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sets the current user ID and role, then fetches the corresponding user details
+     * and starts listening to their chat rooms.
+     */
     suspend fun setCurrentUser() {
         _currentUserId.value = authRepository.getCurrentUserId().toString()
         _currentUserRole.value = authRepository.getCurrentUserRole()
@@ -68,6 +90,10 @@ class ChatMenuViewModel @Inject constructor(
         startListeningToChatRooms()
     }
 
+    /**
+     * Begins listening for changes in chat rooms for the current user.
+     * When chat rooms update, reloads the chat partners' details.
+     */
     suspend fun startListeningToChatRooms() {
         val userId = _currentUserId.value
         if (userId.isEmpty()) return
@@ -80,13 +106,20 @@ class ChatMenuViewModel @Inject constructor(
         }
     }
 
-
+    /**
+     * Retrieves the current user role, ensuring the current user data is set.
+     *
+     * @return The current user's [Role].
+     */
     suspend fun getCurrentUserRole(): Role {
         setCurrentUser()
         return _currentUserRole.value
     }
 
-
+    /**
+     * Loads chat rooms from the repository depending on the user's role,
+     * and subsequently loads chat partners for those rooms.
+     */
     fun loadChatRooms() {
         launchCatching {
             val userId = authRepository.getCurrentUserId()
@@ -107,6 +140,10 @@ class ChatMenuViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads the details of chat partners (doctors or patients) for all chat rooms
+     * currently loaded, based on the current user's role.
+     */
     private suspend fun loadChatPartners() {
         val partnerMap = mutableMapOf<String, Any>()
         val userRole = _currentUserRole.value
@@ -148,6 +185,11 @@ class ChatMenuViewModel @Inject constructor(
         _chatPartners.value = partnerMap
     }
 
+    /**
+     * Fetches and sets the doctor details for the specified doctor ID.
+     *
+     * @param doctorId The unique ID of the doctor to load.
+     */
     fun setDoctorId(doctorId: String) {
         launchCatching {
             _doctor.value = doctorRepository.getDoctorById(doctorId)

@@ -53,6 +53,18 @@ import com.example.careconnect.dataclass.AppointmentStatus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Screen composable that displays the patient's appointments.
+ *
+ * This screen allows users to view their appointments filtered by time range (e.g., all or monthly),
+ * navigate through months (if monthly view is selected), and apply filters by appointment status.
+ * Users can also sort the appointments and reset applied filters and sorting.
+ *
+ * It observes the [PatientAppointmentViewModel] for UI state updates and triggers events
+ * such as range selection, date changes, filtering, sorting, and reset actions.
+ *
+ * @param viewModel The [PatientAppointmentViewModel] instance used to manage state and business logic.
+ */
 @Composable
 fun PatientAppointmentScreen(
     viewModel: PatientAppointmentViewModel = hiltViewModel()
@@ -68,6 +80,23 @@ fun PatientAppointmentScreen(
     )
 }
 
+/**
+ * Content composable for the [PatientAppointmentScreen].
+ *
+ * Displays the UI elements including:
+ * - Header with patient info
+ * - Time range selection chips (All / Month)
+ * - Month navigation controls (if in monthly range mode)
+ * - Filtering and sorting controls with dropdown menus and filter chips
+ * - List of appointment cards or loading/error/no-data states
+ *
+ * @param uiState The current UI state representing appointments and UI selections.
+ * @param onRangeChange Callback invoked when the user changes the time range filter.
+ * @param onDateChange Callback invoked when the user changes the current date (month).
+ * @param onFilterChange Callback invoked when the appointment status filters are modified.
+ * @param onSortChange Callback invoked when the sort option changes.
+ * @param onReset Callback invoked when the user resets all filters and sorting.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PatientAppointmentScreenContent(
@@ -311,6 +340,19 @@ fun PatientAppointmentScreenContent(
     }
 }
 
+/**
+ * Displays a card representing an individual appointment.
+ *
+ * Shows appointment details such as:
+ * - Appointment date
+ * - Time range (start and end time)
+ * - Appointment status (with color coding)
+ * - Doctor's name
+ * - Appointment type
+ * - Location address
+ *
+ * @param appt The [Appointment] data class instance containing appointment details.
+ */
 @Composable
 fun PatientAppointmentCard(appt: Appointment) {
     Card(modifier = Modifier.fillMaxWidth()) {

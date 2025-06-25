@@ -36,7 +36,18 @@ import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.ui.theme.CareConnectTheme
 
-
+/**
+ * Composable screen displaying the chat menu for a patient or doctor user.
+ *
+ * This screen shows a searchable list of chat rooms the user is part of,
+ * allowing navigation to individual chat conversations.
+ * It also includes a top app bar with back navigation and a notifications icon.
+ *
+ * @param openChatScreen Callback to open a specific chat screen with provided doctorId, patientId, and chatId.
+ * @param onBack Callback invoked when the back navigation icon is pressed.
+ * @param openNotificationsScreen Optional callback to open the notifications screen (default empty).
+ * @param viewModel The [ChatMenuViewModel] providing UI state and data.
+ */
 @Composable
 fun ChatMenuScreen(
     openChatScreen : (doctorId: String, patientId: String, chatId: String) -> Unit,
@@ -80,6 +91,20 @@ fun ChatMenuScreen(
     )
 }
 
+/**
+ * Composable rendering the content of the chat menu screen.
+ *
+ * Displays a search input, a list of filtered and sorted chat rooms, and handles user interactions.
+ *
+ * @param uiState The current UI state including search query and loading status.
+ * @param onBack Callback for back navigation.
+ * @param chatRoom List of chat rooms available for the user.
+ * @param chatPartners Map of chat partner IDs to their respective [Doctor] or [Patient] data.
+ * @param userRole The role of the current user ([Role.PATIENT] or [Role.DOCTOR]).
+ * @param onSearchQueryChange Callback invoked when the search query changes.
+ * @param openChatScreen Callback to open a selected chat room.
+ * @param openNotificationsScreen Callback to open the notifications screen.
+ */
 @Composable
 fun ChatMenuScreenContent(
     uiState: ChatMenuUiState,
@@ -181,6 +206,14 @@ fun ChatMenuScreenContent(
     }
 }
 
+/**
+ * Composable for the top app bar of the chat menu screen.
+ *
+ * Displays a title, a back navigation icon, and a notifications icon.
+ *
+ * @param onBack Callback when the back button is pressed.
+ * @param openNotificationsScreen Callback when the notifications icon is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatMenuTopBar(
@@ -227,6 +260,12 @@ fun ChatMenuTopBar(
     }
 }
 
+/**
+ * Preview composable for the chat menu screen content.
+ *
+ * Shows a sample list of chat rooms and chat partners with dummy data.
+ * Useful for UI design and testing without running the full app.
+ */
 @Preview
 @Composable
 fun ChatMenuScreenPreview() {
