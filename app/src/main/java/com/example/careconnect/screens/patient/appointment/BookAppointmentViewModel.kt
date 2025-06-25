@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 
@@ -27,7 +29,8 @@ data class BookAppointmentUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val selectedTimeSlot: TimeSlot? = null,
     val availableSlots: List<TimeSlot> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isBooking: Boolean = false
 )
 
 @HiltViewModel
@@ -90,13 +93,51 @@ class BookAppointmentViewModel @Inject constructor(
     )
 
     fun onDateSelected(date: LocalDate, showSnackBar: (SnackBarMessage) -> Unit) {
+        // Validate that the selected date is not in the past
+        if (date.isBefore(LocalDate.now())) {
+            showSnackBar(SnackBarMessage.StringMessage("Cannot select past dates"))
+            return
+        }
         _selectedDate.value = date
         _selectedTimeSlot.value = null
         loadAvailableSlots(showSnackBar)
     }
 
     fun onTimeSelected(timeSlot: TimeSlot) {
+        // Additional validation to ensure the time slot is not in the past
+        val currentDate = LocalDate.now()
+        val currentTime = LocalTime.now()
+        val selectedDate = _selectedDate.value
+
+        if (selectedDate == currentDate) {
+            try {
+                val slotTime = parseTimeString(timeSlot.startTime)
+                if (slotTime != null && slotTime.isBefore(currentTime)) {
+                    // Don't allow selection of past time slots
+                    return
+                }
+            } catch (e: Exception) {
+                println("Error parsing time: ${timeSlot.startTime}")
+                return
+            }
+        }
+
         _selectedTimeSlot.value = timeSlot
+    }
+
+    private fun parseTimeString(timeString: String): LocalTime? {
+        return try {
+            // First try with HH:mm format (e.g., "09:00")
+            LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm"))
+        } catch (e: Exception) {
+            try {
+                // Then try with H:mm format (e.g., "9:00")
+                LocalTime.parse(timeString, DateTimeFormatter.ofPattern("H:mm"))
+            } catch (e2: Exception) {
+                println("Error parsing time: $timeString")
+                null
+            }
+        }
     }
 
 
@@ -108,6 +149,23 @@ class BookAppointmentViewModel @Inject constructor(
                 val currentDoctor = _doctor.value
                 val currentPatient = patientRepository.getPatientById(authRepository.getCurrentUserId() ?: "")
                 val selectedSlot = currentState.selectedTimeSlot
+
+                // Validate selected date is not in the past
+                if (currentState.selectedDate.isBefore(LocalDate.now())) {
+                    showSnackBar(SnackBarMessage.StringMessage("Cannot book appointments for past dates"))
+                    return@launchCatching
+                }
+
+                if (currentState.selectedDate == LocalDate.now()) {
+                    val slotTime = parseTimeString(selectedSlot?.startTime ?: "" )
+                    if (slotTime != null && slotTime.isBefore(LocalTime.now())) {
+                        showSnackBar(SnackBarMessage.StringMessage("Cannot book appointments for past time slots"))
+                        return@launchCatching
+                    } else if (slotTime == null) {
+                        showSnackBar(SnackBarMessage.StringMessage("Invalid time format"))
+                        return@launchCatching
+                    }
+                }
 
                 if (currentState.selectedTimeSlot == null) {
                     showSnackBar(SnackBarMessage.IdMessage(R.string.please_select_time))
@@ -153,11 +211,29 @@ class BookAppointmentViewModel @Inject constructor(
         launchCatching(showSnackBar) {
             _isLoading.value = true
             try {
-                _availableSlots.value = doctorRepository.getAvailableSlots(
+                val slots = doctorRepository.getAvailableSlots(
                     doctorId = _doctorId.value ?: "",
                     date = _selectedDate.value
                 )
 
+                // Filter out past time slots for current date
+                val filteredSlots = if (_selectedDate.value == LocalDate.now()) {
+                    val currentTime = LocalTime.now()
+                    slots.filter { slot ->
+                        val slotTime = parseTimeString(slot.startTime)
+                        if (slotTime != null) {
+                            !slotTime.isBefore(currentTime)
+                        } else {
+                            // If parsing fails, include the slot but log the error
+                            println("DEBUG Error parsing time for slot: ${slot.startTime}")
+                            true
+                        }
+                    }
+                } else {
+                    slots
+                }
+
+                _availableSlots.value = filteredSlots
                 println("DEBUG: loadAvailableSlots ${_availableSlots.value}")
             } catch (e: Exception) {
                 showSnackBar(SnackBarMessage.StringMessage("Failed to load available slots"))

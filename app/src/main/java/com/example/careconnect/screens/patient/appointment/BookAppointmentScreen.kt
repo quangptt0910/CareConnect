@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,6 +48,7 @@ import com.example.careconnect.dataclass.TimeSlot
 import com.example.careconnect.ui.theme.CareConnectTheme
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 
 
@@ -96,7 +98,9 @@ fun BookAppointmentScreenContent(
         SmallTopAppBarExample()
 
         Column(
-            modifier = Modifier.padding(top = 80.dp).verticalScroll(rememberScrollState()),
+            modifier = Modifier
+                .padding(top = 80.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             doctor?.let {
@@ -124,7 +128,9 @@ fun BookAppointmentScreenContent(
                 }
 
                 // Time slots
-                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)) {
                     Text(
                         text = "Available Time Slots",
                         style = MaterialTheme.typography.titleMedium,
@@ -137,6 +143,7 @@ fun BookAppointmentScreenContent(
                         else -> TimeSelectionSection(
                             slots = uiState.availableSlots,
                             selectedTimeSlot = uiState.selectedTimeSlot,
+                            selectedDate = uiState.selectedDate,
                             onTimeSelected = onTimeSelected
                         )
                     }
@@ -161,19 +168,23 @@ fun BookAppointmentScreenContent(
 private fun TimeSelectionSection(
     slots: List<TimeSlot>,
     selectedTimeSlot: TimeSlot?,
+    selectedDate: LocalDate,
     onTimeSelected: (TimeSlot) -> Unit
 ) {
     TimeSelectionChips(
         availableTimeSlots = slots,
         onTimeSelected = onTimeSelected,
-        selectedTimeSlot = selectedTimeSlot
+        selectedDate = selectedDate,
+        selectedTimeSlot = selectedTimeSlot,
     )
 }
 
 @Composable
 private fun NoSlotsMessage() {
     Box(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -219,7 +230,25 @@ fun SmallTopAppBarExample() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InlineDatePicker(onDateSelected: (Long) -> Unit) {
-    val datePickerState = rememberDatePickerState()
+    val selectableDates = object : SelectableDates {
+        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+            val selectedDate = Instant.ofEpochMilli(utcTimeMillis)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+            return !selectedDate.isBefore(LocalDate.now())
+        }
+
+        override fun isSelectableYear(year: Int): Boolean {
+            val currentYear = LocalDate.now().year
+            return year >= currentYear && year <= currentYear + 2
+        }
+    }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = System.currentTimeMillis(),
+        yearRange = IntRange(LocalDate.now().year, LocalDate.now().year + 2),
+        selectableDates = selectableDates
+    )
+
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { selectedDate ->
             onDateSelected(selectedDate)
@@ -245,17 +274,25 @@ fun InlineDatePicker(onDateSelected: (Long) -> Unit) {
 fun TimeSelectionChips(
     availableTimeSlots: List<TimeSlot>,
     selectedTimeSlot: TimeSlot?,
+    selectedDate: LocalDate?,
     onTimeSelected: (TimeSlot) -> Unit
 ) {
+    val currentTime = LocalTime.now()
+    val currentDate = LocalDate.now()
+
     FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(start = 20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         maxItemsInEachRow = 4 // Limit to 4 chips per row
     ) {
         availableTimeSlots.forEach { slot ->
             val timeRange = "${slot.startTime} - ${slot.endTime}"
             val isSelected = selectedTimeSlot == slot
-            val isAvailable = slot.available
+            val isPastTime = selectedDate == currentDate && LocalTime.parse(slot.startTime) < currentTime
+
+            val isAvailable = slot.available && !isPastTime
 
             Box(
                 modifier = Modifier
