@@ -1,21 +1,110 @@
 package com.example.careconnect.screens.doctor.patients.medicalhistory
 
+import android.app.Activity
+import android.app.DatePickerDialog
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.careconnect.dataclass.Allergy
 import com.example.careconnect.dataclass.Condition
 import com.example.careconnect.dataclass.Immunization
 import com.example.careconnect.dataclass.Medication
 import com.example.careconnect.dataclass.Surgery
+import java.util.Calendar
+
+enum class DosageOption(val label: String) {
+    ONCE_DAILY("Once Daily"),
+    TWICE_DAILY("Twice Daily"),
+    THREE_TIMES_DAILY("Three Times Daily"),
+    AS_NEEDED("As Needed");
+
+    override fun toString() = label
+}
+
+enum class FrequencyOption(val label: String) {
+    DAILY("Daily"),
+    WEEKLY("Weekly"),
+    MONTHLY("Monthly"),
+    AS_NEEDED("As Needed");
+
+    override fun toString() = label
+}
+@Composable
+fun DatePickerField(
+    label: String,
+    date: String,
+    onDateSelected: (String) -> Unit,
+    activityContext: android.app.Activity
+) {
+    val calendar = remember { Calendar.getInstance() }
+    val showDialog = remember { mutableStateOf(false) }
+
+    if (showDialog.value) {
+        DisposableEffect(Unit) {
+            val datePicker = DatePickerDialog(
+                activityContext,
+                { _, year, month, day ->
+                    val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
+                    onDateSelected(selectedDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.setOnDismissListener { showDialog.value = false }
+            datePicker.show()
+
+            onDispose {
+                datePicker.setOnDismissListener(null)
+            }
+        }
+    }
+
+    OutlinedTextField(
+        value = date,
+        onValueChange = {},
+        label = { Text(label) },
+        readOnly = true,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { showDialog.value = true },
+        trailingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select date") }
+    )
+}
+
+
+
+
 
 
 /**
@@ -25,12 +114,17 @@ import com.example.careconnect.dataclass.Surgery
  * @param onSave Callback function to be invoked when the save button is clicked, passing the [Medication] object.
  * @param existing An optional [Medication] object. If provided, the dialog will be in "edit" mode, pre-filling the fields with the existing medication's data. Otherwise, it will be in "add" mode.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MedicationDialog(
     onDismiss: () -> Unit,
     onSave: (Medication) -> Unit,
     existing: Medication? = null
 ) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+        ?: throw IllegalStateException("Context is not an Activity")
+
     var name by remember { mutableStateOf(existing?.name ?: "") }
     var dosage by remember { mutableStateOf(existing?.dosage ?: "") }
     var frequency by remember { mutableStateOf(existing?.frequency ?: "") }
@@ -41,35 +135,146 @@ fun MedicationDialog(
     val dialogTitle = if (isEditing) "Edit Medication" else "Add Medication"
     val saveButtonText = if (isEditing) "Update" else "Add"
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(dialogTitle)},
-        text = {
-            Column {
-                OutlinedTextField(name, { name = it }, label = { Text("Name") })
-                OutlinedTextField(dosage, { dosage = it }, label = { Text("Dosage") })
-                OutlinedTextField(frequency, { frequency = it }, label = { Text("Frequency") })
+    var expandedDosage by remember { mutableStateOf(false) }
+    var expandedFrequency by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            tonalElevation = 8.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(dialogTitle, style = MaterialTheme.typography.titleLarge)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Dosage Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedDosage,
+                    onExpandedChange = { expandedDosage = !expandedDosage }
+                ) {
+                    OutlinedTextField(
+                        readOnly = true,
+                        value = dosage,
+                        onValueChange = {},
+                        label = { Text("Dosage") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDosage)
+                        },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedDosage,
+                        onDismissRequest = { expandedDosage = false }
+                    ) {
+                        DosageOption.entries.forEach {
+                            DropdownMenuItem(
+                                text = { Text(it.label) },
+                                onClick = {
+                                    dosage = it.label
+                                    expandedDosage = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Frequency Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = expandedFrequency,
+                    onExpandedChange = { expandedFrequency = !expandedFrequency }
+                ) {
+                    OutlinedTextField(
+                        readOnly = true,
+                        value = frequency,
+                        onValueChange = {},
+                        label = { Text("Frequency") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFrequency)
+                        },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedFrequency,
+                        onDismissRequest = { expandedFrequency = false }
+                    ) {
+                        FrequencyOption.entries.forEach {
+                            DropdownMenuItem(
+                                text = { Text(it.label) },
+                                onClick = {
+                                    frequency = it.label
+                                    expandedFrequency = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Start Date with Activity context passed
                 OutlinedTextField(startDate, { startDate = it }, label = { Text("Start Date") })
                 OutlinedTextField(endDate, { endDate = it }, label = { Text("End Date") })
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val medication = if (isEditing) {
-                    existing?.copy(id = existing.id,name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
-                } else {
-                    Medication(name = name.trim(), dosage = dosage.trim(), frequency = frequency.trim(), startDate = startDate.trim(), endDate = endDate.trim())
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = {
+                        val medication = if (isEditing) {
+                            existing?.copy(
+                                id = existing.id,
+                                name = name.trim(),
+                                dosage = dosage.trim(),
+                                frequency = frequency.trim(),
+                                startDate = startDate.trim(),
+                                endDate = endDate.trim()
+                            )
+                        } else {
+                            Medication(
+                                name = name.trim(),
+                                dosage = dosage.trim(),
+                                frequency = frequency.trim(),
+                                startDate = startDate.trim(),
+                                endDate = endDate.trim()
+                            )
+                        }
+                        medication?.let(onSave)
+                    }) {
+                        Text(saveButtonText)
+                    }
                 }
-                if (medication != null) {
-                    onSave(medication)
-                }
-            }) {
-                Text(saveButtonText)
             }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
-    )
+        }
+    }
 }
+
+
 
 
 /**

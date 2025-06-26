@@ -85,6 +85,7 @@ class PatientMedicalHistoryViewModel @Inject constructor(
      * @return The ID of the added entry if successful, or null if failed.
      */
     suspend fun addEntry(patientId: String, entry: MedicalHistoryEntry): String? {
+
         return try {
             when (entry) {
                 is Medication -> patientRepository.addMedication(patientId, entry)

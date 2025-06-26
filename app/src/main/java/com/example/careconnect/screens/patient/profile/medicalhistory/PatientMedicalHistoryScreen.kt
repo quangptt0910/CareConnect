@@ -66,9 +66,27 @@ fun PatientMedicalHistoryScreen(
         entries = entries,
         selectedTabIndex = selectedTabIndex,
         onTabSelected = { selectedTabIndex = it },
-            addEntry = { id, entry -> coroutineScope.launch { viewModel.addEntry(id, entry) } },
-            updateEntry = { id, entry -> coroutineScope.launch { viewModel.updateEntry(id, entry) } },
-            deleteEntry = { id, entry -> coroutineScope.launch { viewModel.deleteEntry(id, entry) } }
+            addEntry = { id, entry ->
+                coroutineScope.launch {
+                    viewModel.addEntry(id, entry)
+                    // Reload entries after adding
+                    viewModel.loadEntries(id, tabItems[selectedTabIndex])
+                }
+            },
+            updateEntry = { id, entry ->
+                coroutineScope.launch {
+                    viewModel.updateEntry(id, entry)
+                    // Reload entries after updating
+                    viewModel.loadEntries(id, tabItems[selectedTabIndex])
+                }
+            },
+            deleteEntry = { id, entry ->
+                coroutineScope.launch {
+                    viewModel.deleteEntry(id, entry)
+                    // Reload entries after deleting
+                    viewModel.loadEntries(id, tabItems[selectedTabIndex])
+                }
+            }
         )
     }
 }
