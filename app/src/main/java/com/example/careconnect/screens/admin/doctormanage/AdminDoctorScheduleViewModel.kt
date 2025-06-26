@@ -96,7 +96,7 @@ class AdminDoctorScheduleViewModel @Inject constructor(
         }
 
     /**
-     * Saves the selected dates and triggers navigation to the next screen.
+     * Saves the selected dates and triggers navigation to the   next screen.
      *
      * Handles UI loading states and error messages.
      */

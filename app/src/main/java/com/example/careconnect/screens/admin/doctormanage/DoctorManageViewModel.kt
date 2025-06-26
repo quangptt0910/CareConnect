@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import java.time.LocalDate
 import javax.inject.Inject
 
 /**
@@ -21,6 +23,11 @@ import javax.inject.Inject
 class DoctorManageViewModel @Inject constructor(
     private val doctorRepository: DoctorRepository
 ): MainViewModel() {
+    private val _workingDays = MutableStateFlow<Set<LocalDate>>(emptySet())
+    val workingDays: StateFlow<Set<LocalDate>> = _workingDays
+
+    private val _doctor = MutableStateFlow<Doctor?>(null)
+    val doctor: StateFlow<Doctor?> = _doctor
 
     private val _navigateToAddDoctor = MutableStateFlow(false)
     val navigateToAddDoctor: StateFlow<Boolean>
@@ -48,4 +55,29 @@ class DoctorManageViewModel @Inject constructor(
     suspend fun deleteDoctor(doctor: Doctor) {
         doctorRepository.deleteDoctor(doctor)
     }
+
+    fun updateDoctor(updateDoctor: Doctor) {
+        _doctor.value = updateDoctor
+        launchCatching {
+            doctorRepository.updateDoctor(updateDoctor)
+        }
+    }
+
+    suspend fun getDoctorScheduleDates(doctorId: String): Set<LocalDate> =
+        doctorRepository.getWorkingDays(doctorId)
+            .first() // collect the current set once
+            .toSet()
+
+    fun observeWorkingDays(doctorId: String) = launchCatching {
+        doctorRepository.getWorkingDays(doctorId)
+            .collect { days -> _workingDays.value = days }
+    }
+
+    fun updateDoctorSchedule(doctorId: String, dates: Set<LocalDate>) {
+        launchCatching {
+            doctorRepository.saveWorkingDays(doctorId, dates)
+        }
+    }
+
+
 }

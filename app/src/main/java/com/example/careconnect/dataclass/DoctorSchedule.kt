@@ -17,8 +17,8 @@ import java.util.Date
  * @property updatedAt Timestamp when the schedule was last updated.
  */
 data class DoctorSchedule(
-    @DocumentId val id: String = "",
-    val date: String = "",
+    @DocumentId val id: String = "", // yyyy-mm-dd
+    val date: String = "", // yyyy-mm-dd
     val timeSlots: List<TimeSlot> = emptyList(),
     val isWorkingDay: Boolean = true,
     @ServerTimestamp val createdAt: Date? = null,

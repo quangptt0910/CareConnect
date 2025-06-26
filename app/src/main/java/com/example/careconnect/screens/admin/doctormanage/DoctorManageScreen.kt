@@ -21,8 +21,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,8 +38,10 @@ import com.example.careconnect.R
 import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.SnackBarMessage
+import com.example.careconnect.screens.doctor.profile.EditDoctorDialog
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /**
  * Screen composable to manage the list of doctors in the admin interface.
@@ -54,6 +60,18 @@ fun DoctorManageScreen(
     showSnackBar: (SnackBarMessage) -> Unit
 ){
     val allDoctors by viewModel.allDoctors.collectAsStateWithLifecycle(emptyList())
+    var selectedDoctor by remember { mutableStateOf<Doctor?>(null) }
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    var scheduleDates by remember { mutableStateOf<Set<LocalDate>>(emptySet()) }
+    var showScheduleDialog by remember { mutableStateOf(false) }
+
+    val workingDays by viewModel.workingDays.collectAsState()
+
+    LaunchedEffect(selectedDoctor?.id) {
+        selectedDoctor?.let { viewModel.observeWorkingDays(it.id) }
+    }
+
     println("DEBUG:: DoctorManageScreen: doctorsList = $allDoctors")
     val scope = rememberCoroutineScope()
 
@@ -64,8 +82,62 @@ fun DoctorManageScreen(
     DoctorManageScreenContent(
         openAddDoctorScreen = openAddDoctorScreen,
         doctors = allDoctors,
-        deleteDoctor = { doctor -> scope.launch{viewModel.deleteDoctor(doctor) }}
+        onChangeSchedule = { doctor ->
+            selectedDoctor = doctor
+
+            scope.launch {
+                viewModel.observeWorkingDays(doctor.id)
+                println("DEBUG: DMS: workingDays = $workingDays")
+                scheduleDates = viewModel.getDoctorScheduleDates(doctor.id)
+                println("DEBUG: DoctorManageScreen: scheduleDates = $scheduleDates")
+                showScheduleDialog = true
+            }
+        },
+        deleteDoctor = { doctor -> scope.launch{viewModel.deleteDoctor(doctor) }},
+        onOpenProfile = {
+            println("DEBUG:: DoctorManageScreen: onOpenProfile clicked")
+            selectedDoctor = it
+            showEditDialog = true
+        }
     )
+
+
+
+    if (showEditDialog && selectedDoctor!= null) {
+        EditDoctorDialog(
+            doctor = selectedDoctor!!,
+            onDismiss = { showEditDialog = false },
+            onSave = { updatedDoctor ->
+                viewModel.updateDoctor(updatedDoctor)
+                showEditDialog = false
+            }
+        )
+    }
+
+    if (showScheduleDialog && selectedDoctor != null) {
+        ChangeScheduleDialog(
+            selectedDates = scheduleDates,
+            onDateSelected = { date ->
+                val updated = scheduleDates.toMutableSet().apply {
+                    if (contains(date)) remove(date) else add(date)
+                }
+                scheduleDates = updated
+            },
+            onDismiss = { showScheduleDialog = false },
+            onSave = {
+                scope.launch {
+                    viewModel.updateDoctorSchedule(
+                        doctorId = selectedDoctor!!.id,
+                        dates = scheduleDates
+                    )
+                    showScheduleDialog = false
+                }
+            },
+            doctor = selectedDoctor!!
+        )
+    }
+
+
 }
 
 /**
@@ -80,7 +152,9 @@ fun DoctorManageScreen(
 fun DoctorManageScreenContent(
     openAddDoctorScreen: () -> Unit = {},
     doctors: List<Doctor>,
-    deleteDoctor: (Doctor) -> Unit = {}
+    onChangeSchedule: (Doctor) -> Unit,
+    deleteDoctor: (Doctor) -> Unit = {},
+    onOpenProfile: (Doctor) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -102,16 +176,16 @@ fun DoctorManageScreenContent(
             }
             LazyColumn {
                 items(doctors) { doctor ->
-                    DoctorCard(doctor = doctor, onOpenProfile = {}, onDeleteDoc = { deleteDoctor(doctor)})
+                    DoctorCard(
+                        doctor = doctor,
+                        onChangeSchedule = { onChangeSchedule(doctor) },
+                        onOpenProfile = { onOpenProfile(doctor) },
+                        onDeleteDoc = { deleteDoctor(doctor)}
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-//
-//            FilledCardStats(
-//                title = "Total hours worked",
-//                userProducts = doctors,
-//                onDeleteProduct = {}
-//            )
+
         }
 
         Box(
@@ -164,7 +238,10 @@ fun DoctorManageScreenPreview() {
     )
     CareConnectTheme {
         DoctorManageScreenContent(
-            doctors = doctors
+            doctors = doctors,
+            onOpenProfile = {},
+            deleteDoctor = {},
+            onChangeSchedule = {}
         )
 
     }

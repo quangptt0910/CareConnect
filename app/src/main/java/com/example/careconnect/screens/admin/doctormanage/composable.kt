@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -112,6 +114,7 @@ fun AdminTopAppBar(
 fun DoctorCard(
     modifier: Modifier = Modifier,
     doctor: Doctor,
+    onChangeSchedule: () -> Unit,
     onOpenProfile: () -> Unit,
     onDeleteDoc: (Doctor) -> Unit,
 ) {
@@ -141,15 +144,15 @@ fun DoctorCard(
                                 Text(doctor.specialization) }
                         },
                         trailingContent = {
-
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.End
                             ){
-                                IconButton(
-                                    onClick = { onOpenProfile() }
-                                ){
-                                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                                IconButton(onClick = onChangeSchedule ){
+                                    Icon(imageVector = Icons.Default.Schedule, contentDescription = "Change Schedule")
+                                }
+                                IconButton(onClick = onOpenProfile ){
+                                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Profile")
                                 }
 
                                 Spacer(modifier = Modifier.width(2.dp))
@@ -188,50 +191,52 @@ fun DoctorCard(
         }
     }
 }
+@Composable
+fun ChangeScheduleDialog(
+    doctor: Doctor,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+    selectedDates: Set<LocalDate>,
+    onDateSelected: (LocalDate) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Change Work Schedule") },
+        text = {
+            Column {
+                Text(
+                    text = "Select working days:",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                MultiDatePicker(
+                    selectedDates = selectedDates,
+                    onDateSelected = onDateSelected,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Text(
+                text = "Save",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable { onSave() }
+            )
+        },
+        dismissButton = {
+            Text(
+                text = "Cancel",
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clickable { onDismiss() }
+            )
+        },
+        shape = RoundedCornerShape(12.dp)
+    )
+}
 
-//
-//@Composable
-//fun FilledCardStats(
-//    title: String,
-//    modifier: Modifier = Modifier,
-//    userProducts: List<Doctor>,
-//    onDeleteProduct: (Doctor) -> Unit,
-//) {
-//    // Calculate statistics
-//    val totalDoctors = userProducts.size
-//    val totalHoursWorked = userProducts.sumOf { doctor ->
-//        calculateTotalHoursWorked(doctor.schedule)
-//    }
-//
-//    Card(
-//        colors = CardDefaults.cardColors(
-//            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-//        ),
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .padding(8.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp)
-//        ) {
-//            // Title
-//            Text(
-//                text = title,
-//                style = MaterialTheme.typography.headlineSmall
-//            )
-//
-//            Spacer(modifier = Modifier.height(8.dp))
-//
-//            // Statistics List
-//            Text(text = "• Total hours worked: $totalHoursWorked hours")
-//            Text(text = "• Total doctors: $totalDoctors")
-//
-//            // Additional statistics can be added here
-//        }
-//    }
-//}
+
 
 /**
  * Confirmation button used in dialogs, styled with primary theme colors.
