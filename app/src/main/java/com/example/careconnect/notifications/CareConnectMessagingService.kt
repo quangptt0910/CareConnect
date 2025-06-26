@@ -326,13 +326,11 @@ class CareConnectMessagingService : FirebaseMessagingService() {
                 description = descriptionText
                 enableLights(true)
                 lightColor = android.graphics.Color.BLUE
-                enableVibration(true)
-                vibrationPattern = when (channelId) {
-                    APPOINTMENT_CHANNEL_ID -> longArrayOf(0, 1000, 500, 1000)
-                    CHAT_CHANNEL_ID -> longArrayOf(0, 250, 250, 250)
-                    else -> longArrayOf(0, 500)
-                }
-                setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), null)
+
+                // Don't set channel-level sound and vibration - let individual notifications control this
+                // This allows the per-notification settings to work properly
+                enableVibration(false)  // Disable channel vibration
+                setSound(null, null)    // Disable channel sound
             }
 
             notificationManager.createNotificationChannel(channel)

@@ -240,9 +240,6 @@ fun PatientsProfileScreenContent(
                     modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    MedicalCategoryCard(R.drawable.appointments, "Appointments") {
-                        // Navigate to Medical History Screen
-                    }
                     MedicalCategoryCard(R.drawable.prescriptions, "Prescriptions") {
                         openPrescriptionsScreen(patientId)
                     }
