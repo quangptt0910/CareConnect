@@ -44,4 +44,8 @@ class DoctorManageViewModel @Inject constructor(
             _doctorsList.value = doctorRepository.getAllDoctors()
         }
     }
+
+    suspend fun deleteDoctor(doctor: Doctor) {
+        doctorRepository.deleteDoctor(doctor)
+    }
 }

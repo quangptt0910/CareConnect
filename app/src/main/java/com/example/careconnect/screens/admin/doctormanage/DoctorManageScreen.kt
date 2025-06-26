@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,6 +35,7 @@ import com.example.careconnect.dataclass.Doctor
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.SnackBarMessage
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 
 /**
  * Screen composable to manage the list of doctors in the admin interface.
@@ -53,6 +55,7 @@ fun DoctorManageScreen(
 ){
     val allDoctors by viewModel.allDoctors.collectAsStateWithLifecycle(emptyList())
     println("DEBUG:: DoctorManageScreen: doctorsList = $allDoctors")
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(true) {
         viewModel.loadDoctors()
@@ -60,7 +63,8 @@ fun DoctorManageScreen(
 
     DoctorManageScreenContent(
         openAddDoctorScreen = openAddDoctorScreen,
-        doctors = allDoctors
+        doctors = allDoctors,
+        deleteDoctor = { doctor -> scope.launch{viewModel.deleteDoctor(doctor) }}
     )
 }
 
@@ -75,7 +79,8 @@ fun DoctorManageScreen(
 @Composable
 fun DoctorManageScreenContent(
     openAddDoctorScreen: () -> Unit = {},
-    doctors: List<Doctor>
+    doctors: List<Doctor>,
+    deleteDoctor: (Doctor) -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -97,7 +102,7 @@ fun DoctorManageScreenContent(
             }
             LazyColumn {
                 items(doctors) { doctor ->
-                    DoctorCard(doctor = doctor, onOpenProfile = {}, onDeleteDoc = {})
+                    DoctorCard(doctor = doctor, onOpenProfile = {}, onDeleteDoc = { deleteDoctor(doctor)})
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

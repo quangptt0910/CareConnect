@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.careconnect.R
 import com.example.careconnect.dataclass.SnackBarMessage
+import com.example.careconnect.dataclass.Specialization
 import com.example.careconnect.ui.theme.CareConnectTheme
 
 /**
@@ -78,6 +84,7 @@ fun AddDoctorScreen(
  * @param createDoctorInfo Callback invoked with doctor info and a snack bar callback when user submits.
  * @param showSnackBar Callback to display snack bar messages, default empty.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDoctorScreenContent(
     createDoctorInfo: (String, String, String, String, String, String, String, String, (SnackBarMessage) -> Unit) -> Unit,
@@ -97,6 +104,7 @@ fun AddDoctorScreenContent(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
+
         AdminTopAppBar(
             label = stringResource(R.string.add_doctor),
             onBack = {}
@@ -125,6 +133,11 @@ fun AddDoctorScreenContent(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                var specializationExpanded by remember { mutableStateOf(false) }
+                val specializationOptions = Specialization.all()
+                var selectedSpecialization by remember { mutableStateOf<Specialization?>(null) }
+
+
                 /**
                  * TextFields for doctor information
                  * Validation in viewModel
@@ -135,18 +148,83 @@ fun AddDoctorScreenContent(
                 CustomTextField(label = stringResource(R.string.name), value = name, onValueChange = { name = it })
                 CustomTextField(label = stringResource(R.string.surname), value = surname, onValueChange = { surname = it })
                 CustomTextField(label = stringResource(R.string.email), value = email, onValueChange = { email = it })
-                CustomTextField(label = stringResource(R.string.specialization), value = specialization, onValueChange = { specialization = it })
-                CustomTextField(label = stringResource(R.string.experience), value = experience, onValueChange = { experience = it })
+                ExposedDropdownMenuBox(
+                    expanded = specializationExpanded,
+                    onExpandedChange = { specializationExpanded = !specializationExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedSpecialization?.displayName() ?: "",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Specialization") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = specializationExpanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = specializationExpanded,
+                        onDismissRequest = { specializationExpanded = false }
+                    ) {
+                        specializationOptions.forEach { spec ->
+                            DropdownMenuItem(
+                                text = { Text(spec.displayName()) },
+                                onClick = {
+                                    selectedSpecialization = spec
+                                    specializationExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                CustomTextField(
+                    label = stringResource(R.string.experience),
+                    value = experience,
+                    onValueChange = { if (it.all { ch -> ch.isDigit() }) experience = it },
+                    keyboardType = KeyboardType.Number
+                )
                 CustomTextField(label = stringResource(R.string.address), value = address, onValueChange = { address = it })
-                CustomTextField(label = stringResource(R.string.phone), value = phone, onValueChange = { phone = it })
+                CustomTextField(
+                    label = stringResource(R.string.phone),
+                    value = phone,
+                    onValueChange = {
+                        if (it.length <= 9 && it.all { ch -> ch.isDigit() }) phone = it
+                    },
+                    keyboardType = KeyboardType.Phone
+                )
                 CustomTextField(label = stringResource(R.string.password), value = password, onValueChange = { password = it })
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                val isFormValid = name.isNotBlank()
+                        && surname.isNotBlank()
+                        && email.isNotBlank()
+                        && selectedSpecialization != null
+                        && experience.isNotBlank()
+                        && address.isNotBlank()
+                        && phone.length == 9
+                        && password.isNotBlank()
+
                 // Next Button
                 IconButton(
-                    onClick = { createDoctorInfo(name, surname, email, phone, address, specialization, experience, password, showSnackBar) },
-                    modifier = Modifier.align(Alignment.End)
+                    onClick = {
+                        selectedSpecialization?.let {
+                            createDoctorInfo(
+                                name,
+                                surname,
+                                email,
+                                phone,
+                                address,
+                                it.name, // Enum name
+                                experience,
+                                password,
+                                showSnackBar
+                            )
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.End),
+                    enabled = isFormValid // ✅ disables button when form is incomplete
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Step")
                 }
@@ -208,12 +286,13 @@ fun StepperIndicator(currentStep: Int) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+fun CustomTextField(label: String, value: String, onValueChange: (String) -> Unit,keyboardType: KeyboardType = KeyboardType.Text) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType)
     )
 }
 

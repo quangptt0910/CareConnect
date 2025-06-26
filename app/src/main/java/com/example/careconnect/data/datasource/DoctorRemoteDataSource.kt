@@ -71,6 +71,10 @@ class DoctorRemoteDataSource @Inject constructor(
         return message to doctorId
     }
 
+    suspend fun deleteDoctor(doctor: Doctor) {
+        firestore.collection(DOCTORS_COLLECTION).document(doctor.id).delete().await()
+    }
+
     /**
      * Retrieves the list of doctors scheduled to work today.
      *

@@ -24,6 +24,10 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getAllDoctors()
     }
 
+    suspend fun deleteDoctor(doctor: Doctor) {
+        doctorRemoteDataSource.deleteDoctor(doctor)
+    }
+
     fun getAllDoctorsFlow(): Flow<List<Doctor>> {
         return doctorRemoteDataSource.getAllDoctorsFlow()
     }
