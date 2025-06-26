@@ -47,6 +47,10 @@ class DoctorRepository @Inject constructor(
         return doctorRemoteDataSource.getWorkingDays(doctorId)
     }
 
+    suspend fun deleteWorkingDay(doctorId: String, date: LocalDate) {
+        doctorRemoteDataSource.deleteWorkingDay(doctorId, date)
+    }
+
     fun getPatientsList(doctorId: Flow<String?>): Flow<List<Patient>> {
         return doctorRemoteDataSource.getPatientsList(doctorId)
     }

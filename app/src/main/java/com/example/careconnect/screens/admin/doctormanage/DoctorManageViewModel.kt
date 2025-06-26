@@ -79,5 +79,10 @@ class DoctorManageViewModel @Inject constructor(
         }
     }
 
+    fun deleteWorkingDay(doctorId: String, date: LocalDate) {
+        launchCatching {
+            doctorRepository.deleteWorkingDay(doctorId, date)
+        }
+    }
 
 }

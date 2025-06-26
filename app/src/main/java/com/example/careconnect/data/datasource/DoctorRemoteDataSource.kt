@@ -240,6 +240,10 @@ class DoctorRemoteDataSource @Inject constructor(
         }
     }
 
+
+    suspend fun deleteWorkingDay(doctorId: String, date: LocalDate) {
+        firestore.collection(DOCTORS_COLLECTION).document(doctorId).collection(SCHEDULES_COLLECTION).document(date.toDateString()).delete().await()
+    }
     /**
      * https://firebase.google.com/docs/firestore/query-data/listen#kotlin
      */

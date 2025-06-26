@@ -119,7 +119,15 @@ fun DoctorManageScreen(
             selectedDates = scheduleDates,
             onDateSelected = { date ->
                 val updated = scheduleDates.toMutableSet().apply {
-                    if (contains(date)) remove(date) else add(date)
+                    if (contains(date)) {
+                        remove(date)
+                        scope.launch {
+                            viewModel.deleteWorkingDay(selectedDoctor!!.id, date)
+                        }
+                    }
+                    else {
+                        add(date)
+                    }
                 }
                 scheduleDates = updated
             },
