@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
+import kotlinx.coroutines.launch
 
 /**
  * Admin screen for managing patients.
@@ -36,9 +38,12 @@ fun PatientManageScreen(
     viewModel: PatientsManageViewModel = hiltViewModel()
 ){
     val patients by viewModel.patients.collectAsState()
+    val scope = rememberCoroutineScope()
 
     PatientManageScreenContent(
-        patients = patients
+        patients = patients,
+        deletePatient = { patient -> scope.launch{viewModel.deletePatient(patient) }},
+        updatePatient = { patient -> scope.launch{viewModel.updatePatient(patient) }}
     )
 }
 
@@ -51,7 +56,9 @@ fun PatientManageScreen(
  */
 @Composable
 fun PatientManageScreenContent(
-    patients: List<Patient> = emptyList()
+    patients: List<Patient> = emptyList(),
+    deletePatient: (Patient) -> Unit = {},
+    updatePatient: (Patient) -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -77,7 +84,8 @@ fun PatientManageScreenContent(
             FilledCardPatients(
                 title = "Patients",
                 patients = patients,
-                onDeleteProduct = { /* Handle product deletion */ }
+                onDeleteProduct = { patient -> deletePatient(patient) },
+                updatePatient = { patient -> updatePatient(patient) }
             )
         }
     }

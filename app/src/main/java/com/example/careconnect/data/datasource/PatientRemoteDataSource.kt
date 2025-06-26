@@ -95,6 +95,19 @@ class PatientRemoteDataSource @Inject constructor(
         }
     }
 
+    suspend fun deletePatient(patient: Patient) {
+        try {
+            firestore.collection("patients")
+                .document(patient.id)
+                .delete()
+                .await()
+            Log.d("Firestore", "Patient deleted successfully")
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to delete patient", e)
+            throw e
+        }
+    }
+
     /**
      * Retrieves a list of [Prescription]s for a given patient.
      *

@@ -256,7 +256,6 @@ fun EditPatientDialog(
 ) {
     val name = remember { mutableStateOf(patient.name) }
     val surname = remember { mutableStateOf(patient.surname) }
-    val email = remember { mutableStateOf(patient.email) }
     val phone = remember { mutableStateOf(patient.phone) }
     val address = remember { mutableStateOf(patient.address) }
     val dateOfBirth = remember { mutableStateOf(patient.dateOfBirth) }
@@ -282,7 +281,6 @@ fun EditPatientDialog(
                                 patient.copy(
                                     name = name.value,
                                     surname = surname.value,
-                                    email = email.value,
                                     phone = phone.value,
                                     address = address.value,
                                     dateOfBirth = dateOfBirth.value,
@@ -326,7 +324,6 @@ fun EditPatientDialog(
             Column {
                 OutlinedTextField(value = name.value, onValueChange = { name.value = it }, label = { Text("First Name") })
                 OutlinedTextField(value = surname.value, onValueChange = { surname.value = it }, label = { Text("Last Name") })
-                OutlinedTextField(value = email.value, onValueChange = { email.value = it }, label = { Text("Email") })
                 OutlinedTextField(value = phone.value, onValueChange = { phone.value = it }, label = { Text("Phone") })
                 OutlinedTextField(value = address.value, onValueChange = { address.value = it }, label = { Text("Address") })
                 OutlinedTextField(value = dateOfBirth.value, onValueChange = { dateOfBirth.value = it }, label = { Text("Date of Birth") })

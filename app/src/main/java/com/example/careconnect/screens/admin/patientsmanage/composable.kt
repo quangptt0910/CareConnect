@@ -34,6 +34,7 @@ import com.example.careconnect.R
 import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.screens.admin.doctormanage.DialogCancelButton
 import com.example.careconnect.screens.admin.doctormanage.DialogConfirmButton
+import com.example.careconnect.screens.patient.profile.EditPatientDialog
 
 /**
  * Displays a card containing a list of patients with edit and delete actions.
@@ -52,8 +53,10 @@ fun FilledCardPatients(
     modifier: Modifier = Modifier,
     patients: List<Patient>,
     onDeleteProduct: (Patient) -> Unit,
+    updatePatient: (Patient) -> Unit = {}
 ) {
-
+    var showEditDialog by remember { mutableStateOf(false) }
+    var selectedPatient by remember { mutableStateOf<Patient?>(null) }
     var expanded by rememberSaveable { mutableStateOf(false) }
     var showWarningDialog by remember { mutableStateOf(false) }
     var productToDelete by remember { mutableStateOf<Patient?>(null) }
@@ -85,7 +88,8 @@ fun FilledCardPatients(
                             ) {
                                 IconButton(
                                     onClick = {
-
+                                        selectedPatient = patients
+                                        showEditDialog = true
                                     }
                                 ) {
                                     Icon(
@@ -117,7 +121,22 @@ fun FilledCardPatients(
             if (expanded) {
 
             }
+            if (showEditDialog && selectedPatient != null) {
+                EditPatientDialog(
+                    patient = selectedPatient!!,
+                    onDismiss = { showEditDialog = false },
+                    onSave = { updatedPatient ->
+                        // Call a function to update patient in ViewModel
+                        updatePatient(updatedPatient)
+                        showEditDialog = false
+                    }
+                )
+            }
+
+
         }
+
+
 
         if (showWarningDialog && productToDelete != null) {
             AlertDialog(

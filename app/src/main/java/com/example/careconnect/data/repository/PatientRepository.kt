@@ -30,6 +30,9 @@ class PatientRepository @Inject constructor(
         return patientRemoteDataSource.createPrescription(patientId, prescription)
     }
 
+    suspend fun deletePatient(patient: Patient) {
+        patientRemoteDataSource.deletePatient(patient)
+    }
 
     suspend fun getPrescriptions(patientId: String): List<Prescription> {
         return patientRemoteDataSource.getPrescriptions(patientId)
@@ -70,6 +73,7 @@ class PatientRepository @Inject constructor(
     suspend fun deleteCondition(patientId: String, condition: Condition): Boolean = patientRemoteDataSource.deleteCondition(patientId, condition)
     suspend fun deleteSurgery(patientId: String, surgery: Surgery): Boolean = patientRemoteDataSource.deleteSurgery(patientId, surgery)
     suspend fun deleteImmunization(patientId: String, immunization: Immunization): Boolean = patientRemoteDataSource.deleteImmunization(patientId, immunization)
+
 
 
 }

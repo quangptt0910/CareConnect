@@ -36,4 +36,14 @@ class PatientsManageViewModel @Inject constructor(
             _patients.value = patientRepository.getAllPatients()
         }
     }
+
+    suspend fun updatePatient(patient: Patient) {
+        patientRepository.updatePatient(patient)
+        loadPatients()
+    }
+
+    suspend fun deletePatient(patient: Patient) {
+        patientRepository.deletePatient(patient)
+        loadPatients()
+    }
 }
