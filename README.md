@@ -4,7 +4,7 @@
 An E-clinic app for android, this app is targeting for the hospital as the **admin** will be the manager/director of the hospital. The app provides an ability for the **doctors** to communicate with **patients** and be a safe place to store all their data to view it easier and quicker
 
 
-
+![login_screen.png](assets/login_screen.png)![patient_screen.png](assets/patient_screen.png)![appointments.png](assets/appointments.png)
 ## Technologies
 
 This application is created with:
@@ -70,5 +70,5 @@ Collections
 
 ## Authors
 
-- Follow this [link](https://firebase.google.com/docs/android/setup)
+- Quang Pham, Nerike Bosch
 
