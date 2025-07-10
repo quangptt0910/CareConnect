@@ -22,3 +22,5 @@
 
 -keep class io.ktor.** { *; }
 -keepattributes *Annotation
+
+-keep class com.google.firebase.ai.** { *; }

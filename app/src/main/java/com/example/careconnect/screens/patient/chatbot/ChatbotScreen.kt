@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,7 +31,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -50,18 +49,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.careconnect.dataclass.Patient
+import com.example.careconnect.dataclass.chat.Author
 import com.example.careconnect.dataclass.chat.Message
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatbotScreen(
-    onNavigateBack: () -> Unit,
+    //onNavigateBack: () -> Unit,
     viewModel: ChatbotViewModel = hiltViewModel()
 ) {
     val messages by viewModel.messages.collectAsStateWithLifecycle()
@@ -79,6 +80,38 @@ fun ChatbotScreen(
         }
     }
 
+    ChatbotScreenContent(
+        //onNavigateBack = onNavigateBack,
+        messages = messages,
+        patient = patient,
+        isLoading = isLoading,
+        messageText = messageText,
+        onMessageTextChange = { messageText = it },
+        onSendMessage = {
+            if (messageText.isNotBlank() && !isLoading) {
+                viewModel.sendMessage(messageText)
+                messageText = ""
+                keyboardController?.hide()
+            }
+        },
+        onQuickActionClick = { action -> viewModel.sendQuickAction(action) },
+        listState = listState
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatbotScreenContent(
+    //onNavigateBack: () -> Unit,
+    messages: List<Message>,
+    patient: Patient?,
+    isLoading: Boolean,
+    messageText: String,
+    onMessageTextChange: (String) -> Unit,
+    onSendMessage: () -> Unit,
+    onQuickActionClick: (String) -> Unit,
+    listState: LazyListState
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -93,14 +126,14 @@ fun ChatbotScreen(
                     fontWeight = FontWeight.Bold
                 )
             },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
-            },
+//            navigationIcon = {
+//                IconButton(onClick = onNavigateBack) {
+//                    Icon(
+//                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                        contentDescription = "Back"
+//                    )
+//                }
+//            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -135,11 +168,7 @@ fun ChatbotScreen(
         }
 
         // Quick Action Buttons
-        QuickActionButtons(
-            onActionClick = { action ->
-                viewModel.sendQuickAction(action)
-            }
-        )
+        QuickActionButtons(onActionClick = onQuickActionClick)
 
         // Messages List
         LazyColumn(
@@ -175,22 +204,14 @@ fun ChatbotScreen(
             ) {
                 OutlinedTextField(
                     value = messageText,
-                    onValueChange = { messageText = it },
+                    onValueChange = onMessageTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("Ask me about your health...") },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Send
                     ),
-                    keyboardActions = KeyboardActions(
-                        onSend = {
-                            if (messageText.isNotBlank() && !isLoading) {
-                                viewModel.sendMessage(messageText)
-                                messageText = ""
-                                keyboardController?.hide()
-                            }
-                        }
-                    ),
+                    keyboardActions = KeyboardActions(onSend = { onSendMessage() }),
                     maxLines = 3,
                     shape = RoundedCornerShape(24.dp)
                 )
@@ -198,13 +219,7 @@ fun ChatbotScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 FloatingActionButton(
-                    onClick = {
-                        if (messageText.isNotBlank() && !isLoading) {
-                            viewModel.sendMessage(messageText)
-                            messageText = ""
-                            keyboardController?.hide()
-                        }
-                    },
+                    onClick = onSendMessage,
                     modifier = Modifier.size(48.dp),
                     containerColor = if (isLoading) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primary,
                     contentColor = if (isLoading) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
@@ -366,4 +381,31 @@ fun QuickActionButtons(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun ChatbotScreenPreview() {
+    ChatbotScreenContent(
+        //onNavigateBack = {},
+        messages = listOf(
+            Message(
+                text = "Hello! How can I assist you today?",
+                author = Author(name = "AI Assistant", isBot = true),
+                timestamp = System.currentTimeMillis()
+            ),
+            Message(
+                text = "I have a headache and feel dizzy.",
+                author = Author(name = "Patient", isBot = false),
+                timestamp = System.currentTimeMillis() + 60000
+            )
+        ),
+        patient = Patient(name = "John Doe"),
+        isLoading = false,
+        messageText = "",
+        onMessageTextChange = {},
+        onSendMessage = {},
+        onQuickActionClick = {},
+        listState = rememberLazyListState()
+    )
 }

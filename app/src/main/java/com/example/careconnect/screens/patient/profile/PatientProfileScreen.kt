@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ContactPage
 import androidx.compose.material.icons.filled.Person
@@ -218,7 +219,7 @@ fun PatientProfileScreenContent(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Icon(
-                        imageVector = Icons.Outlined.ArrowForwardIos,
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
                         contentDescription = "Go",
                         modifier = Modifier.size(15.dp).align(Alignment.CenterVertically)
                     )

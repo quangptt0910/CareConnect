@@ -153,7 +153,7 @@ fun PatientApp(
 
             composable(PATIENT_CHATBOT_ROUTE) {
                 ChatbotScreen(
-                    onNavigateBack = { navController.popBackStack() },
+                    //onNavigateBack = { navController.popBackStack() },
                 )
             }
 

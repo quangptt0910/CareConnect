@@ -22,6 +22,7 @@ import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.content
+import com.google.firebase.ai.type.generationConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -83,7 +84,13 @@ class ChatbotViewModel @Inject constructor(
 
     private val generativeModel: GenerativeModel = Firebase.ai(
         backend = GenerativeBackend.googleAI()
-    ).generativeModel("gemini-2.5-flash")
+    ).generativeModel(modelName = "gemini-2.0-flash-exp",
+        generationConfig = generationConfig {
+            temperature = 0.7f
+            topK = 40
+            topP = 0.95f
+            maxOutputTokens = 1024
+        })
 
     private var chat: Chat? = null
 
@@ -115,10 +122,10 @@ class ChatbotViewModel @Inject constructor(
         val patient = _patient.value
 
         return """
-        You are a medical assistant AI for CareConnect, a healthcare app. Your role is to:
+        You are a medical assistant AI for CareConnect, an e-clinic, healthcare app. Your role is to:
         
         1. Help patients understand their symptoms and conditions
-        2. Suggest appropriate medical specializations from our available list
+        2. Suggest appropriate medical specializations from our available list for doctor appointments
         3. Provide basic health guidance and wellness tips
         4. Offer supportive information about medical procedures
         

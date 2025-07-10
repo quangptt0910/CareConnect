@@ -85,17 +85,16 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
 
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-perf:21.0.5")
+    implementation("com.google.firebase:firebase-perf")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-functions:21.1.1")
-    implementation("com.google.firebase:firebase-messaging:24.1.1")
+    implementation("com.google.firebase:firebase-functions")
+    implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-ai")
 
     implementation("androidx.credentials:credentials:1.5.0")
@@ -125,8 +124,11 @@ dependencies {
     //for notification settings
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // http client
-    implementation("io.ktor:ktor-client-core:2.3.7")
-    implementation("io.ktor:ktor-client-okhttp:2.3.7")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-client-okhttp:2.3.2")
+    implementation("io.ktor:ktor-client-core:2.3.2")
+    implementation("io.ktor:ktor-client-websockets:2.3.2")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.2")
+    implementation("io.ktor:ktor-client-logging:2.3.2")
+
 }
