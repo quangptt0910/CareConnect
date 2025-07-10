@@ -13,4 +13,5 @@ data class Author(
     val id: String = "",  // Unique ID for each author
     val name: String = "", // Display name (optional)
     val role: Role = Role.PATIENT, // Role of the author (optional)
+    val isBot: Boolean = false // Flag to indicate if the author is a bot
 )

@@ -85,26 +85,23 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
 
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-perf:21.0.5")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("androidx.credentials:credentials:1.5.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation("com.google.android.gms:play-services-identity-credentials:16.0.0-alpha08")
-
-
-
     implementation("com.google.firebase:firebase-functions:21.1.1")
     implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-messaging:24.1.1")
+    implementation("com.google.firebase:firebase-ai")
 
-
+    implementation("androidx.credentials:credentials:1.5.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.android.gms:play-services-identity-credentials:16.0.0-alpha08")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
 
     // Kotlin coroutine
@@ -127,4 +124,9 @@ dependencies {
 
     //for notification settings
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // http client
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-okhttp:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
 }

@@ -23,6 +23,7 @@ import com.example.careconnect.screens.patient.appointment.BookAppointmentScreen
 import com.example.careconnect.screens.patient.appointment.PatientAppointmentScreen
 import com.example.careconnect.screens.patient.chat.ChatMenuScreen
 import com.example.careconnect.screens.patient.chat.ChatScreen
+import com.example.careconnect.screens.patient.chatbot.ChatbotScreen
 import com.example.careconnect.screens.patient.doctorsoverview.DoctorsOverviewScreen
 import com.example.careconnect.screens.patient.doctorsoverview.DoctorsProfileViewScreen
 import com.example.careconnect.screens.patient.home.HomeScreenPatient
@@ -36,6 +37,7 @@ import com.example.careconnect.screens.settings.NotificationSettingsScreen
 import com.example.careconnect.screens.settings.SettingsScreen
 import com.example.careconnect.ui.navigation.Route.NOTIFICATION_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
+import com.example.careconnect.ui.navigation.Route.PATIENT_CHATBOT_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_MENU_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHAT_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_PROFILE_MEDICAL_HISTORY_ROUTE
@@ -124,7 +126,8 @@ fun PatientApp(
                     openMedicalHistoryScreen = { type ->
                         navController.navigate(getPatientProfileMedicalHistoryRoute(type))
                     },
-                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) }
+                    openNotificationsScreen = { navController.navigate(NOTIFICATION_ROUTE) },
+                    openChatbotScreen = { navController.navigate(PATIENT_CHATBOT_ROUTE) },
                 )
             }
             composable(BarRoutes.CHAT.route) {
@@ -148,12 +151,11 @@ fun PatientApp(
                 PatientAppointmentScreen()
             }
 
-//            composable(HOME_PATIENT_ROUTE){
-//                HomeScreenPatient(
-//                    openSettingsScreen = { navController.navigate(SETTINGS_ROUTE) },
-//                    openDoctorsOverviewScreen = { specialty -> navController.navigate(getPatientDoctorsOverviewRoute(specialty)) }
-//                )
-//            }
+            composable(PATIENT_CHATBOT_ROUTE) {
+                ChatbotScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
 
             composable(SETTINGS_ROUTE) {
                 SettingsScreen(

@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "1000314673536-d6btn212onqmptlb0onvj4d6625u4o6t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.careconnect",
+            "certificate_hash": "d856f2d84354cb9489eca93c84cc8102ecbbd002"
+          }
+        },
+        {
+          "client_id": "1000314673536-dn1aij8rki6b81cts2j7qfkqvpukscvh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.careconnect",
+            "certificate_hash": "48fd50d16033eb73fe942671a6dde3e82ecc7453"
+          }
+        },
+        {
           "client_id": "1000314673536-jih8sqc551acbg6ev91dn6fuvjddcmar.apps.googleusercontent.com",
           "client_type": 3
         }

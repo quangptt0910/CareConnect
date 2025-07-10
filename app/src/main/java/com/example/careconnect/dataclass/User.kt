@@ -83,7 +83,7 @@ data class Patient(
     val role: Role = Role.PATIENT,
     val phone: String = "",
     val address: String = "",
-    val dateOfBirth: String = "",
+    val dateOfBirth: String = "", // Format dd/MM/yyyy
     val gender: Gender = Gender.MALE,
     val pesel: String = "",
     val height: Double = 0.0,
@@ -124,7 +124,7 @@ enum class AuthProvider {
  * Enum class for defining user roles within the system.
  */
 enum class Role {
-    ADMIN, DOCTOR, PATIENT
+    ADMIN, DOCTOR, PATIENT, MODEL
 }
 
 /**

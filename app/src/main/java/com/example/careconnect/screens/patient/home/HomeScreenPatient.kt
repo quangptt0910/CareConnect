@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,10 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,6 +96,7 @@ data class MedicalHistoryQuickActionItem(
  * @param openMedicalHistoryScreen Lambda to open medical history details by type.
  * @param openNotificationsScreen Lambda to open the notifications screen.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenPatient(
     openSettingsScreen: () -> Unit,
@@ -100,11 +104,13 @@ fun HomeScreenPatient(
     openDoctorProfileScreen: (doctorId: String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     openMedicalHistoryScreen: (type: String) -> Unit = {},
-    openNotificationsScreen: () -> Unit = {}
+    openNotificationsScreen: () -> Unit = {},
+    openChatbotScreen: () -> Unit = {}
 ) {
 
     val doctorList by viewModel.doctorList.collectAsState()
     val upcomingAppointments by viewModel.upcomingAppointments.collectAsState()
+
 
     HomeScreenPatientContent(
         uiState = HomeUiState(),
@@ -116,8 +122,10 @@ fun HomeScreenPatient(
         doctorList = doctorList,
         upcomingAppointments = upcomingAppointments,
         openMedicalHistoryScreen = openMedicalHistoryScreen,
-        openNotificationsScreen = openNotificationsScreen
+        openNotificationsScreen = openNotificationsScreen,
+        openChatbotScreen = openChatbotScreen
     )
+
 }
 
 /**
@@ -150,32 +158,31 @@ fun HomeScreenPatientContent(
     doctorList: List<Doctor>,
     upcomingAppointments: List<Appointment> = emptyList(),
     openMedicalHistoryScreen: (type: String) -> Unit = {},
-    openNotificationsScreen: () -> Unit = {}
+    openNotificationsScreen: () -> Unit = {},
+    openChatbotScreen: () -> Unit
 ) {
-    val randomDoctors = remember(doctorList) {
-        doctorList.shuffled().take(5)
-    }
 
     val doctorCarouselItems = remember(doctorList) {
         doctorList.shuffled().take(5).map {
             DoctorCarouselItem(
                 doctor = it,
-                imageUrl = if (it.profilePhoto.isNotBlank()) it.profilePhoto else "drawable://${R.drawable.carousel_image_1}",
+                imageUrl = it.profilePhoto.ifBlank { "drawable://${R.drawable.carousel_image_1}" },
                 specialization = it.specialization
             )
         }
     }
 
-    val sheetState = rememberStandardBottomSheetState(
+    val specializationSheetState = rememberStandardBottomSheetState(
         initialValue = SheetValue.PartiallyExpanded,
         skipHiddenState = true
     )
+
+
     val scope = rememberCoroutineScope()
     val date = LocalDate.now()
 
-    Surface(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
     ) {
         BottomSheetScaffold(
             sheetContent = {
@@ -212,7 +219,7 @@ fun HomeScreenPatientContent(
                 }
             },
             sheetPeekHeight = 100.dp,
-            scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+            scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = specializationSheetState),
         ) { paddingValues ->
             LazyColumn(
                 modifier = Modifier
@@ -354,6 +361,23 @@ fun HomeScreenPatientContent(
                 }
             }
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.BottomEnd
+        ) {
+            FloatingActionButton(
+                onClick = { openChatbotScreen() },
+                containerColor = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "Chatbot")
+            }
+        }
+
+
     }
 }
 
@@ -373,8 +397,8 @@ fun MedicalHistoryQuickActionsCarousel(
         state = rememberCarouselState { actions.size },
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp),
-        preferredItemWidth = 160.dp,
+            .height(80.dp),
+        preferredItemWidth = 170.dp,
         itemSpacing = 12.dp,
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) { index ->
@@ -413,7 +437,7 @@ fun MedicalHistoryQuickActionsCarousel(
 /**
  * Preview composable for the HomeScreenPatientContent.
  */
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun HomeScreenPatientPreview() {
     CareConnectTheme {
@@ -425,7 +449,8 @@ fun HomeScreenPatientPreview() {
             onSearchQueryChange = {},
             openDoctorsOverviewScreen = {},
             openDoctorProfileScreen = {},
-            doctorList = listOf()
+            doctorList = listOf(),
+            openChatbotScreen = {}
         )
     }
 }

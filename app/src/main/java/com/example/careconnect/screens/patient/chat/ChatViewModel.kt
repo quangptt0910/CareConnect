@@ -90,7 +90,7 @@ class ChatViewModel @Inject constructor(
      * @param patientId The patient’s user ID.
      * @param doctorId The doctor’s user ID.
      */
-    fun initialize(chatId: String, patientId: String, doctorId: String) {
+    suspend fun initialize(chatId: String, patientId: String, doctorId: String) {
         _chatId.value = chatId
         _patientId.value = patientId
         _doctorId.value = doctorId
@@ -134,9 +134,9 @@ class ChatViewModel @Inject constructor(
     /**
      * Initializes the current user based on Firebase Authentication and chat participants.
      */
-    fun initializeCurrentUser() {
+    suspend fun initializeCurrentUser() {
         Firebase.auth.currentUser?.let { user ->
-            val name = if (user.uid == patientId) "Patient" else "Doctor"
+            val name = if (user.uid == patientId) getPatient(patientId)?.name ?: "" else getDoctor(doctorId)?.name ?: ""
 
             val role = if (user.uid == patientId) Role.PATIENT else Role.DOCTOR
             setCurrentUser(user.uid, name, role)

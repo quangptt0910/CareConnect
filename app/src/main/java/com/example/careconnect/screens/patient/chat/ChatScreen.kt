@@ -1,5 +1,6 @@
 package com.example.careconnect.screens.patient.chat
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -65,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -74,7 +76,6 @@ import com.example.careconnect.dataclass.Patient
 import com.example.careconnect.dataclass.Role
 import com.example.careconnect.dataclass.chat.ChatRoom
 import com.example.careconnect.dataclass.chat.Message
-import com.example.careconnect.screens.patient.home.HomeUiState
 import com.example.careconnect.ui.theme.CareConnectTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -646,7 +647,7 @@ fun ImagePreview(model : String){
             .clip(RoundedCornerShape(8.dp))
             .clickable {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(model), "*/*")
+                    setDataAndType(model.toUri(), "*/*")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 context.startActivity(intent)
@@ -663,6 +664,7 @@ fun ImagePreview(model : String){
  * @param documentUrl The URL or Uri string of the document.
  * @param isFromMe Indicates if the document was sent by the current user.
  */
+@SuppressLint("UseKtx")
 @Composable
 fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean) {
     val context = LocalContext.current
@@ -696,7 +698,7 @@ fun DocumentPreview(documentName: String, documentUrl: String, isFromMe: Boolean
             )
             IconButton(onClick = {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(Uri.parse(documentUrl), "*/*")
+                    setDataAndType(documentUrl.toUri(), "*/*")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 context.startActivity(intent)
@@ -850,7 +852,6 @@ fun MinimalDropdownMenu(
 @Composable
 fun ChatScreenPreview() {
     CareConnectTheme {
-        val uiState = HomeUiState()
         ChatScreenContent(
             model = viewModel(),
             chatRoom = ChatRoom(),

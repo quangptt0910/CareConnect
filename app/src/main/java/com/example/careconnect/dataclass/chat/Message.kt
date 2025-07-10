@@ -1,6 +1,7 @@
 package com.example.careconnect.dataclass.chat
 
 import android.net.Uri
+import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentId
@@ -50,10 +51,10 @@ data class Message(
     constructor() : this("", "", Author(), System.currentTimeMillis(), null)
 
     val imageUri: Uri?
-        get() = imageUrl?.let { Uri.parse(it) }
+        get() = imageUrl?.toUri()
 
     val documentUri: Uri?
-        get() = documentUrl?.let { Uri.parse(it) }
+        get() = documentUrl?.toUri()
 
     val isFromMe: Boolean
         get() = author.id == Firebase.auth.currentUser?.uid
