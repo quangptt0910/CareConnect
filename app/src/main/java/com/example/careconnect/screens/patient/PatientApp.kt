@@ -35,6 +35,7 @@ import com.example.careconnect.screens.patient.profile.medicalreport.MedicalRepo
 import com.example.careconnect.screens.patient.profile.prescription.PrescriptionScreen
 import com.example.careconnect.screens.settings.NotificationSettingsScreen
 import com.example.careconnect.screens.settings.SettingsScreen
+import com.example.careconnect.ui.navigation.Route
 import com.example.careconnect.ui.navigation.Route.NOTIFICATION_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_BOOKING_APPOINTMENTS_ROUTE
 import com.example.careconnect.ui.navigation.Route.PATIENT_CHATBOT_ROUTE
@@ -69,6 +70,7 @@ fun PatientApp(
     notificationData: NotificationData? = null,
     viewModel: PatientAppViewModel = hiltViewModel()
 ) {
+    val noBottomBarRoutes = setOf(Route.PATIENT_CHATBOT_ROUTE, Route.PATIENT_CHATBOT_ROUTE)
 
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -105,11 +107,15 @@ fun PatientApp(
     }
 
     Scaffold(
-        bottomBar = { BottomBar(
-            tabs = BarRoutes.entries.toTypedArray(),
-            navController = navController,
-            navigateToRoute = { route -> navController.navigate(route) }
-        ) }
+        bottomBar = {
+            if (navController.currentDestination?.route !in noBottomBarRoutes) {
+                BottomBar(
+                    tabs = BarRoutes.entries.toTypedArray(),
+                    navController = navController,
+                    navigateToRoute = { route -> navController.navigate(route) }
+                )
+            }
+        }
     ){
         NavHost(
             navController = navController,
@@ -153,7 +159,7 @@ fun PatientApp(
 
             composable(PATIENT_CHATBOT_ROUTE) {
                 ChatbotScreen(
-                    //onNavigateBack = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() },
                 )
             }
 

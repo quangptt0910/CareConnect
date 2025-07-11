@@ -17,7 +17,6 @@ import com.example.careconnect.dataclass.Surgery
 import com.example.careconnect.dataclass.chat.Author
 import com.example.careconnect.dataclass.chat.Message
 import com.google.firebase.Firebase
-import com.google.firebase.ai.Chat
 import com.google.firebase.ai.GenerativeModel
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
@@ -82,73 +81,61 @@ class ChatbotViewModel @Inject constructor(
         isBot = true
     )
 
-    private val generativeModel: GenerativeModel = Firebase.ai(
-        backend = GenerativeBackend.googleAI()
-    ).generativeModel(modelName = "gemini-2.0-flash-exp",
-        generationConfig = generationConfig {
-            temperature = 0.7f
-            topK = 40
-            topP = 0.95f
-            maxOutputTokens = 1024
-        })
+    private val generativeModel: GenerativeModel by lazy {
+        Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
+            modelName = "gemini-2.5-flash",
+            generationConfig = generationConfig {
+                temperature = 0.9f
+                topK = 32
+                topP = 1f
+                maxOutputTokens = 1024
+            },
+            systemInstruction = content { text(buildSystemPrompt()) }
+        )
 
-    private var chat: Chat? = null
+    }
+
+    private val chat = generativeModel.startChat()
 
     init {
         loadPatientData()
-        initializeChat()
+        addBotMessage("I'm your medical assistant. I can help you understand symptoms, suggest specialists, and provide basic health guidance. What would you like to know?")
     }
 
-    private fun initializeChat() {
-        val systemPrompt = buildSystemPrompt()
-        chat = generativeModel.startChat(
-            history = listOf(
-                content(role = "model") { text(systemPrompt) },
-                content(role = "model") { text("Hello! I'm your medical assistant. How can I help you today?") }
-            )
-        )
 
-        // Add the initial bot message to the chat history
-        _messages.update {
-            it + Message(
-                text = "Hello! I'm your medical assistant. I can help you understand symptoms, suggest specialists, and provide basic health guidance. What would you like to know?",
-                author = botAuthor,
-                timestamp = System.currentTimeMillis()
-            )
-        }
+    private fun addBotMessage(text: String) {
+        val botMessage = Message(
+            text = text,
+            author = botAuthor,
+            timestamp = System.currentTimeMillis()
+        )
+        _messages.value = _messages.value + botMessage
     }
 
     private fun buildSystemPrompt(): String {
-        val patient = _patient.value
-
         return """
-        You are a medical assistant AI for CareConnect, an e-clinic, healthcare app. Your role is to:
-        
+        You are a medical assistant AI for CareConnect, an e-clinic, healthcare app. Your role is to:  
         1. Help patients understand their symptoms and conditions
         2. Suggest appropriate medical specializations from our available list for doctor appointments
         3. Provide basic health guidance and wellness tips
-        4. Offer supportive information about medical procedures
-        
+        4. Offer supportive information about medical procedures      
         IMPORTANT LIMITATIONS:
         - You are NOT a replacement for professional medical advice
         - Always remind patients to consult with healthcare providers for diagnosis and treatment
         - Do not provide specific medical diagnoses
         - Do not recommend specific medications or dosages
         - In emergencies, advise patients to seek immediate medical attention
-        
-        PATIENT INFORMATION:
-        ${patient?.let { buildPatientContext(it) } ?: "Patient information not available"}
+        - Do not engage in discussions about sensitive topics like mental health crises
         
         AVAILABLE SPECIALIZATIONS in CareConnect:
         ${availableSpecializations.joinToString("\n")}
         
         RESPONSE GUIDELINES:
-        - Be empathetic and supportive
-        - Provide clear, easy-to-understand explanations
+        - Provide clear, easy-to-understand explanations but keep them short
         - When suggesting specialists, mention specific ones from our list
         - Include relevant health tips and lifestyle advice
         - Always emphasize the importance of professional medical consultation
-        - Be concise but comprehensive
+        - Be concise and no verbose
         - If asked about emergency symptoms, prioritize immediate care advice
         
         Remember: Your goal is to be helpful and informative while ensuring patient safety through proper medical channels.
@@ -247,29 +234,43 @@ class ChatbotViewModel @Inject constructor(
                     author = userAuthor,
                     timestamp = System.currentTimeMillis()
                 )
-                _messages.update { it + userMessage }
+                _messages.value = _messages.value + userMessage
 
                 // Enhanced prompt with context
                 val contextualPrompt = buildContextualPrompt(userInput)
 
                 // Send the contextual prompt to the Gemini API
-                val response = chat?.sendMessage(contextualPrompt)
-                val responseText = response?.text ?: "I'm sorry, I couldn't process your request right now. Please try again."
+                val response = chat.sendMessage(contextualPrompt)
+                if (response.text.isNullOrBlank()) {
+                    addBotMessage("Failed to get a response from the chat API. Please try again later.")
+                    println("DEBUG: Received empty response from the chat API")
+                } else {
+                    println("DEBUG: Received response from chat API: ${response.text}")
+                }
+                val responseText = response.text ?: "I'm sorry, I couldn't process your request right now. Please try again."
 
                 val botMessage = Message(
                     text = responseText,
                     author = botAuthor,
                     timestamp = System.currentTimeMillis()
                 )
-                _messages.update { it + botMessage }
+                _messages.value = _messages.value + botMessage
 
             } catch (e: Exception) {
-                val errorMessage = Message(
-                    text = "I apologize, but I'm experiencing technical difficulties. Please try again in a moment, or contact support if the issue persists.",
+                val errorMessage = when {
+                    e.message?.contains("quota", ignoreCase = true) == true ->
+                        "I'm temporarily unavailable due to high demand. Please try again in a few moments."
+                    e.message?.contains("network", ignoreCase = true) == true ->
+                        "Please check your internet connection and try again."
+                    else ->
+                        "I apologize, but I'm experiencing technical difficulties. Please try again in a moment."
+                }
+                val botErrorMessage = Message(
+                    text = errorMessage,
                     author = botAuthor,
                     timestamp = System.currentTimeMillis()
                 )
-                _messages.update { it + errorMessage }
+                _messages.value = _messages.value + botErrorMessage
             } finally {
                 _isLoading.update { false }
             }
@@ -277,6 +278,7 @@ class ChatbotViewModel @Inject constructor(
     }
 
     private fun buildContextualPrompt(userInput: String): String {
+        var prompt = userInput
         // Check if user is asking about specializations
         val isSpecializationQuery = userInput.contains("specialist", ignoreCase = true) ||
                 userInput.contains("doctor", ignoreCase = true) ||
@@ -288,7 +290,6 @@ class ChatbotViewModel @Inject constructor(
                 userInput.contains("severe pain", ignoreCase = true) ||
                 userInput.contains("can't breathe", ignoreCase = true)
 
-        var prompt = userInput
 
         if (isSpecializationQuery) {
             prompt += "\n\nPlease suggest appropriate specialists from the CareConnect available specializations list."
@@ -307,6 +308,28 @@ class ChatbotViewModel @Inject constructor(
             "Symptom checker" -> sendMessage("I'm experiencing some symptoms and would like guidance")
             "Medication info" -> sendMessage("I have questions about medications")
             "Emergency signs" -> sendMessage("What are signs that I need emergency medical care?")
+        }
+    }
+
+    fun testApiConnection() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val testResponse = chat?.sendMessage("Hello, are you working?")
+                val responseText = testResponse?.text?.trim()
+
+                if (responseText.isNullOrBlank()) {
+                    addBotMessage("API test failed: Empty response received")
+                } else {
+                    addBotMessage("API test successful: $responseText")
+                }
+            } catch (e: Exception) {
+                addBotMessage("API test failed: ${e.message}")
+                println("API Test Error: ${e.message}")
+                e.printStackTrace()
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 }

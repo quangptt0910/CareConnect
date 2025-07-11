@@ -53,6 +53,8 @@ android {
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Xlint:deprecation")
 }
+
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -85,7 +87,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
 
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-crashlytics")
@@ -124,11 +126,26 @@ dependencies {
     //for notification settings
     implementation("com.google.code.gson:gson:2.10.1")
 
-    implementation("io.ktor:ktor-client-okhttp:2.3.2")
-    implementation("io.ktor:ktor-client-core:2.3.2")
-    implementation("io.ktor:ktor-client-websockets:2.3.2")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.2")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.2")
-    implementation("io.ktor:ktor-client-logging:2.3.2")
+    val ktorVersion = "2.3.2"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.ktor:ktor-client-encoding:$ktorVersion")
+    implementation("io.ktor:ktor-client-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-client-auth:$ktorVersion")
 
+}
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "io.ktor" && !requested.version?.startsWith("2.3")!!) {
+                useVersion("2.3.2")
+                because("Ensure compatibility with Firebase AI expecting Ktor 2.3.2")
+            }
+        }
+    }
 }

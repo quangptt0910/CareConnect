@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -31,6 +32,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -62,7 +64,7 @@ import java.util.Locale
 
 @Composable
 fun ChatbotScreen(
-    //onNavigateBack: () -> Unit,
+    onBack: () -> Unit,
     viewModel: ChatbotViewModel = hiltViewModel()
 ) {
     val messages by viewModel.messages.collectAsStateWithLifecycle()
@@ -81,7 +83,7 @@ fun ChatbotScreen(
     }
 
     ChatbotScreenContent(
-        //onNavigateBack = onNavigateBack,
+        onBack = onBack,
         messages = messages,
         patient = patient,
         isLoading = isLoading,
@@ -102,7 +104,7 @@ fun ChatbotScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatbotScreenContent(
-    //onNavigateBack: () -> Unit,
+    onBack: () -> Unit,
     messages: List<Message>,
     patient: Patient?,
     isLoading: Boolean,
@@ -126,14 +128,14 @@ fun ChatbotScreenContent(
                     fontWeight = FontWeight.Bold
                 )
             },
-//            navigationIcon = {
-//                IconButton(onClick = onNavigateBack) {
-//                    Icon(
-//                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                        contentDescription = "Back"
-//                    )
-//                }
-//            },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -159,11 +161,6 @@ fun ChatbotScreenContent(
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "I'm your AI medical assistant. I can help you understand symptoms, suggest which specialists to consult, and provide basic health guidance. Remember, I'm here to support you, not replace professional medical advice.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
             }
         }
 
@@ -387,7 +384,7 @@ fun QuickActionButtons(
 @Composable
 fun ChatbotScreenPreview() {
     ChatbotScreenContent(
-        //onNavigateBack = {},
+        onBack = {},
         messages = listOf(
             Message(
                 text = "Hello! How can I assist you today?",
