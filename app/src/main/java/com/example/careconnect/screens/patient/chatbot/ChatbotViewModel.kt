@@ -262,8 +262,7 @@ class ChatbotViewModel @Inject constructor(
                         "I'm temporarily unavailable due to high demand. Please try again in a few moments."
                     e.message?.contains("network", ignoreCase = true) == true ->
                         "Please check your internet connection and try again."
-                    else ->
-                        "I apologize, but I'm experiencing technical difficulties. Please try again in a moment."
+                    else -> e.message ?: "I'm sorry, I couldn't process your request right now. Please try again."
                 }
                 val botErrorMessage = Message(
                     text = errorMessage,

@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1000314673536-2vjpes41hj7mf9setb7mqikr1nur3kjt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.careconnect",
+            "certificate_hash": "e224136815b611cb5251aa543dece25d448425a0"
+          }
+        },
+        {
           "client_id": "1000314673536-d6btn212onqmptlb0onvj4d6625u4o6t.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
