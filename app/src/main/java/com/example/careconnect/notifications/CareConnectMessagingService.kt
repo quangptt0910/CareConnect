@@ -100,6 +100,15 @@ class CareConnectMessagingService : FirebaseMessagingService() {
                     "CHAT_MESSAGE" -> {
                         if (notificationRepository.shouldShowChatNotifications()) {
                             val settings = notificationRepository.getNotificationSettings(role)
+
+                            Log.d(TAG, "=== CHAT SETTINGS DEBUG ===")
+                            Log.d(TAG, "Chat notifications enabled: ${settings.chatNotifications.enabled}")
+                            Log.d(TAG, "Chat sound: ${settings.chatNotifications.sound}")
+                            Log.d(TAG, "Chat vibration: ${settings.chatNotifications.vibration}")
+                            Log.d(TAG, "Chat showPreview: ${settings.chatNotifications.showPreview}")
+                            Log.d(TAG, "shouldShowChatNotifications(): ${notificationRepository.shouldShowChatNotifications()}")
+                            Log.d(TAG, "=========================")
+
                             if (role == Role.DOCTOR || role == Role.PATIENT) {
                                 handleChatNotification(remoteMessage, settings.chatNotifications)
                             } else {
@@ -166,6 +175,15 @@ class CareConnectMessagingService : FirebaseMessagingService() {
         recipientId: String,
         chatSettings: ChatNotificationSettings
     ) {
+        Log.d(TAG, "=== SHOW CHAT NOTIFICATION DEBUG ===")
+        Log.d(TAG, "ChatSettings object: $chatSettings")
+        Log.d(TAG, "Sound setting: ${chatSettings.sound}")
+        Log.d(TAG, "Vibration setting: ${chatSettings.vibration}")
+        Log.d(TAG, "ShowPreview setting: ${chatSettings.showPreview}")
+        Log.d(TAG, "Title: $title")
+        Log.d(TAG, "Body: $body")
+        Log.d(TAG, "===================================")
+
         createNotificationChannel(CHAT_CHANNEL_ID, CHAT_CHANNEL_NAME, CHAT_CHANNEL_DESCRIPTION)
 
         val intent = Intent(this, MainActivity::class.java).apply {
@@ -195,8 +213,10 @@ class CareConnectMessagingService : FirebaseMessagingService() {
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
 
         if (chatSettings.sound) {
+            Log.d(TAG, "SOUND: Setting notification sound to default ringtone")
             notificationBuilder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
         } else {
+            Log.d(TAG, "SOUND: Disabling notification sound (setting to null)")
             notificationBuilder.setSound(null)
         }
 
